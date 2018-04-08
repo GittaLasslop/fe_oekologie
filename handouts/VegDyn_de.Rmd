@@ -1,0 +1,246 @@
+---
+title: "Fernerkundung globale Ökologie: 3. Vegetationsdynamik"
+author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+bibliography: ~/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+classoption: a4paper
+lang: de-DE
+output:
+  tufte::tufte_handout:
+##    latex_engine: xelatex
+    fig_caption: yes
+    includes:
+      in_header: styles.tex
+##    toc: true
+    highlight: default
+---
+
+# Vegetationsdynamik
+
+Unter Vegetationsdynamik wird hier die Vegetationsperiode verstanden. Das hier verwendete MODIS Kürzel ist: [MCD12Q2](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q2).
+
+## Literatur
+
+@buitenwerf_three_2015; @ganguly_land_2010; @soudani_evaluation_2008; @zhang_global_2006; @zhang_monitoring_2003 
+
+## Initialisieren
+Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
+```{r, message=FALSE, warning=FALSE}
+library(raster)
+library(ggplot2)
+library(reshape2)
+library(FEglOek)
+fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
+fegloekOptions(region="NWBRAZIL")
+fegloekInit()
+```
+
+Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.
+```{r}
+source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
+source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
+```
+
+Download der Daten
+```{r, message=FALSE, warning=FALSE}
+downloadData("VegDyn")
+```
+
+## Einlesen der Daten
+
+Ähnlich zur Phenologie wird hier eine Zeitreihe mit den Dateien erzeugt.
+Dies geschieht für den Anfang und das Ende der Vegetationsperiode. Die Daten
+liegen schon in geografischen Koordinaten vor und nicht in UTM.
+
+```{r, message=FALSE, warning=FALSE}
+data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+files <- list.files(data.dir, pattern="Increase.Num_Modes_01.tif$", full.names=TRUE)
+stackVegStart <- stack(files)
+files <- list.files(data.dir, pattern="Minimum.Num_Modes_01.tif$", full.names=TRUE)
+stackVegEnd <- stack(files)
+```
+
+## Verarbeiten der Daten
+
+Am den ebenfalls zuvor benutzten Punkten wird eine Zeitreihe extrahiert.
+
+```{r}
+sPoints  <- SpatialPoints(getOption("fegloekPoints"),
+                          proj4string=CRS("+proj=longlat +ellps=WGS84"))
+dfVegStart <- extract(stackVegStart, sPoints, df=TRUE)
+dfVegStart = dfVegStart[, -1]
+dfVegEnd   <- extract(stackVegEnd, sPoints, df=TRUE)
+dfVegEnd   = dfVegEnd[, -1]
+vegDate    <- extractMODISDate(colnames(dfVegStart))
+```
+
+Setzen Sie ungültige Werte gleich NA, transponieren und wandeln Sie die
+Geodaten in einen data.frame um.
+
+```{r}
+vegInvalid <- 32767
+dfVegStart[dfVegStart==vegInvalid] = NA
+dfVegEnd[dfVegEnd==vegInvalid] = NA
+dfVegStart = as.data.frame(t(dfVegStart))
+dfVegEnd   = as.data.frame(t(dfVegEnd))
+```
+
+Berechnen Sie aus dem Anfang und dem Ende die Dauer der Vegetationsperiode für jedes Jahr.
+
+```{r}
+dfGSL <- dfVegEnd - dfVegStart
+```
+
+Verschmelzen des Datensatzes zur besseren Darstellung. Dabei werden alle Spalten außer 'date' in eine Spalte ('value') geschrieben und eine neue Spalte ('variable') mit den vorherigen Spaltennames als Wert wird erzeugt. 
+
+```{r}
+dfGSL$date = vegDate
+melted.dfGSL <- melt(dfGSL, id.vars="date")
+```
+
+## Grafikausgabe
+
+Eine PDF-Datei zum Schreiben öffnen und erzeugen der Grafik.
+
+```{r}
+p <- ggplot(melted.dfGSL, aes(date, value))
+p <- p + geom_line()
+p <- p + scale_x_date()
+p <- p + xlab("Datum") + ylab("Vegetationsperiode [Tagen]")
+p <- p + facet_wrap(~variable, ncol=1)
+```
+```{r, eval=FALSE}
+file <- paste0(getOption("fegloekRegion"), "_GSL.pdf")
+pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=8, height=8)
+print(p)
+dev.off()
+```
+```{r, warning=FALSE, message=FALSE, echo=FALSE, fig.width=8, fig.height=5}
+print(p)
+```
+
+# Abhängigkeit der Vegetationsperiode von der Höhe
+
+Die Gruppen BANGLADESH, BORNEO, MEXICO, NWBRAZIL, SAFRICA, SEBRAZIL und SWAUSTRALIA sollten
+nun zu einer anderen Region wechseln, entweder NEAMERICA, NEASIA, NEUROPA, SEAUSTRALIA oder SEEUROPE.
+Dafür muss die entsprechende Zeile aus obiger Initialisierung angepasst werden.
+
+```{r}
+fegloekOptions(region="SEEUROPE")
+if (any(getOption("fegloekRegion") == c("BANGLADESH", "BORNEO", "MEXICO", "NWBRAZIL",
+                   "SAFRICA", "SEBRAZIL", "SWAUSTRTALIA")))
+  warning("Falsche Region!")
+```
+
+## Einlesen und Verarbeiten der Daten
+
+Im Folgenden wird eine durchschnittliche Vegetationsperiode über die Jahre 2001 bis 2010
+für einen bestimmten Auschnitt ("kElevExtent") in der Karte berechnet. rValid zählt,
+wieviele gültige Werte rVegStart und rVegEnd haben. Wenn die Vegetationsperiode
+null ist, setzen Sie auf NA.
+
+```{r}
+data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+years <- c(2006:2010)
+if (exists("rGSL")) rm(rGSL)
+for (y in years) {
+  file <- file.path(data.dir, 
+          paste0("MCD12Q2_", y, "-01-01.Onset_Greenness_Increase.Num_Modes_01.tif"))
+  rVegStart <- raster(file)
+  rVegStart = crop(rVegStart, getOption("fegloekVegDynExtent"))
+  rVegStart[rVegStart==32767] = NA
+  file <- file.path(data.dir, 
+          paste0("MCD12Q2_", y, "-01-01.Onset_Greenness_Minimum.Num_Modes_01.tif"))
+  rVegEnd <- raster(file)
+  rVegEnd = crop(rVegEnd, getOption("fegloekVegDynExtent"))
+  rVegEnd[rVegEnd==32767] = NA
+  if (exists("rGSL")) {
+    rNewGSL = rVegEnd - rVegStart
+    rGSL[is.finite(rNewGSL)] = rGSL[is.finite(rNewGSL)] + rNewGSL[is.finite(rNewGSL)]
+    rValid[is.finite(rNewGSL)] = rValid[is.finite(rNewGSL)] + 1
+  } else {
+    rGSL <- rVegEnd - rVegStart
+    rValid <- rGSL
+    rValid[is.finite(rGSL)] = 1
+    rValid[!is.finite(rGSL)] = 0
+  }
+}
+rGSL <- rGSL / rValid
+rGSL[rGSL==0] = NA
+```
+
+Umwandeln zu einem data.frame und umbenennen der Spalten.
+
+```{r}
+dfGSL <- as.data.frame(rasterToPoints(rGSL))
+colnames(dfGSL) <- c("long", "lat", "GSL")
+```
+Laden der Landklassifikation, anpassen der Vegetationsperiode
+und verbinden mit der LCT Klassifizierung.
+
+```{r}
+file <- file.path(data.dir, "MCD12Q1_GEO_hres_2010-01-01.Land_Cover_Type_3.tif")
+rLCT <- raster(file)
+rLCT = crop(rLCT, getOption("fegloekVegDynExtent"))
+rLCT = resample(rLCT, rGSL, method="ngb")
+dfLCT <- as.data.frame(rasterToPoints(rLCT))
+colnames(dfLCT) <- c("long", "lat", "id")
+dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
+```
+
+Ein digitales Höhenmodel (GTOPO30) wird geladen.
+
+```{r}
+file  <- file.path(data.dir, "GTOPO30.tif")
+rGtopo <- raster(file)
+rGtopo = crop(rGtopo, getOption("fegloekVegDynExtent"))
+rGtopo = resample(rGtopo, rGSL, method="ngb")
+dfGtopo <- as.data.frame(rasterToPoints(rGtopo))
+colnames(dfGtopo) <- c("long", "lat", "elevation")
+```
+
+Anschließend werden alle drei Datensätze anhand fer Koordinate-Spalten verschmolzen.
+
+```{r}
+dfData <- merge(dfGSL, dfGtopo, by=c("long", "lat"))
+dfData = merge(dfData, dfLCT, by=c("long", "lat"))
+```
+
+Im letzten Schritt wird einen Scatterplot erzeugt, mit der Höhe über NN
+als unabhängige Variable und der Vegetationsperiode als abhängige Variable.
+Unterteilt wird es nochmals nach Landbedeckung.
+
+## Grafikausgabe
+
+```{r}
+transparentColor <- rgb(1, 0.5, 0, 0.01, maxColorValue=1)
+p <- ggplot(data=dfData, aes(x=elevation, y=GSL))
+p = p + geom_point(color=transparentColor)
+p = p + geom_smooth(se=TRUE, color='#2957FF')
+p = p + xlab("Höhe über NN [m]")
+p = p + ylab("Vegetationsperiode [Tage]")
+p = p + facet_wrap(~name, ncol=3, scale="free_y")
+```
+```{r, eval=FALSE}
+file <- paste0(getOption("fegloekRegion"), "_GSL.png")
+png(file.path(getOption("fegloekFigDir"), file), width=1024, height=800)
+dev.off()
+```
+```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.ext='png', dpi=150, fig.width=8, fig.height=8}
+print(p)
+```
+
+# Hausaufgaben
+
+1. Erzeugen Sie einen Plot mit allen Landbedeckungsklassen in einem Panel und färben diese unterschiedlich ein (Funktionen facet_wrap, scale_color_manual).
+
+2. Nutzen Sie eine andere Variable, die mit der Länge der Vegetationsperiode korrelieren könnte und wiederholen Sie den zweiten Teil damit.
+
+3. Handelt es sich bei den betrachteten Zusammenhängen um signifikante lineare Korrelationen (Funktion lm)?
+
+# Freiwillige Zusatzaufgabe
+
+1. Oder wer noch tiefer einsteigen will: Gibt es signifikante nicht-lineare Korrelationen (Funktionen glm, nlm)?
+
+2. Verbessert sich das Ergebnis der (nicht-)linearen Korrelation, wenn die Vegetationsperiode von zwei Variablen abhängt?
+
+# Literatur

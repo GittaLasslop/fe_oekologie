@@ -1,0 +1,157 @@
+---
+title: "Fernerkundung globale Ökologie: 2. Phänologie"
+author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+bibliography: ~/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+classoption: a4paper
+lang: de-DE
+output:
+  tufte::tufte_handout:
+##    latex_engine: xelatex
+    fig_caption: yes
+    includes:
+      in_header: styles.tex
+##    toc: true
+    highlight: default
+---
+
+# Phänologie
+
+Die Phänologie ist der Jahresgang der Vegetation. Dieser kann mit Hilfe des zeitlich hinreichend hoch aufgelösten NDVI (normalized difference vegetation index) und EVI (enhanced vegetation index) analysiert werden. Das MODIS Kürzel ist unter anderem [MYD13A2](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1).
+
+## Literatur
+
+@buitenwerf_three_2015; @liang_validating_2011; @churkina_spatial_2005; @huete_overview_2002
+
+## Initialisieren
+Hier werden die benötigten Pakete geladen und Verzeichnisse erzeugt sowie weitere Variablen initialisiert. Die Parameter 'baseDir' und 'region' müssen von jeder Gruppe entsprechend angepasst werden.
+```{r, message=FALSE, warning=FALSE}
+library(raster)
+library(ggplot2)
+library(reshape2)
+library(FEglOek)
+fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
+fegloekOptions(region="NWBRAZIL")
+fegloekInit()
+```
+Download der Daten
+```{r, message=FALSE, warning=FALSE}
+downloadData("PHEN")
+```
+
+## Einlesen und Verarbeiten der MODIS Daten
+Es wird eine Serie (oder ein Stapel) aus den herunter geladenen georeferenzierter Dateien erzeugt.
+
+```{r, message=FALSE, warning=FALSE}
+data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+files <- list.files(data.dir, pattern="NDVI.tif$", full.names=TRUE)
+stackNDVI <- stack(files)
+```
+\marginnote{
+\textbf{Daueraufgabe}\\
+Nicht vergessen: Schauen Sie sich Zwischenergebnisse immer wieder mit den
+Befehlen "head()" und "str()" an, um zu verstehen, was Sie
+gerade gemacht haben.
+}
+Die während der Initialisation definierten Punkte in Breiten-/Lägengrad, werden in
+UTM Koordinaten transformiert. Aus den bereitgestellten GIS-Daten (Raster-Format, UTM-Projektion) wird eine Zeitserie
+an den spezifizierten Punkten extrahiert und in einem "data.frame" gespeichert.
+
+```{r}
+sPoints    <- SpatialPoints(getOption("fegloekPoints"),
+                            proj4string=CRS("+proj=longlat +ellps=WGS84"))
+sPointsUTM <- spTransform(sPoints, CRS(projection(stackNDVI)))
+```
+
+Für diese Punkte werden Zeitserien als "data.frame" extrahiert. Die zusätzliche
+Variable "ID" an Position 1 wird entfernt.
+
+```{r}
+dfNDVI <- extract(stackNDVI, sPointsUTM, df=TRUE)
+dfNDVI$ID = NULL
+```
+
+Mit der Funktion "extractMODISDate" des Paketes werden die 
+Zeitpunkte des jeweiligen "Überflugs" aus den Spaltennamen extrahiert.
+
+```{r}
+filenames <- colnames(dfNDVI)
+ndviDate <- extractMODISDate(filenames)
+```
+
+\marginnote{
+\textbf{Aufgabe}\\
+Finden Sie "scale factor" und "valid range" auf der dem heutigen Thema entsprechenden MODIS
+Web-Seite und definieren Sie den scale factor als Variable mit dem Namen "ndviScaleFactor" und die Untergrenze als
+"ndviLowerLimit".
+}
+
+Wenn Sie die gesuchten Variablen nicht finden können, erzeugen Sie die Variablen "ndviScaleFactor = 1" und
+ndviLowerLimit = -1.e30". Die Werte werden mit den so eben definierten "ndviLowerLimit" und "ndviScaleFactor" skaliert.
+
+```{r, echo=FALSE}
+ndviScaleFactor <- 0.0001
+ndviLowerLimit  <- -2000
+```
+
+```{r}
+dfNDVI[dfNDVI <= ndviLowerLimit] = NA
+dfNDVI = dfNDVI * ndviScaleFactor
+```
+
+Minimum/Maximum und Median jeder Zeitserie werden berechnet. Der Median wird als blaue Linien im Plot dargestellt. Der Schnittpunkt der Vegetationsindex-Kurve mit dem Median stellt eine sehr grobe Abschätzung des Anfangs und Ende der Vegetationsperiode dar.
+
+```{r}
+ndviMin <- apply(dfNDVI, 1, "min", na.rm=TRUE)
+ndviMax <- apply(dfNDVI, 1, "max", na.rm=TRUE)
+ndviMid <- (ndviMax + ndviMin) / 2
+```
+
+Der dfNDVI hat die extrahierten Zeitserien zeilenweise angeordnet. Wir wollen die Zeitserien für die vier Punkte jedoch jeweils in einer Spalte habe mit der zusätzlichen Spalte 'date'. Hierfür muss 'dfNDVI' transponiert werden (Befehl 't()').
+
+```{r}
+dfNDVI = data.frame(date=ndviDate, t(dfNDVI))
+```
+
+Um eine "schöne" Darstellung zu erzielen, müssen die Datenspalten
+verschmolzen werden. Dies geschieht mit der funktion "melt" aus dem Paket "reshape2".
+
+```{r}
+melted.dfNDVI <- melt(dfNDVI, id.vars="date")
+ndviMid <- data.frame(variable=paste0("X", 1:4), value=ndviMid)
+```
+
+## Grafikausgabe
+
+Erzeugen Sie eine PDF-Datei mit den Zeitserien
+```{r, eval=FALSE}
+file <- paste0(getOption("fegloekRegion"), "_NDVI.pdf")
+pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=8, height=8)
+```
+```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=5}
+p <- ggplot(melted.dfNDVI, aes(x=date, y=value))
+p <- p + geom_line()
+p <- p + geom_hline(data=ndviMid, aes(yintercept=value),
+                    colour="blue", linetype="dashed")
+p <- p + scale_x_date()
+p <- p + xlab("Datum")
+p <- p + facet_wrap(~variable, ncol=1)
+p <- p + ylab("NDVI")
+print(p)
+```
+```{r, eval=FALSE}
+dev.off()
+```
+
+# Hausaufgabe
+
+1. Wiederholen Sie dieses Skript mit dem EVI, idealerweise wieder als Schleife.
+
+# Freiwillige Zusatzaufgabe
+
+Zeigen NDVI und/oder EVI einen Trend auf? Ist dieser signifikant?
+
+R bietet eine Fülle an Funktionen zur Zeitserienanalyse (z.B. decompose und stl).
+Diese können benutzt werden um den Jahresgang und Trend zu separieren. 
+Achtung, die hier vorliegende Zeitserie ist unregelmäßig und muss angepasst werden (Funtion 'aggregate' oder erweiterte Zeitserien mit 'library(xts)').
+
+# Literatur

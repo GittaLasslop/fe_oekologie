@@ -1,0 +1,235 @@
+---
+title: "Fernerkundung globale Ökologie: 5. Feuer"
+author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+classoption: a4paper
+lang: de-DE
+bibliography: /home/jsteinkamp/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+output:
+  tufte::tufte_handout:
+##    latex_engine: xelatex
+    fig_caption: yes
+    includes:
+      in_header: styles.tex
+##    toc: true
+    highlight: default
+---
+
+# Feuer
+
+MODIS Kürzel: [MCD45A1](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd45a1)
+
+## Literatur
+@roy_collection_2008; @giglio_global_2006
+
+## Initialisieren
+Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
+```{r, message=FALSE, warning=FALSE}
+library(raster)
+library(plyr)
+library(ggplot2)
+library(FEglOek)
+fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
+fegloekOptions(region="NWBRAZIL")
+fegloekInit()
+```
+Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.
+```{r}
+source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
+source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
+```
+Download der Daten
+```{r, message=FALSE, warning=FALSE}
+downloadData("Fire")
+```
+
+## Einlesen und verarbeiten der Daten
+
+Laden der Landnutzungsklassen und erzeugen eine Maske, bei der Land 1 ist,
+Wasser und Unklassifiziert 0. Anzeigen der Gesamtpixelzahl und Anzahl der Landpixel
+erfolgt mit "nrow". Zusätzlich wird eine Spalte mit dem Namen der
+Landbedeckungsklasse erzeugt.
+
+```{r}
+data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+dfLCT <- geotiff2df(file.path(data.dir, "MCD12Q1_2010-01-01.Land_Cover_Type_3.tif"), "id")
+dfLCT$mask = 1
+dfLCT$mask[dfLCT$id >= 254] = 0
+dfLCT$mask[dfLCT$id == 0] = 0
+
+nrow(dfLCT)
+dfLCT = subset(dfLCT, mask == 1)
+nrow(dfLCT)
+
+dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
+```
+
+\marginnote{
+\textbf{Aufgabe}\\
+1. Wie groß is der Landanteil in Ihrer bearbeiteten Region? 
+
+2. Wie bereits bei NPP besprochen, gibt es auch hier Fehlklassifizierungen. Es
+macht zum Beispiel keinen Sinn, Nadelwälder in Äquatornähe zu haben. Diese
+können Sie durch obige Maskierung ebenfalls aus dem Datensatz entfernen.
+}
+
+Im Folgendem werden monatliche Feuerdaten eingelesen und gezählt, wie viele
+Pixel pro Monat gebrannt haben. Die Ergebnisse werden in den data.frames
+tsFire und tsLCTFire gespeichert. Die Schleife dauert recht lange, verlieren Sie nicht
+die Geduld oder gehen Sie Essen. Sie können die Zeile "message"
+aktivieren, um eine Fortschrittsanzeige zu bekommen.
+
+```{r, message=FALSE}
+files  <- list.files(data.dir, pattern="burndate.tif$", full.names=TRUE)
+date   <- extractMODISDate(files)
+tsFire <- data.frame(date=date, count=0)
+
+if (exists("tsLCTFire"))
+  rm(tsLCTFire)
+
+for (i in 1:length(files)) {
+  dfFire <- geotiff2df(files[i], "burndate", valid_range=c(0, 366))
+  if (nrow(dfFire) > 0) {
+    dfMerged <- merge(dfFire, dfLCT, by=c("x", "y"))
+    tsFire$count[i] = nrow(dfMerged)
+  }
+
+  dfFire = merge(dfFire, dfLCT, by=c("x", "y"))
+
+  if (exists("tsLCTFire") && nrow(dfFire) > 0) {
+    tsLCTFire <- rbind(tsLCTFire,
+                       cbind(ddply(dfFire, c("name"), summarize,
+                                   count=length(burndate)), date=date[i]))
+  } else if (nrow(dfFire) > 0) {
+    tsLCTFire <- cbind(ddply(dfFire, c("name"), summarize,
+                             count=length(burndate)), date=date[i])
+  }
+  message(paste0(round(i / (length(files)) * 100, 1), "% "))
+}
+```
+
+## Darstellen der Daten
+
+Erzeugen Sie eine PDF Datei, mit der Zeitserie:
+
+\marginnote{
+\textbf{Aufgabe}\\
+Welche Einheit muss auf der y-Achse stehen?
+
+Überlegen Sie, wie Sie das als Anteil in Prozent der gesamten
+Landfläche berechnen können?
+}
+
+```{r, message=FALSE, warning=FALSE}
+p <- ggplot(tsFire, aes(x=date, y=count))
+p <- p + geom_bar(stat="identity", fill="red")
+p <- p + scale_x_date()
+p <- p + xlab("Datum")
+p <- p + ylab("burned")
+```
+```{r, eval=FALSE}
+file <- paste0(getOption("fegloekRegion"), "_Fire.pdf")
+pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=8, height=3)
+print(p)
+dev.off()
+```
+```{r, echo=FALSE, fig.width=6, fig.height=3}
+print(p)
+```
+
+Um heraus zu finden, was gebrannt hat, wird hier die Fläche nach Landnutzung
+klassifiziert und für jede Landbedeckungsklasse eine Zeitreihe geplottet.
+
+
+```{r}
+p <- ggplot(tsLCTFire, aes(x=date, y=count))
+p <- p + geom_bar(stat="identity",fill="red")
+p <- p + scale_x_date()
+p <- p + xlab("Datum")
+p <- p + ylab("burned")
+p <- p + facet_wrap(~name, ncol=3)
+```
+```{r, eval=FALSE}
+file <- paste0(getOption("fegloekRegion"), "_FireTSLCT.pdf")
+pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=12, height=6)
+print(p)
+dev.off()
+```
+```{r, echo=FALSE, fig.width=8, fig.height=5}
+print(p)
+```
+
+## Räumliche Feuerverbreitung
+
+-------------------------------------------------------
+**Hinweis**
+
+Dieser Teil ist nur sinnvoll, wenn "genügend" Pixel gebrannt haben, damit das auf
+der Karte sichtbar wird. Überlegen Sie selbst, ob Sie in Ihrer Region weiter machen
+oder zu einer anderen Region wechseln sollten.
+-------------------------------------------------------
+
+Die Ländergrenzen werden auf UTM umprojiziert.
+\marginnote{
+\textbf{Aufgabe}\\
+Auch wenn die Angabe in km$^2$ groß erscheint, sind die Feuerpixel doch kaum
+zu sehen. Definieren Sie einen Bereich (fireExtent) auf den die Bilder zugeschnitten
+werden (crop), damit die "Feuer" besser zu sehen sind.
+}
+```{r, eval=FALSE}
+rFire <- raster(files[1])
+rFire <- crop(rFire, fireExtent)
+regionmap <- borderSubset(rFire)
+```
+
+```{r, eval=FALSE}
+files <- list.files(data.dir, pattern='.*burndate.tif$',
+                    full.names=TRUE)
+date  <- extractMODISDate(files)
+```
+
+Jeder Zeitschritt wird einzeln eingelesen und als Grafik  ausgegeben.
+Diese Bilder können anschließend in eine Animation umgewandelt werden (freiwillig).
+
+```{r, eval=FALSE}
+png(filename=file.path(getOption("fegloekFigDir"), "Fire_%03d.png"), width=800, height=600)
+
+for (i in 1:length(files)) {
+  dfFire <- geotiff2df(files[i], "burndate", crop=fireExtent)
+  dfFire$state=""
+
+  dfFire = subset(dfFire, burndate != 11111)
+
+  dfFire$state[dfFire$burndate == 0] = "unburned"
+  dfFire$state[dfFire$burndate > 0] = "burned"
+  dfFire$state[dfFire$burndate == 900] = "snow or high aerosol"
+  dfFire$state[dfFire$burndate == 9998] = "water"
+  dfFire$state[dfFire$burndate == 9999] = "water"
+  dfFire$state[dfFire$burndate == 10000] = "insufficient data"
+  dfFire$state <- factor(dfFire$state, levels=c("unburned", "burned",
+                 "snow or high aerosol", "water", "insufficient data"))
+
+  p <- ggplot(dfFire, aes(x=x, y=y))
+  p <- p + geom_raster(aes(fill=state))
+  p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
+  p <- p + scale_fill_manual(values=c("unburned"="darkgreen", "burned"="orange",
+                 "snow or high aerosol"="lightyellow", "water"="lightblue",
+                 "insufficient data"="grey60"), drop=FALSE)
+  p <- p + coord_fixed(xlim=c(min(dfFire$x), max(dfFire$x)),
+                       ylim=c(min(dfFire$y), max(dfFire$y)))
+  p <- p + xlab("easting")
+  p <- p + ylab("northing")
+  p <- p + labs(title = paste("Fire", date[i]))
+  print(p)
+
+  message(paste0(round(i / (length(files)) * 100, 1), "% "))
+}
+dev.off()
+```
+
+
+\marginnote{
+\textbf{freiwillige Zusatzaufgabe}\\
+Die Einzelbilder anschließend können zu einem Film zu zusammengesetzt werden.
+}
+
+# Literatur

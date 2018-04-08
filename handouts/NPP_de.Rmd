@@ -1,0 +1,146 @@
+---
+title: "Fernerkundung globale Ökologie: 4. NPP/GPP"
+author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+bibliography: ~/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+classoption: a4paper
+lang: de-DE
+output:
+  tufte::tufte_handout:
+##    latex_engine: xelatex
+    fig_caption: yes
+    includes:
+      in_header: styles.tex
+##    toc: true
+    highlight: default
+---
+
+# Netto-/Brutto-Primärproduktion
+
+Das MODIS Kürzel ist [MOD17A3](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mod17a3).
+
+## Literatur
+ 
+ @zhao_drought-induced_2010; @zhao_improvements_2005; @nemani_climate-driven_2003 und zum vertiefen: @de_kauwe_satellite_2016 und Kommentare, sowie Antworten zu  @zhao_drought-induced_2010
+
+## Initialisieren
+Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
+```{r, message=FALSE, warning=FALSE}
+library(raster)
+library(ggplot2)
+library(plyr)
+library(FEglOek)
+fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
+fegloekOptions(region="NWBRAZIL")
+fegloekInit()
+```
+Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.
+```{r}
+source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
+source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
+```
+Download der Daten
+```{r, message=FALSE, warning=FALSE}
+downloadData("NPP")
+```
+
+## Einlesen der Daten
+\marginnote{
+\textbf{Aufgabe}\\
+Finden Sie wieder "scale factor" und "valid range" auf der dem heutigen Thema entsprechenden MODIS
+Web-Seite und definiere Sie scale factor als "nppScaleFactor" und die Limits als
+"nppValidRange". Wenn Sie die gesuchten Variablen nicht finden können, nehmen Sie nppScaleFactor = 1 und
+nppValidRange = c(0, 1.e30). Die Funktion 'geotiff2df()' muss hierfür wieder erweitert werden und zwar um den Parameter 'scale\textunderscore factor'.
+}
+
+```{r, echo=FALSE}
+nppScaleFactor <- 0.0001
+nppValidRange  <- c(0, 65500)
+```
+
+Eine Datei, in der die NPP-Werte sind, wird geladen.
+
+```{r}
+data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+file <- file.path(data.dir, "MOD17A3_2010-01-01.Npp_1km.tif")
+dfNPP <- geotiff2df(file, "NPP", valid_range = nppValidRange, scale_factor = nppScaleFactor)
+```
+
+Laden der Landnutzungsklassen, anhand welcher die NPP-Werte klassifiziert werden.
+
+```{r}
+file <-file.path(data.dir, "MCD12Q1_2010-01-01.Land_Cover_Type_3.tif")
+dfLCT <- geotiff2df(file, 'id', valid_range = c(0, 253))
+dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
+```
+
+## Datenprozessierung
+
+In den Regionen Alaska, Südafrika und Australiens stimmen die Koordinaten der zwei Dateien leider nicht exakt überein, daher muss ein Datensatz an den anderen angepasst werden. Die Rundung führt leider zu einer geringen Ungenauigkeit, die im Rahmen unseres Kurses jedoch vernachlässigt werden kann.
+
+```{r}
+if (getOption("fegloekRegion") == "ALASKA" ||
+    getOption("fegloekRegion") == "SAFRICA" ||
+    getOption("fegloekRegion") == "SWAUSTRALIA" ||
+    getOption("fegloekRegion") == "SEAUSTRALIA") {
+    dfNPP$x = round(dfNPP$x, -3)
+    dfNPP$y = round(dfNPP$y, -3)
+    dfLCT$x = round(dfLCT$x, -3)
+    dfLCT$y = round(dfLCT$y, -3)
+}
+```
+
+Verschmelzen der zwei data.frames.
+
+```{r}
+dfData <- merge(dfNPP, dfLCT, by=c("x", "y"))
+```
+
+\marginnote{
+\textbf{Aufgabe}\\
+Machen alle Ökosysteme in Ihrer Region Sinn? Sie können den Befehl
+'table' nutzen oder den mächtigeren (aber auch komplizierteren) Befehl 
+'ddply' aus dem Paket 'plyr'. Überlegen Sie anhand des Resultats,
+welche Ökosysteme Sie von der Analyse ausnehmen können und wie Sie
+das machen.
+}
+
+```{r, echo=FALSE}
+knitr::kable(ddply(dfData, c("id", "name"), summarize, count=length(id)))
+```
+
+## Grafikausgabe
+
+Es wird ein sogenannter boxplot erzeugt.
+
+```{r, message=FALSE, warning=FALSE}
+p <- ggplot(dfData, aes(x=name, y=NPP, fill=name))
+p <- p + geom_boxplot()
+p <- p + guides(fill=FALSE)
+p <- p + xlab(NULL)
+p <- p + ylab("NPP [kg(C)/m^2]")
+p <- p + coord_flip()
+```
+```{r, eval=FALSE}
+file <- paste0(getOption("fegloekRegion"), "_NPP.pdf")
+pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=8, height=8)
+print(p)
+dev.off()
+```
+
+```{r, echo=FALSE, fig.width=6, fig.height=4, fig.ext='png', dpi=150}
+print(p)
+```
+
+# Hausaufgaben
+
+1. Änderen Sie die Farbgebung analog zu den vorherigen Skripten.
+
+2. Machen Sie das gleiche für Land Cover Type 3.
+
+3. Es gibt auch eine entsprechende GPP Datei (Brutto-Primärproduktion). Machen Sie das gleiche für LCT1, LCT3 und GPP.
+
+4. Setzen Sie NPP ins Verhältnis zu GPP.
+    + Erzeugen Sie eine Karte des Verhältnisses NPP:GPP?
+    + Erzeugen Sie einen Boxplot des Verhältnisses von NPP:GPP pro Ökosystem?
+    
+# Literatur

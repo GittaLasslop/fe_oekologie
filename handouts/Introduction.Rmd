@@ -19,11 +19,13 @@ Die Standarddistribution kann durch zahlreiche Pakete erweitert werden, die dann
 
 
 ## RStudio
-Der Aufruf des Programms R startet eine Konsole in der Befehle ausgeführt werden können. Zur Datenanalyse oder zur Entwicklung von Methoden ist es jedoch hilfreich weitere tools zur Verfügung zu haben, diese werden in Entwicklungsumgebungen zusammengefasst.
+Der Aufruf des Programms R startet eine Konsole in der Befehle ausgeführt werden können. Zur Dokumentation einer Datenanalyse oder zur Entwicklung von Methoden ist es jedoch hilfreich weitere Tools zur Verfügung zu haben, diese werden in Entwicklungsumgebungen zusammengefasst.
 
-[RStudio](https://www.rstudio.com/) ist eine solche Entwicklungsumgebung für [R](https://cran.r-project.org/). Hier können Programme in einem Texteditor geschrieben und getestet werden. Die wichtigsten Teile in RStudio sind der Editor und die Konsole. Im Editor werden Programme geschrieben und als Textdateien gespeichert. In der Konsole werden die Programme ausgeführt und die Rückmeldung der einzelnen Befehle erfolgt hier. Ausserdem gibt es noch eine Übersicht über früher benutzte Befehle, bestehende Variablen, Dateien, Hilfe, Abbildungen etc.
+[RStudio](https://www.rstudio.com/) ist eine solche Entwicklungsumgebung für [R](https://cran.r-project.org/). Hier können Programme in einem Texteditor geschrieben und getestet werden. Die wichtigsten Teile in RStudio sind der Editor und die Konsole (Figure 1). Im Editor werden Programme geschrieben und als Textdateien gespeichert. In der Konsole werden die Programme oder einzelne Befehle ausgeführt und die Rückmeldung der einzelnen Befehle erfolgt hier. Ausserdem gibt es noch eine Übersicht über bereits benutzte Befehle (History), bestehende Variablen, Dateien, Hilfe, Abbildungen, Übersicht über installierte Pakete und anderes.
 
-Abbildung screenshot Rstudio
+```{r echo=FALSE, out.width="100%", fig.align="center", fig.cap="Benutzeroberfläche der RStudio Entwicklungsumgebung."}
+knitr::include_graphics("screenshot_rstudio_annotated.png")
+```
 
 
 Hilfe in R
@@ -37,6 +39,13 @@ Aufruf aus der R Konsole
 Internet Suchmaschine
 ---------------------
 [R] was-ich-wissen-will
+
+-------------------------------------
+**Aufgabe**
+
+Welche Optionen gibt es für den Aufruf der Funktion var?
+-------------------------------------
+
 
 
 R als Taschenrechner
@@ -61,9 +70,7 @@ Was sind Variablen?
 
 Variablen speichern Werte, die wir ihnen zuweisen. In R funktioniert das
 durch die Zeichen "=" und "<-", wobei "<-" bevorzugt werden sollte, wenn
-Variablen definiert werden. "<-" definiert immer eine neue Variable und
-sollte nicht zur Parameterzuweisung beim Funktionsaufruf verwendet werden.
-Der Operator mit "<-" wird zuerst ausgewertet (hat die höhere Priorität/Präzedenz). 
+Variablen definiert werden. 
 
 Mit diesen Variablen kann man dann weiter rechnen, oder sie verändern.
 
@@ -104,8 +111,7 @@ Atomare Variablen sind die einfachsten. Alle anderen weiteren sind aus ihnen auf
 Es gibt verschiedene Typen von Werten, die in Variablen gespeichert werden dürfen:
 
 * Boolean: 0 oder 1 bzw. FALSE oder TRUE
-* Numerisch: ganze Zahl heißt "integer" (z.B. -1, 0 oder 1); Fließkommazahl heißt
-  "float" oder "double" (z.B. 3.1415 oder 2.9979e8)
+* Numerisch: z.B. -1, 0, 3.1415 oder 2.9979e8)
 * String: Zeichenfolge
 
 Eindimensionale Variablen

@@ -74,11 +74,13 @@ Variablen definiert werden.
 
 Mit diesen Variablen kann man dann weiter rechnen, oder sie verändern.
 
-Variablen werden in der Regel klein geschrieben. Variablen, die nicht mehr
-verändert werden, heißen Konstanten. Diese beginnen hier mit einem kleinem k.
 Es sollten möglichst selbsterklärende Namen für Variablen gewählt werden bzw.
-aus dem Kontext sollte sich erschließen, was sie bedeuten. Variablennamen können
-auch aus mehreren Wörtern zusammengesetzt sein. So kann zum Beispiel "dozentenNamen",
+aus dem Kontext sollte sich erschließen, was sie bedeuten.  
+Variablennamen können aus Buchstaben (klein oder groß wird unterschieden) 
+Ziffern und dem Punkt ('.') zusammengesetzt werden. Variablennamen
+dürfen kein Leerzeichen beinhalten und nicht mit einer Zahl beginnen. Variablennamen können
+aus mehreren Wörtern zusammengesetzt sein. Zur besseren Lesbarkeit kann der Anfang
+des zweiten Wortes hervorgehoben werden, zum Beispiel kann "dozentenNamen",
 "dozenten.namen" oder "dozenten_namen" in R benutzt werden, wobei wir bei
 erster Konvention bleiben. Unter R ist es eigentlich Standard mit "." zu trennen.
 Aber Vorsicht, in den meisten anderen Sprachen wie C, C++ und Python hat der Punkt eine besondere
@@ -107,11 +109,11 @@ Was für Variablen gibt es?
 Nulldimensionale Variablen
 --------------------------
 
-Atomare Variablen sind die einfachsten. Alle anderen weiteren sind aus ihnen aufgebaut.
+Atomare Variablen sind die einfachsten. Alle anderen sind aus ihnen aufgebaut.
 Es gibt verschiedene Typen von Werten, die in Variablen gespeichert werden dürfen:
 
 * Boolean: 0 oder 1 bzw. FALSE oder TRUE
-* Numerisch: z.B. -1, 0, 3.1415 oder 2.9979e8)
+* Numerisch: z.B. -1, 0, 3.1415 oder 2.9979e8, R unterscheidet nicht zwischen ganzen Zahlen oder Dezimalzahlen wie es häufig in anderen Programmiersprachen der Fall ist.
 * String: Zeichenfolge
 
 Eindimensionale Variablen
@@ -164,14 +166,15 @@ array(1:(2 * 3 * 4), c(3, 4, 2))
 
 Faktoren
 ---------
-
+Faktoren beinhalten nominale Daten (eine qualitative Merkmalsausbildung ohne natürliche Ordnung oder Reihenfolge).
 ```{r}
-x <- c("abc", "klm", "def", "hij", "abc", "hij")
-str(x)
-y <- as.factor(x)
-str(y)
-as.numeric(y)
+geschlecht <- c("m", "m", "w", "m", "w", "w", "w", "m", "m", "w", "m", "w")
+str(geschlecht)
+geschlecht.factor <- as.factor(geschlecht)
+str(geschlecht.factor)
+as.numeric(geschlecht.factor)
 ```
+Sobald die Variable als Faktor definiert ist, wird erkannt wieviele eindeutige Kategorien (levels) vorhanden sind.
 
 Funktionen
 ----------
@@ -210,12 +213,12 @@ da dies Kurzformen für TRUE und FALSE sind und zu schwer auffindbaren Fehlern f
 Klammern
 =========
 
-Befehle: ()
+Funktionsaufruf: ()
 ------------
-Parameter werden in Klammern an Befehle übergeben. Dies kann entweder mit
-"Parameter=Wert" passieren, oder ohne "Parameter=", dann muss aber die vom 
-Befehl erwartete Reihenfolge eingehalten werden. Zwischen dem Befehl und der
-öffnenden Klammer darf **kein** Leerzeichen stehen. Siehe auch schon obere
+Parameter werden in Klammern an Funktionen übergeben. Dies kann entweder mit
+"Parameter=Wert" passieren, oder ohne "Parameter=", dann muss aber die von der 
+Funktion erwartete Reihenfolge eingehalten werden. Zwischen der Funktion und der
+öffnenden Klammer sollte **kein** Leerzeichen stehen. Siehe auch schon obere
 Beispiele.
 
 ```{r}

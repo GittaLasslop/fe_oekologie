@@ -1,6 +1,6 @@
 ---
 title: "Fernerkundung globale Ökologie: R Einführung"
-author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
 #lang: de-DE
 output:
@@ -8,12 +8,31 @@ output:
 ##    toc: true
     highlight: default
 ---
+R
+=====================
+## Kurzbeschreibung
+R ist eine Programmiersprache und Programmierumgebung zur statistischen Auswertung und graphischen Darstellung von Daten.
+R ist eine open source software, was bedeutet dass die Nutzung kostenfrei und auch der source code öffentlich ist.
+Unter www.r-project.org finden sich umfassende Information zu R.
+
+Die Standarddistribution kann durch zahlreiche Pakete erweitert werden, die dann speziellere Methoden beinhalten. Diese Pakete sind online verfügbar z.B. auf dem Internetportal cran.org.
+
+
+## RStudio
+Der Aufruf des Programms R startet eine Konsole in der Befehle ausgeführt werden können. Zur Datenanalyse oder zur Entwicklung von Methoden ist es jedoch hilfreich weitere tools zur Verfügung zu haben, diese werden in Entwicklungsumgebungen zusammengefasst.
+
+[RStudio](https://www.rstudio.com/) ist eine solche Entwicklungsumgebung für [R](https://cran.r-project.org/). Hier können Programme in einem Texteditor geschrieben und getestet werden. Die wichtigsten Teile in RStudio sind der Editor und die Konsole. Im Editor werden Programme geschrieben und als Textdateien gespeichert. In der Konsole werden die Programme ausgeführt und die Rückmeldung der einzelnen Befehle erfolgt hier. Ausserdem gibt es noch eine Übersicht über früher benutzte Befehle, bestehende Variablen, Dateien, Hilfe, Abbildungen etc.
+
+Abbildung screenshot Rstudio
+
+
 Hilfe in R
 =====================
 Aufruf aus der R Konsole
 ---------------------
-* ?\<Befehl\> zeigt Hilfe für ein bekanntes Kommando an
-* ??\<Schlagwort\> zeigt Befehle und Bibliotheken an, in deren Hilfeseite das Schlagwort vorkommt.
+* ?\<Befehl\> oder help(\<Befehl\>) zeigt Hilfe für ein bekanntes Kommando an, z.B. ?var zeigt die Hilfe für die Funktion zur Varianzberechnung an
+* ??\<Schlagwort\> oder help.search() zeigt Befehle und Bibliotheken an, in deren Hilfeseite das Schlagwort vorkommt.
+* Beispiele für eine bestimmte Funktion können mit example("Funktion") aufgerufen werden
 
 Internet Suchmaschine
 ---------------------
@@ -61,7 +80,7 @@ wenn verkürzte Variablennamen verwendet werden, sollten sie in Kommentaren erkl
 werden, falls sich der Zusammenhang nicht von alleine erschließt.
 
 ```{r}
-dozentenNamen <- "Steinkamp/Werner"
+dozentenNamen <- "Lasslop/Werner"
 dozentenNamen
 ```
 

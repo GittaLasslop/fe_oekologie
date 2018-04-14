@@ -102,6 +102,11 @@ i <- 1
 i = i + 1
 i
 ```
+Mit dem Befehl 
+```{r}
+ls()
+```
+werden alle existierenden Variablen angezeigt.
 
 Was für Variablen gibt es?
 ===========================
@@ -112,9 +117,22 @@ Nulldimensionale Variablen
 Atomare Variablen sind die einfachsten. Alle anderen sind aus ihnen aufgebaut.
 Es gibt verschiedene Typen von Werten, die in Variablen gespeichert werden dürfen:
 
-* Boolean: 0 oder 1 bzw. FALSE oder TRUE
+* Boolean oder Logisch: 0 oder 1 bzw. FALSE oder TRUE
 * Numerisch: z.B. -1, 0, 3.1415 oder 2.9979e8, R unterscheidet nicht zwischen ganzen Zahlen oder Dezimalzahlen wie es häufig in anderen Programmiersprachen der Fall ist.
 * String: Zeichenfolge
+Den Datentyp kann man sich in R mit der Funktion
+```{r}
+class(TRUE)
+class(1)
+class('a')
+```
+anzeigen lassen.
+Datentypen könnten in R auch umgewandelt werden:
+```{r}
+number=1
+character=as.character(number)
+class(character)
+```
 
 Eindimensionale Variablen
 --------------------------

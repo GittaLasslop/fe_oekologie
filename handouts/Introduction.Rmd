@@ -291,7 +291,7 @@ ab. Hier einige wenige der gebräuchlisten Funktionen, die für statistische Aus
 * lm()
 * image()
 
-Schauen Sie sich die Hilfeseiten an (siehe Abschnitt Hilfe etwas weiter unten) und nutzen Sie das bisher
+Schauen Sie sich die Hilfeseiten an und nutzen Sie das bisher
 gelernte, um mit den Befehlen zu spielen und sie auszuprobieren.
 
 Bedingungen

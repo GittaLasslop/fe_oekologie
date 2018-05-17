@@ -10,7 +10,6 @@ output:
     fig_caption: yes
     includes:
       in_header: styles.tex
-##    toc: true
     highlight: default
 ---
 

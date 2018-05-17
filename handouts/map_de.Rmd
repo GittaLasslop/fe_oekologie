@@ -1,7 +1,7 @@
 ---
 title: "Fernerkundung globale Ökologie"
 subtitle: "Paket Einführung"
-author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
 #lang: de-DE
 output:
@@ -10,14 +10,17 @@ output:
     fig_caption: yes
     includes:
       in_header: styles.tex
+##    toc: true
     highlight: default
 ---
 
 # Einführung
 
-Das Seminar Material finden Sie zum Teil auch unter:
+Das Seminar Material finden Sie im OLAT SOSE 2018.
 
-[http://bit.ly/FE_globale_Oekologie](http://bit.ly/FE_globale_Oekologie).
+Die Daten die im Kurs benutzt werden finden Sie unter:
+https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
+
 
 ## Rstudio
 
@@ -124,11 +127,11 @@ print(p)
 
 Die von uns vorprozessierten Daten werden geladen.
 ```{r}
-#downloadData("map")# funktioniert nicht, alternative: im browser dropbox link kopieren und mit folgenden Befehlen herunterladen
 fileName <- paste0("LUC_", getOption("fegloekRegion"), 
                    ".zip")
 file='https://www.dropbox.com/sh/1rcz0fjmgz2hnuh/AABBwtgJHlcD21y5t43NFLpma/Daten/LUC_ALASKA.zip?dl=0'
-download.file(file,file.path(getOption("fegloekDataDir"),fileName))
+file='https://powerfolder.gwdg.de/dl/fiXNVFhCv7bwzo33Hj8Rys5L/LUC_ALASKA.zip'
+download.file(file,file.path(getOption("fegloekDataDir"),fileName),method='wget')
 unzip(file.path(getOption("fegloekDataDir"), fileName), 
             exdir = getOption("fegloekDataDir"))
 ```

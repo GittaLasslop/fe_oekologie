@@ -64,6 +64,7 @@ for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal
   }
 }
 if (!require(FEglobaleOekologie)) {
+  library("devtools")
   install_github("joergsteinkamp/FEglobaleOekologie")
 }
 ```

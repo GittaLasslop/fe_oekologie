@@ -126,7 +126,7 @@ print(p)
 
 ## Regionale Karte mit Landbedeckung
 
-Die von uns vorprozessierten Daten (LUC_ALASKA.zip) werden geladen. Sie können die Daten entweder mit der Funktion download.file() oder von Hand herunterladen.
+Die von uns vorprozessierten Daten (LUC_ALASKA.zip) werden geladen. Sie können die Daten entweder mit der Funktion download.file() oder von Hand herunterladen. Für andere Regionen müssen Sie erst den Link online herausfinden und entsprechend im Skript anpassen.
 ```{r}
 fileName <- paste0("LUC_", getOption("fegloekRegion"), 
                    ".zip")

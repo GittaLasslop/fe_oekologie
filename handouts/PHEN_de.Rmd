@@ -31,14 +31,15 @@ fegloekOptions(baseDir = "/home/gitta/R/Lehre")
 fegloekOptions(region="NWBRAZIL")
 fegloekInit()
 ```
-Download der Daten (PHEN_NWBRAZIL.zip)
-```{r, message=FALSE, warning=FALSE}
+Download der Daten (PHEN_NWBRAZIL.zip), wenn Sie eine andere Region wählen müssen Sie auch den DownloadLink entsprechend anpassen. Den Link zu den einzelnen Dateien können Sie online finden: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
 file='https://powerfolder.gwdg.de/dl/fiKVDMyBFTUdAoTu76e82RZD'
 fileName <- paste0("PHEN_", getOption("fegloekRegion"), 
                    ".zip")
-#download.file(file,file.path(getOption("fegloekDataDir"),fileName))
-#unzip(file.path(getOption("fegloekDataDir"), fileName), 
-#            exdir = getOption("fegloekDataDir"))
+download.file(file,file.path(getOption("fegloekDataDir"),fileName))
+unzip(file.path(getOption("fegloekDataDir"), fileName), 
+            exdir = getOption("fegloekDataDir"))
 ```
 
 ## Einlesen und Verarbeiten der MODIS Daten

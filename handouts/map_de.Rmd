@@ -125,13 +125,14 @@ print(p)
 
 ## Regionale Karte mit Landbedeckung
 
-Die von uns vorprozessierten Daten werden geladen.
+Die von uns vorprozessierten Daten (LUC_ALASKA.zip) werden geladen. Sie können die Daten entweder mit der Funktion download.file() oder von Hand herunterladen.
 ```{r}
 fileName <- paste0("LUC_", getOption("fegloekRegion"), 
                    ".zip")
-file='https://www.dropbox.com/sh/1rcz0fjmgz2hnuh/AABBwtgJHlcD21y5t43NFLpma/Daten/LUC_ALASKA.zip?dl=0'
+#file='https://www.dropbox.com/sh/1rcz0fjmgz2hnuh/AABBwtgJHlcD21y5t43NFLpma/Daten/LUC_ALASKA.zip?dl=0'
+#oder
 file='https://powerfolder.gwdg.de/dl/fiXNVFhCv7bwzo33Hj8Rys5L/LUC_ALASKA.zip'
-download.file(file,file.path(getOption("fegloekDataDir"),fileName),method='wget')
+download.file(file,file.path(getOption("fegloekDataDir"),fileName))
 unzip(file.path(getOption("fegloekDataDir"), fileName), 
             exdir = getOption("fegloekDataDir"))
 ```
@@ -145,7 +146,7 @@ data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 file <- file.path(data.dir, paste0("MCD12Q1_GEO_lres_", year, "-01-01.Land_Cover_Type_", lct, ".tif"))
 ```
 
-Der nun folgenden Teil wird in fast allen folgenden Skripten wieder kommen. Deshalb werden wir ihn gemeinsam in eine Funktion packen, die in einer Datei 'functions.R' gespeichert werden soll. Dabei wird der Pfad zu dem GeoTiff dieser Funktion als Argument übergeben. Die Funktion liefert dann die Datentabelle (data.frame) zurück, welche einer Variablen zugewiesen werden kann.
+Der nun folgende Teil wird in fast allen folgenden Skripten wieder kommen. Deshalb werden wir ihn gemeinsam in eine Funktion packen, die in einer Datei 'functions.R' gespeichert werden soll. Dabei wird der Pfad zu dem GeoTiff dieser Funktion als Argument übergeben. Die Funktion liefert dann die Datentabelle (data.frame) zurück, welche einer Variablen zugewiesen werden kann.
 ```{r}
 rLCT  <- raster(file)
 dfLCT <- as.data.frame(rasterToPoints(rLCT))

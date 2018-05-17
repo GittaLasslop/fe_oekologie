@@ -1,9 +1,7 @@
 ---
 title: "Fernerkundung globale Ökologie: 2. Phänologie"
-author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
-bibliography: ~/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
-lang: de-DE
 output:
   tufte::tufte_handout:
 ##    latex_engine: xelatex
@@ -20,7 +18,7 @@ Die Phänologie ist der Jahresgang der Vegetation. Dieser kann mit Hilfe des zei
 
 ## Literatur
 
-@buitenwerf_three_2015; @liang_validating_2011; @churkina_spatial_2005; @huete_overview_2002
+#@buitenwerf_three_2015; @liang_validating_2011; @churkina_spatial_2005; @huete_overview_2002
 
 ## Initialisieren
 Hier werden die benötigten Pakete geladen und Verzeichnisse erzeugt sowie weitere Variablen initialisiert. Die Parameter 'baseDir' und 'region' müssen von jeder Gruppe entsprechend angepasst werden.
@@ -28,14 +26,19 @@ Hier werden die benötigten Pakete geladen und Verzeichnisse erzeugt sowie weite
 library(raster)
 library(ggplot2)
 library(reshape2)
-library(FEglOek)
-fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
+library(FEglobaleOekologie)
+fegloekOptions(baseDir = "/home/gitta/R/Lehre")
 fegloekOptions(region="NWBRAZIL")
 fegloekInit()
 ```
-Download der Daten
+Download der Daten (PHEN_NWBRAZIL.zip)
 ```{r, message=FALSE, warning=FALSE}
-downloadData("PHEN")
+file='https://powerfolder.gwdg.de/dl/fiKVDMyBFTUdAoTu76e82RZD'
+fileName <- paste0("PHEN_", getOption("fegloekRegion"), 
+                   ".zip")
+#download.file(file,file.path(getOption("fegloekDataDir"),fileName))
+#unzip(file.path(getOption("fegloekDataDir"), fileName), 
+#            exdir = getOption("fegloekDataDir"))
 ```
 
 ## Einlesen und Verarbeiten der MODIS Daten
@@ -75,7 +78,7 @@ Zeitpunkte des jeweiligen "Überflugs" aus den Spaltennamen extrahiert.
 
 ```{r}
 filenames <- colnames(dfNDVI)
-ndviDate <- extractMODISDate(filenames)
+ndviDate <- extractDate(filenames)
 ```
 
 \marginnote{

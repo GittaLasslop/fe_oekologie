@@ -111,6 +111,9 @@ ndviMin <- apply(dfNDVI, 1, "min", na.rm=TRUE)
 ndviMax <- apply(dfNDVI, 1, "max", na.rm=TRUE)
 ndviMid <- (ndviMax + ndviMin) / 2
 ```
+\marginnote{
+\textbf{Aufgabe}\\
+Schauen Sie sich die Hilfe zur Funktion apply an, was passiert bei diesem Aufruf?}
 
 Der dfNDVI hat die extrahierten Zeitserien zeilenweise angeordnet. Wir wollen die Zeitserien für die vier Punkte jedoch jeweils in einer Spalte habe mit der zusätzlichen Spalte 'date'. Hierfür muss 'dfNDVI' transponiert werden (Befehl 't()').
 

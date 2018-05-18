@@ -124,6 +124,11 @@ wobei "c" für "combine" steht. Einfacher:
 ```{r}
 x <- 1:13
 ```
+Mit der Funktion **seq(start, ende, schrittweite)** können Zahlenfolgen mit gegebenem Schrittweite erzeugt werden:
+```{r}
+seq(2,20,2)
+```
+
 Da Vektoren eine homogene Datenstruktur sind (alle Elemente sind vom gleichen Datentyp) kann man mit ihnen rechnen:
 ```{r}
 x / 2 + 1
@@ -220,7 +225,7 @@ quadratFunktion <- function(x, a=1, b=0, c=0) {
 quadratFunktion(-3:3)
 quadratFunktion(-3:3, c=-5)
 ```
-
+Die Variablen x,a,b und c existieren dabei nur innerhalb der Funktion, außerhalb können die Variablen mit gleichem Namen definiert sein, durch den Aufruf der Funktion werden diese nicht benutzt oder verändert.
 # Reservierte Wörter und Variablennamen
 
 Die folgenden Wörter dürfen nicht als Variablennamen verwendet werden da sie

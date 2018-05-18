@@ -156,6 +156,8 @@ dev.off()
 
 2. Machen Sie eine Abbildung für den mittleren Jahresgang des NDVI. Hierfür fügen Sie eine Spalte mit dem Monat an den data.frame melted.dfNDVI hinzu. Den Monat können Sie aus der Datumsvariablen mit dem folgenden Befehl extrahieren as.numeric(format(melted.dfNDVI\$date,"%m")). Jetzt müssen Sie die Variable aggregieren. Dies kann mit der Funktion aggregate gemacht werden aggregate(melted.dfNDVI,by=list(month=melted.dfNDVI\$month,variablen=melted.dfNDVI$variable),FUN='mean',na.rm=T). (3 Punkte)
 
+3. Machen Sie alle Abbildungen nochmal für eine andere Region aus der temperaten Zone (1 Punkt).
+
 # Freiwillige Zusatzaufgabe
 
 Zeigen NDVI und/oder EVI einen Trend auf? Ist dieser signifikant?

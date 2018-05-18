@@ -55,6 +55,8 @@ stackNDVI <- stack(files)
 Nicht vergessen: Schauen Sie sich Zwischenergebnisse immer wieder mit den
 Befehlen "head()" und "str()" an, um zu verstehen, was Sie
 gerade gemacht haben.
+\textbf{Aufgabe}\\
+Wie viele Dateien werden mit stack eingelesen?
 }
 Die während der Initialisation definierten Punkte in Breiten-/Lägengrad, werden in
 UTM Koordinaten transformiert. Aus den bereitgestellten GIS-Daten (Raster-Format, UTM-Projektion) wird eine Zeitserie
@@ -74,7 +76,7 @@ dfNDVI <- extract(stackNDVI, sPointsUTM, df=TRUE)
 dfNDVI$ID = NULL
 ```
 
-Mit der Funktion "extractMODISDate" des Paketes werden die 
+Mit der Funktion "extractDate" des Paketes FEglobaleOekologie werden die 
 Zeitpunkte des jeweiligen "Überflugs" aus den Spaltennamen extrahiert.
 
 ```{r}
@@ -102,7 +104,7 @@ dfNDVI[dfNDVI <= ndviLowerLimit] = NA
 dfNDVI = dfNDVI * ndviScaleFactor
 ```
 
-Minimum/Maximum und Median jeder Zeitserie werden berechnet. Der Median wird als blaue Linien im Plot dargestellt. Der Schnittpunkt der Vegetationsindex-Kurve mit dem Median stellt eine sehr grobe Abschätzung des Anfangs und Ende der Vegetationsperiode dar.
+Minimum/Maximum und Median jeder Zeitserie werden berechnet. Der Median wird später als blaue Linien im Plot dargestellt. Der Schnittpunkt der Vegetationsindex-Kurve mit dem Median stellt eine sehr grobe Abschätzung des Anfangs und Ende der Vegetationsperiode dar.
 
 ```{r}
 ndviMin <- apply(dfNDVI, 1, "min", na.rm=TRUE)
@@ -123,6 +125,9 @@ verschmolzen werden. Dies geschieht mit der funktion "melt" aus dem Paket "resha
 melted.dfNDVI <- melt(dfNDVI, id.vars="date")
 ndviMid <- data.frame(variable=paste0("X", 1:4), value=ndviMid)
 ```
+\marginnote{
+\textbf{Aufgabe}\\
+Vergleichen Sie dfNDVI und melted.dfNDVI. Was hat die Funktion melt bewirkt?}
 
 ## Grafikausgabe
 

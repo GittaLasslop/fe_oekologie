@@ -225,7 +225,7 @@ knitr::kable(plyr::ddply(dfLCT, c("id", "name"), plyr::summarize, count=length(n
 
 2. Es sind Daten für die Jahre 2001 und 2010 vorhanden. Schreiben Sie erneut eine Schleife für diese 2 Jahre, so dass Sie am Ende vier Karten haben: 2001 + LCT1, 2001 + LCT3, 2010 + LCT1, 2010 + LCT3. (2 Punkt)
 
-3. Schreiben Sie eine Funktion, die die Spalte 'name' für die numerische Spalte 'id' der Landbedeckungsklasse an den data.frame anhängt. (1 Punkt)
+3. Schreiben Sie eine Funktion, die eine Spalte 'name' mit der Landbedeckung als Character anhängt (basierend auf der numerischen Spalte 'id' der Landbedeckungsklasse). (1 Punkt)
 
 4. Benutzten Sie den Befehl 'scale_fill_manual' um den Biomen sinnvolle Farben zuzuweisen. (Mit der geladenen ggplot2 library können Sie mit ?scale_fill_manual die Hilfe aufrufen. Beachten Sie auch das cheat-sheet im OLAT.) (1 Punkt)
 

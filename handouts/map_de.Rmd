@@ -126,7 +126,7 @@ print(p)
 
 ## Regionale Karte mit Landbedeckung
 
-Die von uns vorprozessierten Daten (LUC_ALASKA.zip) werden geladen. Sie können die Daten entweder mit der Funktion download.file() oder von Hand herunterladen. Für andere Regionen müssen Sie erst den Link online herausfinden und entsprechend im Skript anpassen.
+Die von uns vorprozessierten Daten (LUC_ALASKA.zip) werden geladen. Sie können die Daten entweder mit der Funktion download.file() oder von Hand herunterladen. Achten Sie darauf die Datei im Data Verzeichnis abzuspeichern (getOption("fegloekDataDir")).
 ```{r}
 fileName <- paste0("LUC_", getOption("fegloekRegion"), 
                    ".zip")
@@ -193,6 +193,8 @@ p = p + labs(title = "MODIS MCD12Q1 Landcover")
 p = p + xlab("Longitude")
 p = p + ylab("Latitude")
 ```
+\marginnote{\textbf{Aufgabe}\\
+Ändern Sie in den abgebildeten Kartenausschnitt so dass nur der Bereich zwischen Longitude -160 und -140 gezeigt wird. Setzen Sie die Legende statt unter die Abbildung über die Abbildung. Was setzt der Parameter ncol in der Funktion guide_legend? Setzen Sie als Überschrift über die Legende den Text "Land cover types". Ändern Sie die Dicke der Ländergrenzen.}
 
 Anschließend wird eine Karte mit der entsprechenden Region erzeugt und in einer PDF Datei gespeichert.
 

@@ -14,7 +14,7 @@ output:
 
 # Phänologie
 
-Die Phänologie ist der Jahresgang der Vegetation. Dieser kann mit Hilfe des zeitlich hinreichend hoch aufgelösten NDVI (normalized difference vegetation index) und EVI (enhanced vegetation index) analysiert werden. Das MODIS Kürzel ist unter anderem [MYD13A2](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1).
+Die Phänologie ist der Jahresgang der Vegetation. Dieser kann mit Hilfe des zeitlich hinreichend hoch aufgelösten NDVI (normalized difference vegetation index) und EVI (enhanced vegetation index) analysiert werden. Das MODIS Kürzel ist unter anderem [MYD13A2](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/myd13a2_v006).
 
 ## Initialisieren
 Hier werden die benötigten Pakete geladen und Verzeichnisse erzeugt sowie weitere Variablen initialisiert. Die Parameter 'baseDir' und 'region' müssen von jeder Gruppe entsprechend angepasst werden.
@@ -24,22 +24,19 @@ library(ggplot2)
 library(reshape2)
 library(FEglobaleOekologie)
 fegloekOptions(baseDir = "/home/gitta/R/Lehre")
-fegloekOptions(region="NWBRAZIL")
+fegloekOptions(region="NEUROPE")
 fegloekInit()
 ```
 Download der Daten (PHEN_NWBRAZIL.zip), wenn Sie eine andere Region wählen müssen Sie auch den DownloadLink entsprechend anpassen. Den Link zu den einzelnen Dateien können Sie online finden: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
+Laden Sie dort die Datei "PHEN_{REGION}.zip" runter und speichern Sie sie in dem Ordner:
 
 ```{r, message=FALSE, warning=FALSE, eval=FALSE}
-file='https://powerfolder.gwdg.de/dl/fiKVDMyBFTUdAoTu76e82RZD'
-fileName <- paste0("PHEN_", getOption("fegloekRegion"), 
-                   ".zip")
-download.file(file,file.path(getOption("fegloekDataDir"),fileName))
-unzip(file.path(getOption("fegloekDataDir"), fileName), 
-            exdir = getOption("fegloekDataDir"))
+file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
 ## Einlesen und Verarbeiten der MODIS Daten
-Es wird eine Serie (oder ein Stapel) aus den herunter geladenen georeferenzierter Dateien erzeugt.
+Wir erzeugen nun eine Variable data.dir in der der Pfad zu dem Verzeichnis gespeichert ist in dem die Dateien liegen.
+Dann erzeugen wir einen Vektor files der alle Dateinamen dieses Verzeichnisses enthält in denen die Zeichenkette "NDVI.tif" vorkommt (list.files()). Diese Dateien werden mit der Funktion stack() gelesen und der Variablen stackNDVI zugewiesen. Es wird eine Serie (oder ein Stapel) aus den herunter geladenen georeferenzierten Dateien erzeugt.
 
 ```{r, message=FALSE, warning=FALSE}
 data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
@@ -49,14 +46,13 @@ stackNDVI <- stack(files)
 \marginnote{
 \textbf{Hinweis}\\
 Nicht vergessen: Schauen Sie sich Zwischenergebnisse immer wieder mit den
-Befehlen "head()" und "str()" an, um zu verstehen, was Sie
-gerade gemacht haben.
+Befehlen "head()", "summary()" und "str()" an, um zu verstehen, was Sie
+gerade gemacht haben. Informationen zu raster/stack Objekten bekommen Sie indem Sie einfach den Variablennamen in die Konsole eingeben.
 \textbf{Aufgabe}\\
 Wie viele Dateien werden mit stack eingelesen?
 }
 Die während der Initialisation definierten Punkte in Breiten-/Lägengrad, werden in
-UTM Koordinaten transformiert. Aus den bereitgestellten GIS-Daten (Raster-Format, UTM-Projektion) wird eine Zeitserie
-an den spezifizierten Punkten extrahiert und in einem "data.frame" gespeichert.
+UTM Koordinaten transformiert. 
 
 ```{r}
 sPoints    <- SpatialPoints(getOption("fegloekPoints"),
@@ -64,7 +60,8 @@ sPoints    <- SpatialPoints(getOption("fegloekPoints"),
 sPointsUTM <- spTransform(sPoints, CRS(projection(stackNDVI)))
 ```
 
-Für diese Punkte werden Zeitserien als "data.frame" extrahiert. Die zusätzliche
+Aus den bereitgestellten GIS-Daten (Raster-Format, UTM-Projektion) wird eine Zeitserie
+an den spezifizierten Punkten mit der Funktion "extract()" extrahiert und in einem "data.frame" gespeichert. Die zusätzliche
 Variable "ID" an Position 1 wird entfernt.
 
 ```{r}
@@ -73,7 +70,7 @@ dfNDVI$ID = NULL
 ```
 
 Mit der Funktion "extractDate" des Paketes FEglobaleOekologie werden die 
-Zeitpunkte des jeweiligen "Überflugs" aus den Spaltennamen extrahiert.
+Zeitpunkte des jeweiligen "Überflugs" aus den Spaltennamen/Dateinamen extrahiert.
 
 ```{r}
 filenames <- colnames(dfNDVI)
@@ -117,8 +114,7 @@ Der dfNDVI hat die extrahierten Zeitserien zeilenweise angeordnet. Wir wollen di
 dfNDVI = data.frame(date=ndviDate, t(dfNDVI))
 ```
 
-Um eine "schöne" Darstellung zu erzielen, müssen die Datenspalten
-verschmolzen werden. Dies geschieht mit der funktion "melt" aus dem Paket ["reshape2"] (https://www.jstatsoft.org/article/view/v021i12).
+Um eine effiziente Verabeitung durch die Abbildungsfunktionen von ggplot2 zu ermöglichen müssen die Daten transformiert werden. Dies geschieht mit der funktion "melt" aus dem Paket ["reshape2"] (https://www.jstatsoft.org/article/view/v021i12).
 
 ```{r}
 melted.dfNDVI <- melt(dfNDVI, id.vars="date")
@@ -149,6 +145,8 @@ print(p)
 ```{r, eval=FALSE}
 dev.off()
 ```
+
+Die Funktion "facet_wrap()" sorgt dafür dass die Abbildung für alle 4 Punkte angefertigt wird.
 
 # Hausaufgabe
 

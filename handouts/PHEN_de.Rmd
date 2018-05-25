@@ -27,7 +27,7 @@ fegloekOptions(baseDir = "/home/gitta/R/Lehre")
 fegloekOptions(region="NEUROPE")
 fegloekInit()
 ```
-Download der Daten (PHEN_NWBRAZIL.zip), wenn Sie eine andere Region wählen müssen Sie auch den DownloadLink entsprechend anpassen. Den Link zu den einzelnen Dateien können Sie online finden: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
+Die benötigten Fernerkundungsdaten finden Sie online: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
 Laden Sie dort die Datei "PHEN_{REGION}.zip" runter und speichern Sie sie in dem Ordner:
 
 ```{r, message=FALSE, warning=FALSE, eval=FALSE}
@@ -154,18 +154,18 @@ Die Funktion "facet_wrap()" sorgt dafür dass die Abbildung für alle 4 Punkte a
 
 2. Erstellen Sie eine Abbildung für den mittleren Jahresgang des NDVI. Hierfür fügen Sie eine Spalte mit dem Monat an den data.frame melted.dfNDVI hinzu. Den Monat können Sie aus der Datumsvariablen mit dem folgenden Befehl extrahieren
 ```{r, eval=FALSE}
-melted.dfNDVI\$month <- as.numeric(format(melted.dfNDVI\$date,"%m")). 
+melted.dfNDVI$month <- as.numeric(format(melted.dfNDVI$date,"%m")) 
 ```
 Jetzt müssen Sie die Variable monatsweise mitteln. Dies erreichen Sie mit der Funktion aggregate:
 ```{r, eval=FALSE}
-mean.dfNDVI <- aggregate(melted.dfNDVI,by=list(month=melted.dfNDVI\$month,
+mean.dfNDVI <- aggregate(melted.dfNDVI,by=list(month=melted.dfNDVI$month,
                                 variablen=melted.dfNDVI$variable),
                                 FUN='mean',na.rm=T)
 ```
 Damit Sie den Überblick behalten was passiert, überprüfen Sie die Variablen nach jedem Schritt (z.B. mit head(), summary(), str(), ... ).
  **(3 Punkte)**
  
-3. Wiederholen Sie alle Abbildungen für eine andere Region aus der temperaten Zone **(1 Punkt)**.
+3. Wiederholen Sie alle Abbildungen für eine andere Region **(1 Punkt)**.
 
 # Freiwillige Zusatzaufgabe
 

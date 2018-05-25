@@ -1,9 +1,9 @@
 ---
 title: "Fernerkundung globale Ökologie: 4. NPP/GPP"
-author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
-bibliography: ~/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+# bibliography: ~/Cloud/Dropbox/etc/texmf/bib/zotero.bib
 classoption: a4paper
-lang: de-DE
+## lang: de-DE
 output:
   tufte::tufte_handout:
 ##    latex_engine: xelatex
@@ -20,7 +20,7 @@ Das MODIS Kürzel ist [MOD17A3](https://lpdaac.usgs.gov/dataset_discovery/modis/
 
 ## Literatur
  
- @zhao_drought-induced_2010; @zhao_improvements_2005; @nemani_climate-driven_2003 und zum vertiefen: @de_kauwe_satellite_2016 und Kommentare, sowie Antworten zu  @zhao_drought-induced_2010
+# @zhao_drought-induced_2010; @zhao_improvements_2005; @nemani_climate-driven_2003 und zum vertiefen: @de_kauwe_satellite_2016 und Kommentare, sowie Antworten zu  @zhao_drought-induced_2010
 
 ## Initialisieren
 Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
@@ -28,28 +28,27 @@ Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
 library(raster)
 library(ggplot2)
 library(plyr)
-library(FEglOek)
-fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
-fegloekOptions(region="NWBRAZIL")
+library(FEglobaleOekologie)
+fegloekOptions(baseDir = "/home/gitta/R/Lehre")
+fegloekOptions(region="BORNEO")
 fegloekInit()
 ```
-Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.
-```{r}
+```{r, echo=FALSE}
 source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
 source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
 ```
-Download der Daten
-```{r, message=FALSE, warning=FALSE}
-downloadData("NPP")
+Download der Daten von https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2, die entpackten Dateien sollen in folgendem Verzeichnis liegen.
+```{r, message=FALSE, warning=FALSE,eval=FALSE}
+file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
 ## Einlesen der Daten
 \marginnote{
 \textbf{Aufgabe}\\
 Finden Sie wieder "scale factor" und "valid range" auf der dem heutigen Thema entsprechenden MODIS
-Web-Seite und definiere Sie scale factor als "nppScaleFactor" und die Limits als
+Web-Seite (MOD17A3, siehe oben) und definieren Sie scale factor als "nppScaleFactor" und die Limits als
 "nppValidRange". Wenn Sie die gesuchten Variablen nicht finden können, nehmen Sie nppScaleFactor = 1 und
-nppValidRange = c(0, 1.e30). Die Funktion 'geotiff2df()' muss hierfür wieder erweitert werden und zwar um den Parameter 'scale\textunderscore factor'.
+nppValidRange = c(0, 1.e30). 
 }
 
 ```{r, echo=FALSE}
@@ -57,7 +56,9 @@ nppScaleFactor <- 0.0001
 nppValidRange  <- c(0, 65500)
 ```
 
-Eine Datei, in der die NPP-Werte sind, wird geladen.
+Eine Datei, in der die NPP-Werte sind, wird geladen, dafür schreiben wir eine Funktion basierend auf dem code der letzen Stunde. Die Funktion 'geotiff2df()' soll die input Parameter "file" (Dateiname), "name" (den Namen für die Datenvariable, hier NPP), valid\_range und scale\_factor haben. Als Rückgabe brauchen wir einen dataframe mit drei Spalten: x und y (lat und lon) Werte und die Werte der Datenvariablen.
+Die Datei soll mit raster() gelesen werden und dann in einen dataframe mit as.data.frame(rasterToPoints(raster)) umgewandelt werden. Zusätzlich müssen noch die Spaltennamen in "x","y" und den input parameter "name" (hier NPP) geändert werden. Werte außerhalb der Limits (valid\_range) sollen auf NA gesetzt werden (z.B. data[data <= valid_range[1]] = NA) und die Variable mit dem scale\_factor multipliziert werden.
+Dann verwenden wir die Funktion um die Daten zu lesen:
 
 ```{r}
 data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
@@ -65,7 +66,7 @@ file <- file.path(data.dir, "MOD17A3_2010-01-01.Npp_1km.tif")
 dfNPP <- geotiff2df(file, "NPP", valid_range = nppValidRange, scale_factor = nppScaleFactor)
 ```
 
-Laden der Landnutzungsklassen, anhand welcher die NPP-Werte klassifiziert werden.
+Laden der Landnutzungsklassen, anhand welcher die NPP-Werte klassifiziert werden. (Die Daten müssen Sie eventuell noch runterladen.) Die LCT3lookuptable müssen Sie wie in der letzten Stunde einlesen.
 
 ```{r}
 file <-file.path(data.dir, "MCD12Q1_2010-01-01.Land_Cover_Type_3.tif")
@@ -133,14 +134,14 @@ print(p)
 
 # Hausaufgaben
 
-1. Änderen Sie die Farbgebung analog zu den vorherigen Skripten.
+1. Änderen Sie die Farbgebung analog zu den vorherigen Skripten. **(1 Punkt)**
 
-2. Machen Sie das gleiche für Land Cover Type 3.
+2. Machen Sie das gleiche für Land Cover Type 1. **(2 Punkte)**
 
-3. Es gibt auch eine entsprechende GPP Datei (Brutto-Primärproduktion). Machen Sie das gleiche für LCT1, LCT3 und GPP.
+3. Es gibt auch eine entsprechende GPP Datei (Brutto-Primärproduktion). Machen Sie das gleiche für LCT1, LCT3 und GPP. (3 Punkte)
 
 4. Setzen Sie NPP ins Verhältnis zu GPP.
-    + Erzeugen Sie eine Karte des Verhältnisses NPP:GPP?
-    + Erzeugen Sie einen Boxplot des Verhältnisses von NPP:GPP pro Ökosystem?
+    + Erzeugen Sie eine Karte des Verhältnisses NPP:GPP (1 Punkt)
+    + Erzeugen Sie einen Boxplot des Verhältnisses von NPP:GPP pro Ökosystem (1 Punkt)
     
 # Literatur

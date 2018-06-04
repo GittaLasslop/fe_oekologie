@@ -1,5 +1,5 @@
 ---
-title: "Fernerkundung globale Ökologie: 4. NPP/GPP"
+title: "Fernerkundung globale Ökologie: 3. NPP/GPP"
 author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 bibliography: /home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2018/handouts/literatur.bib
 classoption: a4paper
@@ -23,6 +23,20 @@ Das MODIS Kürzel ist [MOD17A3](https://lpdaac.usgs.gov/dataset_discovery/modis/
  @zhao_drought-induced_2010; @zhao_improvements_2005; @nemani_climate-driven_2003 und zum vertiefen: @de_kauwe_satellite_2016 und Kommentare, sowie Antworten zu  @zhao_drought-induced_2010
 
 ## Initialisieren
+Sollten Sie eine Fehlermeldung beim Laden der Pakete bekommen installieren Sie diese bitte als erstes nochmal neu mit dem code aus der 1. Stunde:
+```{r, message=FALSE, warning=FALSE,eval=FALSE}
+for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal", "devtools")) {
+  if (!require(p, character.only=TRUE)) {
+    install.packages(p)
+    library(p, character.only=TRUE)
+  }
+}
+
+library("devtools")
+install_github("joergsteinkamp/FEglobaleOekologie")
+
+```
+
 Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
 ```{r, message=FALSE, warning=FALSE}
 library(raster)
@@ -33,11 +47,13 @@ fegloekOptions(baseDir = "/home/gitta/R/Lehre")
 fegloekOptions(region="BORNEO")
 fegloekInit()
 ```
+
+
 ```{r, echo=FALSE}
 source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
 source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
 ```
-Download der Daten von https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2, die entpackten Dateien sollen in folgendem Verzeichnis liegen.
+Download der Daten von https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2 (NPP_region.zip), die entpackten Dateien sollen in folgendem Verzeichnis liegen.
 ```{r, message=FALSE, warning=FALSE,eval=FALSE}
 file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
@@ -58,6 +74,14 @@ nppValidRange  <- c(0, 65500)
 
 Eine Datei, in der die NPP-Werte sind, wird geladen, dafür schreiben wir eine Funktion basierend auf dem code der letzen Stunde. Die Funktion 'geotiff2df()' soll die input Parameter "file" (Dateiname), "name" (den Namen für die Datenvariable, hier NPP), valid\_range und scale\_factor haben. Als Rückgabe brauchen wir einen dataframe mit drei Spalten: x und y (lat und lon) Werte und die Werte der Datenvariablen.
 Die Datei soll mit raster() gelesen werden und dann in einen dataframe mit as.data.frame(rasterToPoints(raster)) umgewandelt werden. Zusätzlich müssen noch die Spaltennamen in "x","y" und den input parameter "name" (hier NPP) geändert werden. Werte außerhalb der Limits (valid\_range) sollen auf NA gesetzt werden (z.B. data[data <= valid_range[1]] = NA) und die Variable mit dem scale\_factor multipliziert werden.
+Funktionen in R haben die allgemeine Form:
+```{r,eval=FALSE}
+Funktionsname <- function(InputPar1,InputPar2,...){
+  R code
+  return(value)
+}
+```
+
 Dann verwenden wir die Funktion um die Daten zu lesen:
 
 ```{r}
@@ -66,7 +90,7 @@ file <- file.path(data.dir, "MOD17A3_2010-01-01.Npp_1km.tif")
 dfNPP <- geotiff2df(file, "NPP", valid_range = nppValidRange, scale_factor = nppScaleFactor)
 ```
 
-Laden der Landnutzungsklassen, anhand welcher die NPP-Werte klassifiziert werden. (Die Daten müssen Sie eventuell noch runterladen.) Die LCT3lookuptable müssen Sie wie in der letzten Stunde einlesen.
+Laden der Landnutzungsklassen, anhand welcher die NPP-Werte klassifiziert werden. (Die Daten müssen Sie eventuell noch runterladen wenn Sie das letzte Mal eine andere Region benutzt haben.) Die LCT3lookuptable müssen Sie wie in der letzten Stunde einlesen.
 
 ```{r}
 file <-file.path(data.dir, "MCD12Q1_2010-01-01.Land_Cover_Type_3.tif")
@@ -76,7 +100,7 @@ dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
 
 ## Datenprozessierung
 
-In den Regionen Alaska, Südafrika und Australiens stimmen die Koordinaten der zwei Dateien leider nicht exakt überein, daher muss ein Datensatz an den anderen angepasst werden. Die Rundung führt leider zu einer geringen Ungenauigkeit, die im Rahmen unseres Kurses jedoch vernachlässigt werden kann.
+In den Regionen Alaska, Südafrika und Australiens stimmen die Koordinaten der zwei Dateien leider nicht exakt überein, daher muss ein Datensatz an den anderen angepasst werden. Die Rundung führt leider zu einer geringen Ungenauigkeit, die im Rahmen unseres Kurses jedoch vernachlässigt werden kann. Um die beiden Datensätze zusammenzufügen müssen die Werte jedoch exakt übereinstimmen, sie werden daher mit den folgenden code-Zeilen korrigiert. Finden Sie was die Funktion round macht!
 
 ```{r}
 if (getOption("fegloekRegion") == "ALASKA" ||
@@ -134,14 +158,17 @@ print(p)
 
 # Hausaufgaben
 
-1. Änderen Sie die Farbgebung analog zu den vorherigen Skripten. **(1 Punkt)**
+1. Änderen Sie die Farbgebung in der Abbildung. **(1 Punkt)**
 
-2. Machen Sie das gleiche für Land Cover Type 1. **(2 Punkte)**
+2. Was bewirkt der Befehl *coord_flip()*? **(1 Punkt)**
 
-3. Es gibt auch eine entsprechende GPP Datei (Brutto-Primärproduktion). Machen Sie das gleiche für LCT1, LCT3 und GPP. (3 Punkte)
+3. Wie können Sie die Zahl 2.7645 auf zwei Nachkommastellen runden? **(1 Punkt)**
 
-4. Setzen Sie NPP ins Verhältnis zu GPP.
-    + Erzeugen Sie eine Karte des Verhältnisses NPP:GPP (1 Punkt)
-    + Erzeugen Sie einen Boxplot des Verhältnisses von NPP:GPP pro Ökosystem (1 Punkt)
+4. Es gibt auch eine entsprechende GPP Datei (Brutto-Primärproduktion). Machen Sie das gleiche für GPP. **(2 Punkte)**
+
+5. Erstellen Sie eine Karte von NPP. **(1 Punkt)**
+
+6. Setzen Sie NPP ins Verhältnis zu GPP.
+    + Erzeugen Sie eine Karte des Verhältnisses NPP:GPP **(1 Punkte)**
     
 # Literatur

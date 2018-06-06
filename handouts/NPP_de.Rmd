@@ -58,7 +58,16 @@ Download der Daten von https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU
 file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
+
 ## Einlesen der Daten
+
+```{r, echo=FALSE}
+nppScaleFactor <- 0.0001
+nppValidRange  <- c(0, 65500)
+```
+
+Eine Datei, in der die NPP-Werte sind, wird geladen, dafür schreiben wir eine Funktion basierend auf dem code der letzen Stunde. Die Funktion 'geotiff2df()' soll die input Parameter "file" (Dateiname), "name" (den Namen für die Datenvariable, hier NPP), valid\_range und scale\_factor haben. Als Rückgabe brauchen wir einen dataframe mit drei Spalten: x und y (lat und lon) Werte und die Werte der Datenvariablen.
+
 \marginnote{
 \textbf{Aufgabe}\\
 Finden Sie wieder "scale factor" und "valid range" auf der dem heutigen Thema entsprechenden MODIS
@@ -67,12 +76,6 @@ Web-Seite (MOD17A3, siehe oben) und definieren Sie scale factor als "nppScaleFac
 nppValidRange = c(0, 1.e30). 
 }
 
-```{r, echo=FALSE}
-nppScaleFactor <- 0.0001
-nppValidRange  <- c(0, 65500)
-```
-
-Eine Datei, in der die NPP-Werte sind, wird geladen, dafür schreiben wir eine Funktion basierend auf dem code der letzen Stunde. Die Funktion 'geotiff2df()' soll die input Parameter "file" (Dateiname), "name" (den Namen für die Datenvariable, hier NPP), valid\_range und scale\_factor haben. Als Rückgabe brauchen wir einen dataframe mit drei Spalten: x und y (lat und lon) Werte und die Werte der Datenvariablen.
 Die Datei soll mit raster() gelesen werden und dann in einen dataframe mit as.data.frame(rasterToPoints(raster)) umgewandelt werden. Zusätzlich müssen noch die Spaltennamen in "x","y" und den input parameter "name" (hier NPP) geändert werden. Werte außerhalb der Limits (valid\_range) sollen auf NA gesetzt werden (z.B. data[data <= valid_range[1]] = NA) und die Variable mit dem scale\_factor multipliziert werden.
 Funktionen in R haben die allgemeine Form:
 ```{r,eval=FALSE}
@@ -160,15 +163,14 @@ print(p)
 
 1. Änderen Sie die Farbgebung in der Abbildung. **(1 Punkt)**
 
-2. Was bewirkt der Befehl *coord_flip()*? **(1 Punkt)**
+2. Was bewirkt der Befehl *coord_flip()*? **(0.5 Punkt)**
 
-3. Wie können Sie die Zahl 2.7645 auf zwei Nachkommastellen runden? **(1 Punkt)**
+3. Wie können Sie die Zahl 2.7645 auf zwei Nachkommastellen runden? **(0.5 Punkt)**
 
-4. Es gibt auch eine entsprechende GPP Datei (Brutto-Primärproduktion). Machen Sie das gleiche für GPP. **(2 Punkte)**
+4. Es gibt auch eine entsprechende GPP Datei (Brutto-Primärproduktion). Machen Sie den gleichen Boxplot für GPP. **(1 Punkt)**
 
-5. Erstellen Sie eine Karte von NPP. **(1 Punkt)**
+5. Erstellen Sie eine Karte von NPP (siehe map_de.R Skript). **(2 Punkte)**
 
-6. Setzen Sie NPP ins Verhältnis zu GPP.
-    + Erzeugen Sie eine Karte des Verhältnisses NPP:GPP **(1 Punkte)**
+6. Setzen Sie NPP ins Verhältnis zu GPP. Erzeugen Sie einen Boxplot des Verhältnisses NPP:GPP für alle Landbedeckungsklassen **(2 Punkte)**.
     
 # Literatur

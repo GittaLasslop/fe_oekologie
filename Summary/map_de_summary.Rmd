@@ -1,0 +1,76 @@
+---
+title: "map_de.R Summary"
+output: beamer_presentation
+---
+
+
+## Zusammenfassung der letzten Stunde
+
++ Einlesen von Dateien
++ Anfertigen einer Abbildung
++ Häufige Fehler
+
+## Einlesen von Dateien
+
+1. Satellitendaten (.tif)
+  
+    ```{r, echo = TRUE, eval=FALSE}
+    library(raster)
+    dataRaster = raster(file)
+    ```
+Daten die mit raster oder stack eingelesen wurden sind in einem speziellen Datenformat und werden in einen data.frame konvertiert.
+```{r, eval = FALSE}
+    library(raster)
+    dataDF <- as.data.frame(rasterToPoints(dataRaster))
+```
+
+
+2. Textdatei
+    ```{r, echo = TRUE, eval=FALSE}
+    dataDF = read.table(file,sep=';',header=T)
+    ```
+    
+## Erstellen einer Abbildung
+Abbildung von raster Daten, *name* gibt den Namen der Variablen an, die farbig abgebildet wird:
+```{r, eval = FALSE}
+library(ggplot2)
+p <- ggplot(dataDF, aes(x = x, y = y))
+p = p + geom_raster(aes(fill = name))
+```
+Hinzufügen der Ländergrenzen:
+```{r, eval = FALSE}
+worldmap <- map_data("world")
+p = p + geom_path(data = worldmap, size = 0.1, 
+                  colour = "black",
+                  aes(x = long, y = lat, group = group))
+```
+
+## Hinzufügen von Punkten mit Beschriftung:
+```{r, eval = FALSE}
+points=data.frame(long=c(-143.54, -152.60 ,-147.12),
+                  lat=c(61.43, 64.85, 65.13))
+p = p + geom_point(data = points, aes(x = long, y = lat),
+                   color = "black", shape = 10, 
+                   size = 2.5)
+p = p + geom_text(data = points, 
+                  aes(x = long, y = lat, 
+                      label =c('P1','P2','P3')))
+```
+Zum Abspeichern:
+```{r, eval = FALSE}
+pdf('filename.pdf')
+  print(p)
+dev.off()
+```
+
+
+## Häufige Fehler in der letzten Stunde
+1. Datei nicht gefunden
+* wenn der Dateiname in einer Variablen gespeichert ist, lassen Sie sich den Namen in der Konsole ausgeben
+* kopieren sie die Datei in einen Texteditor, damit der pfad angezeigt wird
+* list.files('Verzeichnis') listet die Dateien in einem Verzeichnis
+2. Zwischenschritte in der Konsole ausgeben
+
+3. Daten nicht in einer Variablen abgespeichert
+
+4. Text bitte nur in einem einfachen Editor bearbeiten (z.B. Rstudio, nicht in Word)

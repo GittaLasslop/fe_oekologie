@@ -18,7 +18,7 @@ Die Phänologie ist der Jahresgang der Vegetation. Dieser kann mit Hilfe des zei
 
 ## Initialisieren
 Hier werden die benötigten Pakete geladen und Verzeichnisse erzeugt sowie weitere Variablen initialisiert. Die Parameter 'baseDir' und 'region' müssen von jeder Gruppe entsprechend angepasst werden.
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
 library(raster)
 library(ggplot2)
 library(reshape2)
@@ -27,8 +27,18 @@ fegloekOptions(baseDir = "/home/gitta/R/Lehre")
 fegloekOptions(region="NEUROPE")
 fegloekInit()
 ```
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+library(raster)
+library(ggplot2)
+library(reshape2)
+library(FEglobaleOekologie)
+fegloekOptions(baseDir = "IhrBaseDir")
+fegloekOptions(region="NEUROPE")
+fegloekInit()
+```
+
 Die benötigten Fernerkundungsdaten finden Sie online: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
-Laden Sie dort die Datei "PHEN_{REGION}.zip" runter und speichern Sie sie in dem Ordner:
+Laden Sie dort die Datei "PHEN_{REGION}.zip" herunter und speichern Sie die entzippten Dateien in dem Ordner:
 
 ```{r, message=FALSE, warning=FALSE, eval=FALSE}
 file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
@@ -165,9 +175,6 @@ mean.dfNDVI <- aggregate(melted.dfNDVI,by=list(month=melted.dfNDVI$month,
 Damit Sie den Überblick behalten was passiert, überprüfen Sie die Variablen nach jedem Schritt (z.B. mit head(), summary(), str(), ... ).
  **(3 Punkte)**
  
-3. Wiederholen Sie alle Abbildungen für eine andere Region **(1 Punkt)**.
+3. Wiederholen Sie die beiden Abbildungen für eine andere Region **(2 Punkte)**.
 
-# Freiwillige Zusatzaufgabe
-
-Zeigen NDVI und/oder EVI einen Trend auf? Ist dieser signifikant?
 

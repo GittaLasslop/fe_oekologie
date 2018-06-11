@@ -1,0 +1,80 @@
+---
+title: "PHEN_de.R Summary"
+output: beamer_presentation
+---
+
+
+## Zusammenfassung der letzten Stunde
+
++ Einlesen von Dateien mit mehreren Zeitschritten
++ Anfertigen einer Abbildung mit Zeitreihen
++ Häufige Fehler
+
+## Einlesen von Dateien
+
+1. Satellitendaten (.tif)
+Einlesen von mehreren Dateien:  
+    ```{r, echo = TRUE, eval=FALSE}
+    library(raster)
+    dataRaster = stack(files)
+    ```
+dataRaster hat dann mehrere layer, die die einzelnen Daten der einzelnen Dateien beinhalten.
+Aus dieser Variablen werden Zeitreihen an voher definierten Punkten extrahiert.
+```{r, eval = FALSE}
+    dataDF <- extract(dataRaster,Points)
+```
+## Datentransformation
+Das Skript der letzten Woche beinhaltet ein Beispiel für die Transformation von geographischen Daten in andere Koordinatensysteme (spTransform()), die Anwendung von Funktionen auf mehrdimensionale Arrays (apply()):
+```{r, eval = FALSE}
+sPointsUTM <- spTransform(sPoints, CRS(projection(sNDVI)))
+# für jede Zeile wird das Minimum ausgerechnen (margin=1)
+ndviMin <- apply(dfNDVI, 1, "min", na.rm=TRUE)
+
+```
+In der Hausaufgabe wurde ein Monatsmittel für vier verschiedene Punkte erstellt mit der Funktion aggregate():
+```{r, eval = FALSE}
+mean.dfNDVI <- aggregate(dfNDVI,
+                         by=list(month=dfNDVI$month,
+                            variablen=dfNDVI$variable),
+                            FUN='mean',na.rm=T)
+```
+
+## Erstellen einer Abbildung
+Abbildung von Zeitreihen, *value* gibt den Namen der y-Variablen an, die als Linie abgebildet wird. 
+Die Abbildung wird für die vier Punkte wiederholt durch den Befehl facet_wrap():
+```{r, eval = FALSE}
+library(ggplot2)
+p <- ggplot(data, aes(x=date, y=value))
+p <- p + geom_line()
+p <- p + facet_wrap(~variable, ncol=1)
+```
+Hinzufügen des Medians als horizontale Linie:
+```{r, eval = FALSE}
+p <- p + geom_hline(data=ndviMid, aes(yintercept=value),
+                    colour="blue", linetype="dashed")
+```
+
+## Achsenformatierung:
+```{r, eval = FALSE}
+p <- p + xlab("Datum")
+p <- p + ylab("NDVI")
+```
+Zum Abspeichern:
+```{r, eval = FALSE}
+pdf('filename.pdf')
+  print(p)
+dev.off()
+```
+
+
+## Häufige Fehler in der letzten Stunde
+1. Pakete nicht installiert
+* erst mit library(Paketname) überprüfen ob die Pakete installiert sind, sonst mit dem ersten Abschnitt des map_de.R scriptes nochmal installieren.
+2. Datei nicht gefunden
+* **keine Umlaute oder Leerzeichen im Verzeichnis angeben**
+* wenn der Dateiname in einer Variablen gespeichert ist, lassen Sie sich den Namen in der Konsole ausgeben
+* kopieren sie die Datei in einen Texteditor, damit der pfad angezeigt wird
+* list.files('Verzeichnis') listet die Dateien in einem Verzeichnis
+3. Wenn Sie einen Fehler in einer Variablen bemerken und etwas im Skript ändern starten Sie im Skript in der Zeile in der diese Variable das erste mal auftaucht.
+4. Zwischenschritte in der Konsole ausgeben
+

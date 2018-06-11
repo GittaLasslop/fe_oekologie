@@ -1,0 +1,56 @@
+---
+title: "NPP_de.R Summary"
+output: beamer_presentation
+---
+
+
+## Zusammenfassung der letzten Stunde
+
++ Funktion
++ Boxplot
++ Probleme
+
+## Schreiben einer Funktion: Wieso?
+
++ Abfolge von Befehlen, die man häufig immer wieder gleich benutzt.
+Das können kompliziertere Berechnungen sein wie zum Beispiel die Fläche einer Gridzelle oder Umrechnungen zwischen Einheiten.
++ ist die Funktion einmal gut getestet können sich keine Fehler mehr einschleichen
++ Änderungen/Updates müssen nur einmal innerhalb der Funktion gemacht werden
++ Erhöht die Übersichtlichkeit
+
+## Schreiben einer Funktion
+```{r,eval=FALSE}
+Funktionsname <- function(InputPar1,InputPar2,...){
+  R code
+  return(value)
+}
+```
+Aufruf: var1=Funktionsname(var2,var3)
+
+var2 und var3 heißen innerhalb der Funktion InputPar1 und InputPar2
+
+der inhalt von value wird der Variablen var1 zugewiesen
+
+die Variablen InputPar1, InputPar2 und value existieren ausserhalb der Funktion nicht.
+
+## Boxplot
+Bildet den Median, die zwei Quartile und die beiden Extremwerte ab. Definition der Extremwerte variiert.
+```{r, eval=FALSE}
+p <- ggplot(dfData, aes(x=name, y=NPP,fill=name))
+p <- p + geom_boxplot()
+p <- p + guides(fill=FALSE)
+p <- p + xlab(NULL)
+p <- p + ylab("NPP [kg(C)/m^2]")
+p <- p + coord_flip()
+p
+```
+
+
+## Probleme in der letzten Stunde
+1. Zuweisung von Ergebnissen einer Funktion an eine Variable.
+
+Ohne Zuweisung werden die Ergebnisse nur in der Konsole ausgegeben und können nicht im Skript weiterverwendet werden.
+
+2. Ergebnisse können auch ohne Fehlermeldung falsch sein.
+
+Behalten Sie den Überblick was in Ihrem Skript passiert.

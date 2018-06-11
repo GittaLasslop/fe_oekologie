@@ -1,8 +1,8 @@
 ---
-title: "Fernerkundung globale Ökologie: 1. Landnutzungsänderung"
+title: "Fernerkundung globale Ökologie: 4. Landnutzungsänderung"
 author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
-lang: de-DE
+#lang: de-DE
 bibliography: /home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2018/handouts/literatur.bib
 output:
   tufte::tufte_handout:
@@ -18,12 +18,15 @@ output:
 
 Über den jährlich ermittelten Landnutzungstypen (Land cover type, LCT) lässt sich die Veränderung der Landnutzung über den Zeitraum der vorhandenen Satellitenmessungen ermitteln.
 
-MODIS Kürzel ist [MCD12Q1](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1)
+## Daten
+Das MODIS Kürzel für die heutige Sitzung ist [MCD12Q1](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1).
 
 ## Literatur
-1. Generell: @mertes_detecting_2015 @yin_mapping_2014 @broich_remotely_2011 @friedl_modis_2010 @schneider_new_2009
+Generelle Literatur zu den relevanten MODIS Produkten:  
+@Mertes2015Detectingchangeurban @Yin2014MappingAnnualLand @Broich2011Remotelysensedforest @Friedl2010MODISCollectionglobal @Schneider2009newmapglobal
 
-2. Unsicherheiten: @fritz_highlighting_2011 @park_characteristics_2014
+Für eine Diskussion von Unsicherheiten der genutzten Produkte:  
+@Fritz2011Highlightingcontinueduncertainty @Park2014CharacteristicsMODISlandcover
 
 ## Initialisieren
 Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
@@ -31,32 +34,36 @@ Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
 library(raster)
 library(ggplot2)
 library(reshape2)
-library(FEglOek)
-fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
-fegloekOptions(region="BORNEO")
-```
-Laden der in den letzten Stunden geschriebenen Funktion.
-```{r}
-source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
-```
 
-Laden Sie die Daten runten und verschieben Sie die entzippten Dateien in den foglenden Ordner:
+library(FEglobaleOekologie)
+fegloekOptions(baseDir = "/home/gitta/R/Lehre") 
+fegloekOptions(region="ALASKA")
+fegloekInit()
+```
+Die benötigten Fernerkundungsdaten finden Sie online: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
+Laden Sie dort die Datei "LUC_{REGION}.zip" und verschieben Sie die entzippten Dateien in den folgenden Ordner:
 ```{r, message=FALSE, warning=FALSE}
 file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
+Ausserdem benötigen wir die Funktion *geotiff2df()* aus den letzten Sitzungen. Kopieren Sie den Quelltext der Funktion in dieses Script oder laden Sie die Funktion aus einer externen Datei *functions.R* (in ihrem OLAT_Skript haben wir die Funktion schon eingefügt - generell ist es aber ratsam bei größeren Projekten häufig verwendete Funktionen in externe Dateien auszulagern und mit source in the Laufzeitumgebung zu laden).
+
+```{r, messsage=FALSE}
+source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
+```
+
 ## Verarbeiten der Daten
 
-Die LUC Daten sind für die Jahre 2001 -- 2010 vorhanden. Die Jahre werden in einer for-Schleife zwischen start_year und end_year durchlaufen und mit jedem Durchlauf wird berechnet, wieviel Pixel bewaldet und unbewaldet sind. Im ersten Jahr (year == start_year) wird der data.frame tsForest erzeugt und in den folgenden Jahren wird diesem data.frame je eine Zeile hinzugefügt (rbind, "row bind"). Für das erste und letze Jahr wird eine Karte erzeugt.
+In unseren MODIS Beispiel-Daten sind LUC Informationen für die Jahre 2001 -- 2010 vorhanden. Die Jahre werden in einer for-Schleife zwischen start_year und end_year durchlaufen und mit jedem Durchlauf wird berechnet, wieviel Pixel als bewaldet und unbewaldet klassifiziert sind. Im ersten Jahr (year == start_year) wird der data.frame tsForest erzeugt und in den folgenden Jahren wird diesem data.frame je eine Zeile hinzugefügt (rbind, "row bind"). Für das erste und letze Jahr wird eine Karte erzeugt (Hinweis: die Daten der Region BORNEO für das Jahr 2001 enthalten ungewöhnlich viele nicht-klassifizierte Pixel - starten hier deshalb mit dem Jahr 2002; generell sollten Sie bei LUC Analysen immer prüfen ob Unregelmässigkeiten in einer Zeitscheibe zu beobachten sind - sie könnten sich auch die Quality Control Daten des Produkts ansehen; diese finden Sie auf der MODIS-Homepage als seperaten Datensatz).
 
 ```{r}
 start_year <- 2001
 end_year <- 2010
 ```
 
-Der crop Befehl schneidet eine von uns vordefinierte Region (getOption("fegloekLUCExtent")) aus den Daten aus, dieser muss als Erweiterung in die im letzen Skript geschriebene Funktion 'geotiff2df()' als Parameter eingebaut werden, ebenso wie 'valid_range'. Die Daten liegen in UTM-Projektion vor, um Ländergrenzen dazustellen muss die vorhandene Karte auf die jeweilige Projektion der Region umprojiziert werden. Das wird in der von uns geschriebenen Funktion 'borderSubset()' gemacht.
+Der *crop* Befehl schneidet eine von uns vordefinierte Region (mittels einer Hilfsfunktion des Pakets FEglobaleOekologie (getOption("fegloekLUCExtent")) aus den Daten aus. Diese Region muss als zusätzliches/ optionales Funktionsargument der Funktion 'geotiff2df()' übergeben werden. Die Begrenzungsdaten liegen in der UTM-Projektion vor. Um Ländergrenzen dazustellen zu können müssen wir zunächst die vorhandene Karte auf die jeweilige Projektion der Region umprojiziert. Das wird in der von uns geschriebenen Funktion 'borderSubset()' gemacht.
 
-Es wird pro Jahr eine neue Spalte erzeugt, die Wald und nicht bewaldete Gebiete unterscheidet. Was Wald und nicht Wald ist, kann der zuletzt definierten Variable LCT3lookuptable entnommen werden. Anschließend  wird die Anzahl der bewaldeten und unbewaldeten Pixel pro Jahr gezählt und in dem data.frame tsForest gespeichert.
+Anschliessend wird für jedes Jahr eine neue Spalte erzeugt, die Wald und nicht bewaldete Gebiete unterscheidet. Die Klassifikation in Wald / Nicht-Wald erfolgt mittels der zuletzt definierten Variable in LCT3lookuptable. Anschließend wird die Anzahl der bewaldeten und unbewaldeten Pixel pro Jahr gezählt und in dem data.frame tsForest gespeichert.
 
 ```{r, echo=FALSE, results="hide", message=FALSE, warning=FALSE, fig.width=5, fig.height=4, fig.margin=TRUE}
 forestExtent <- getOption("fegloekLUCExtent")
@@ -93,7 +100,7 @@ for (year in start_year:end_year) {
     p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
                          ylim=c(min(dfLCT$y), max(dfLCT$y)))
     p <- p + theme(legend.position = "bottom")
-    p <- p + scale_fill_manual(values=c("unforested"="yellow", "forested"="darkgreen",
+    p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
                                         "water"="lightblue"), drop=FALSE)
     p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
     label = paste0(nFor, " * km^2")
@@ -113,7 +120,7 @@ for (year in start_year:end_year) {
 
 \marginnote{
 \textbf{Aufgabe}\\
-Unkommentieren Sie innerhalb der Schleife über die Jahre die Zeilen mit "annotate" und setzen sie die x und y Koordinaten so, das die jeweiligen Flächen mit auf der Grafik stehen (Befehl extent(rLCT) gibt die Limits aus).
+Aktivieren Sie innerhalb der Schleife die Zeilen mit 'annotate' und wählen sie die X- und Y-Koordinaten so, das die Informationen innerhalb der Karte erscheinen (Hinweis: der Befehl 'extent(rLCT)' gibt Ihnen die Limits der Karte aus).
 }
 
 ```{r, eval=FALSE}
@@ -151,7 +158,7 @@ for (year in start_year:end_year) {
     p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
                          ylim=c(min(dfLCT$y), max(dfLCT$y)))
     p <- p + theme(legend.position = "bottom")
-    p <- p + scale_fill_manual(values=c("unforested"="yellow", "forested"="darkgreen",
+    p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
                                         "water"="lightblue"), drop=FALSE)
     p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
     
@@ -173,14 +180,15 @@ for (year in start_year:end_year) {
 }
 ```
 
-Jetzt wird die Zeitreihe geplottet. Dafür werden die Spalten 'forested' und 'unforested' mit dem Befehl 'melt' in einer Spalte namens 'value' kombiniert und eine zusätzliche Spalte names 'variable' erzeugt, die die entsprechenden alten Spaltennamen 'forested'/'unforested' enthält. Falls Ihre zwei Klassen deutlich unterschiedliche Flächen aufweisen,
-aktivieren Sie den facet_wrap Befehl. Denken Sie daran, die Variablen entsprechend ihrer obigen Definition
-umzubenennen.
+Nun plotten wir die Zeitreihe. Dafür werden die Spalten 'forested' und 'unforested' mit dem Befehl 'melt' in einer Spalte namens 'value' kombiniert und eine zusätzliche Spalte names 'variable' erzeugt, die die entsprechenden alten Spaltennamen 'forested'/'unforested' enthält. Falls sich die Größen der zwei Landnurzungklassen in ihrer Region sehr stark unterscheiden können Sie mit dem Befehl 'facet_wrap' die Balken der Klassen in interschiedlichen Panelen plotten und so Trends leichter sichtbar machen. Denken Sie daran, die Variablen entsprechend ihrer obigen Definition umzubenennen.
 
 ```{r}
 tsForest = melt(tsForest, measure.vars=c("forested", "unforested"))
 p <- ggplot(tsForest, aes(x=Year, y=value, fill=variable))
 p <- p + geom_bar(stat="identity", position="dodge")
+p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
+                                        "water"="lightblue"), drop=FALSE)
+
 ## p <- p + facet_wrap(~variable, ncol=1, scales="free_y")
 ```
 ```{r, eval=FALSE}
@@ -194,18 +202,91 @@ dev.off()
 print(p)
 ```
 
+Die Karte mit der räumlichen Verteilung kann auch für jedes Jahr geplottet werden. Diese Bilder können Sie zu einer Animation zusammenfügen. Hierzu benötigen Sie die Erweiterung 'gganimate' der Bibliothek 'ggplot2'. Diese muss zunächst mit den folgenden Befehlen nachinstalliert werden:
+
+```{r, eval=FALSE}
+## Installation des Zusatzpakets
+library(devtools)
+devtools::install_github("dgrtwo/gganimate")
+
+## laden des neuen Pakets
+library(gganimate)
+```
+
+Nun modifizieren wir das Plotskript so, dass für jedes Jahr eine neuer Layer der Animation ausgegeben wird (sehen Sie sich hierzu auch die Beispiele auf [GitHub](https://github.com/dgrtwo/gganimate) an). Damit dies funtioniert müssen wir zunächst einen data.frame aller Daten (über alle Jahre) erzeugen. Hierbei wird im Gegensatz zu unserem bisherigen Skript noch dfLCT noch eine Spalte 'year' angefügt. Wir speichern die dfLCT data.frames der einzelnen Jahre dann in einer Liste (list_of_dfLCTs) um sie anschliessend mit der Befehlskombination *do.call*, *rbind* zu einem grossen data.frame zu vereinen. Diesen benutzen wir schliesslich um eine Animation mit ggplot zu erzeugen.
+
+```{r, eval=FALSE}
+
+forestExtent <- getOption("fegloekLUCExtent")
+data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+
+list_of_dfLCTs = list()
+cnt = 1
+
+for (year in start_year:end_year) {
+  file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
+  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop=forestExtent, valid_range = c(0, 253))
+
+  # reproject border lines, if not yet done
+  if (!exists("regionmap")) {
+    rLCT <- raster(file.path(data.dir, file))
+    rLCT = crop(rLCT, forestExtent)
+    regionmap = borderSubset(rLCT)
+  }
+
+  dfLCT$name=""
+  dfLCT$name[dfLCT$id < 5 | dfLCT$id > 8] = "unforested"
+  dfLCT$name[dfLCT$id > 4 & dfLCT$id < 9] = "forested"
+  dfLCT$name[dfLCT$id == 0] = "water"
+
+  dfLCT$year=year
+  print(head(dfLCT))
+  
+  list_of_dfLCTs[[cnt]] = dfLCT
+  cnt = cnt + 1
+}
+
+## Verknuepfung der einzelnen dfLCT data.frames zu einem grossen data.frame
+dfLCT_total <- do.call("rbind", list_of_dfLCTs)
+
+
+p <- ggplot(dfLCT_total, aes(x=x, y=y, frame=year))
+p <- p + geom_raster(aes(fill=name))
+p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
+p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
+                         ylim=c(min(dfLCT$y), max(dfLCT$y)))
+p <- p + theme(legend.position = "bottom")
+p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
+                                        "water"="lightblue"), drop=FALSE)
+p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
+    
+## label = paste0(nFor, " * km^2")
+## p <- p + annotate("text", label=label, x=3e5, y=9.05e6,
+##                  color="white", parse=TRUE, size=12)
+## label = paste0(nUnf, " * km^2")
+## p <- p + annotate("text", label=label, x=3e5, y=8.95e6,
+##                  color="white", parse=TRUE, size=12)
+    
+p <- p + xlab("easting")
+p <- p + ylab("northing")
+
+gganimate(p)
+
+```
+
+
+
+
 # Hausaufgaben
 
-1. Beschriften Sie die y-Achse korrekt (?xlab, ?ylab).
+1. Beschriften Sie die Achsen korrekt (Hinweis: ?xlab, ?ylab). **(0.5 Punkte)**
 
-2.  In dem Skript wird das Verhältnis Wald zu nicht Wald in einem kleinem Ausschnitt betrachtet. Überlegen Sie sich eine eigene Klassifizierung (Urbanisierung, Landwirtschaft, Verbuschung, ...) Ihrer Region und passen Sie die Variablennamen und die Klassifizierung entsprechend an. Eventuell muss auch der zu benutzende Ausschnitt verändert werden (forestExtent), damit zum Beispiel eine Stadt enthalten ist.
- 
-# freiwillige Zusatzaufgaben
+2. In dem Skript wird das Verhältnis Wald zu nicht-Wald in einem kleinem Ausschnitt betrachtet. Überlegen Sie sich eine eigene Klassifizierung (Urbanisierung, Landwirtschaft, Verbuschung, ...) für Ihre Region und passen Sie die Variablennamen und die Klassifizierung entsprechend an. Eventuell muss auch der zu benutzende Ausschnitt verändert werden (forestExtent; schauen Sie sich den bisherigen Wert an um die Angabe zu verstehen), damit zum Beispiel eine Stadt enthalten ist. **(2 Punkte)**
 
-1. Beschriften Sie die x-Achsen mit ganzen Zahlen damit es eher einer Zeitachse mit Jahren entspricht (?scale_x_continuous).
+3. Beschriften Sie die x-Achse des Zeitreihen-Plots mit ganzen Zahlen damit es eher einer Zeitachse mit Jahren entspricht (?scale_x_continuous). **(0.5 Punkte)**
 
-2. Wählen Sie eine sinnvolle Farbgebung aus. Hilfe gibt es auf [docs.ggplot2.org](http://docs.ggplot2.org/current/)
+4. Wählen Sie eine sinnvolle Farbgebung aus. Hilfe gibt es auf [docs.ggplot2.org](http://docs.ggplot2.org/current/) **(1 Punkt)**
 
-3. Die Karte mit der räumlichen Verteilung kann auch für jedes Jahr geplottet werden. Diese Bilder können Sie zu einer Animation zusammen fügen.
+5. Modifizieren Sie den Plot indem sie die Balkendarstellung durch Linien ersetzen. **(1 Punkt)**
 
 # Literatur

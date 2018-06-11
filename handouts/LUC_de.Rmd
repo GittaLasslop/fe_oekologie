@@ -1,9 +1,9 @@
 ---
 title: "Fernerkundung globale Ökologie: 1. Landnutzungsänderung"
-author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
 lang: de-DE
-bibliography: ~/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+bibliography: /home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2018/handouts/literatur.bib
 output:
   tufte::tufte_handout:
 ##    latex_engine: xelatex
@@ -33,16 +33,16 @@ library(ggplot2)
 library(reshape2)
 library(FEglOek)
 fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
-fegloekOptions(region="NWBRAZIL")
+fegloekOptions(region="BORNEO")
 ```
 Laden der in den letzten Stunden geschriebenen Funktion.
 ```{r}
 source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
 ```
 
-Download der Daten
+Laden Sie die Daten runten und verschieben Sie die entzippten Dateien in den foglenden Ordner:
 ```{r, message=FALSE, warning=FALSE}
-downloadData("LUC")
+file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
 ## Verarbeiten der Daten
@@ -198,7 +198,7 @@ print(p)
 
 1. Beschriften Sie die y-Achse korrekt (?xlab, ?ylab).
 
-2.  In dem Skript wird das Verhältnis Wald zu nicht Wald in einem kleinem Ausschnitt betrachtet. Überlegen Sie sich eine eigene Klassifizierung (Urbanisierung, Landwitschaft, Verbuschung, ...) Ihrer Region und passen Sie die Variablennamen und die Klassifizierung entsprechend an. Eventuell muss auch der zu benutzende Ausschnitt verändert werden (forestExtent), damit zum Beispiel eine Stadt enthalten ist.
+2.  In dem Skript wird das Verhältnis Wald zu nicht Wald in einem kleinem Ausschnitt betrachtet. Überlegen Sie sich eine eigene Klassifizierung (Urbanisierung, Landwirtschaft, Verbuschung, ...) Ihrer Region und passen Sie die Variablennamen und die Klassifizierung entsprechend an. Eventuell muss auch der zu benutzende Ausschnitt verändert werden (forestExtent), damit zum Beispiel eine Stadt enthalten ist.
  
 # freiwillige Zusatzaufgaben
 

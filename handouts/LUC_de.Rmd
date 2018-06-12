@@ -54,7 +54,6 @@ Ausserdem benötigen wir die Funktion *geotiff2df()* aus den letzten Sitzungen. 
 source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
 ```
 
-### Aufgabe
 
 Erweitern Sie die Funktion *geotiff2df()* so, dass Sie mit der Übergabe eines optionalen Arguments "crop_extent" die Ausgabe beschneiden können. Hierzu  benötigen Sie:  
 (1) ein zusaetzliches Funktionsargument ('crop_extent') mit dem Standardwert NA (für 'nicht definiert') und  

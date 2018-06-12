@@ -36,7 +36,6 @@ library(ggplot2)
 library(reshape2)
 
 library(FEglobaleOekologie)
-##fegloekOptions(baseDir = "/home/gitta/R/Lehre") 
 fegloekOptions(baseDir =
                "/Users/cwerner/Dropbox/Documents/2018/teaching/fe_oekologie_2018/handouts")
 fegloekOptions(region="NWBRAZIL")
@@ -236,7 +235,7 @@ cnt = 1
 
 for (year in start_year:end_year) {
   file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
-  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop=forestExtent, valid_range = c(0, 253))
+  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop_extent=forestExtent, valid_range = c(0, 253))
 
   # reproject border lines, if not yet done
   if (!exists("regionmap")) {
@@ -281,7 +280,7 @@ p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
 p <- p + xlab("easting")
 p <- p + ylab("northing")
 
-gganimate(p)
+gganimate(p, "meine_animation.html")
 
 ```
 
@@ -296,15 +295,13 @@ gganimate(p)
 
 3. Beschriften Sie die x-Achse des Zeitreihen-Plots mit ganzen Zahlen damit es eher einer Zeitachse mit Jahren entspricht (?scale_x_continuous). **(0.5 Punkte)**
 
-4. Wählen Sie eine für die Plots eine sinnvolle Farbgebung aus. Hilfe gibt es wie immer auf [docs.ggplot2.org](http://docs.ggplot2.org/current/) **(1 Punkt)**
+4. Modifizieren Sie den Plot indem sie die Balkendarstellung durch Linien ersetzen. **(1 Punkt)**
 
-5. Modifizieren Sie den Plot indem sie die Balkendarstellung durch Linien ersetzen. **(1 Punkt)**
+5. Die Ausführen ihres Skriptes bricht ab und in der Konsole von Rstudio entdecken Sie die Fehlermeldung file does not exist". Beschreiben Sie kurz Ihr Vorgehen um den Fehler zu beheben/ einzugrenzen. **(1 Punkt)**
 
-6. Die Ausführen ihres Skriptes bricht ab und in der Konsole von Rstudio entdecken Sie die Fehlermeldung file does not exist". Beschreiben Sie kurz Ihr Vorgehen um den Fehler zu beheben/ einzugrenzen. **(0.5 Punkte)**
+6. Mit welcher Funktion können Sie in R Spalten an einen data.frame anhängen? **(1 Punkt)**
 
-7. Mit welcher Funktion können Sie in R Spalten an einen data.frame anhängen? **(1 Punkt)**
-
-8. Nennen Sie mindestens eine Funktion mit der man in R die Anzahl der Zeilen in einem data.frame herausfinden kann. **(0.5 Punkte)**
+7. Nennen Sie mindestens eine Funktion mit der man in R die Anzahl der Zeilen in einem data.frame herausfinden kann. **(1 Punkt)**
 
 
 # Literatur

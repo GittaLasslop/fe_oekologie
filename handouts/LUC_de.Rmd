@@ -37,7 +37,7 @@ library(reshape2)
 
 library(FEglobaleOekologie)
 fegloekOptions(baseDir = "/home/gitta/R/Lehre") 
-fegloekOptions(region="ALASKA")
+fegloekOptions(region="BORNEO")
 fegloekInit()
 ```
 Die benötigten Fernerkundungsdaten finden Sie online: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
@@ -107,7 +107,7 @@ for (year in start_year:end_year) {
     p <- p + annotate("text", label=label, x=3e5, y=9.05e6,
                       color="white", parse=TRUE, size=6)
     label = paste0(nUnf, " * km^2")
-    p <- p + annotate("text", label=label, x=3e5, y=8.95e6,
+    p <- p + annotate("text", label=label, x=-1e5, y=1.5e,
                       color="white", parse=TRUE, size=6)
     p <- p + labs(title=year)
     p <- p + xlab("easting")

@@ -3,7 +3,7 @@ title: "Fernerkundung globale Ökologie: 4. Landnutzungsänderung"
 author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
 #lang: de-DE
-bibliography: /home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2018/handouts/literatur.bib
+bibliography: literatur.bib
 output:
   tufte::tufte_handout:
 ##    latex_engine: xelatex
@@ -36,21 +36,31 @@ library(ggplot2)
 library(reshape2)
 
 library(FEglobaleOekologie)
-fegloekOptions(baseDir = "/home/gitta/R/Lehre") 
-fegloekOptions(region="ALASKA")
+##fegloekOptions(baseDir = "/home/gitta/R/Lehre") 
+fegloekOptions(baseDir =
+               "/Users/cwerner/Dropbox/Documents/2018/teaching/fe_oekologie_2018/handouts")
+fegloekOptions(region="NWBRAZIL")
 fegloekInit()
 ```
 Die benötigten Fernerkundungsdaten finden Sie online: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
 Laden Sie dort die Datei "LUC_{REGION}.zip" und verschieben Sie die entzippten Dateien in den folgenden Ordner:
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
 file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
-Ausserdem benötigen wir die Funktion *geotiff2df()* aus den letzten Sitzungen. Kopieren Sie den Quelltext der Funktion in dieses Script oder laden Sie die Funktion aus einer externen Datei *functions.R* (in ihrem OLAT_Skript haben wir die Funktion schon eingefügt - generell ist es aber ratsam bei größeren Projekten häufig verwendete Funktionen in externe Dateien auszulagern und mit source in the Laufzeitumgebung zu laden).
+Ausserdem benötigen wir die Funktion *geotiff2df()* aus den letzten Sitzungen. Kopieren Sie den Quelltext der Funktion in dieses Script oder laden Sie die Funktion aus einer externen Datei *functions.R* (in ihrem OLAT_Skript haben wir die Funktion der letzten Sitzung schon eingefügt - generell ist es aber ratsam bei größeren Projekten häufig verwendete Funktionen in externe Dateien auszulagern und mit source in the Laufzeitumgebung zu laden).
 
 ```{r, messsage=FALSE}
 source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
 ```
+
+### Aufgabe
+
+Erweitern Sie die Funktion *geotiff2df()* so, dass Sie mit der Übergabe eines optionalen Arguments "crop_extent" die Ausgabe beschneiden können. Hierzu  benötigen Sie:  
+(1) ein zusaetzliches Funktionsargument ('crop_extent') mit dem Standardwert NA (für 'nicht definiert') und  
+(2) den Befehl crop (?crop) um die Ausdehnung unserer Karte auf die Grenzen 'crop_extent' zu beschneiden.   
+In unserem heutigen Skript haben wir die Position für die Funktionserweiterung mit einem Kommentar markiert. **Hinweis:** Für den Aufbau der if-Bedingung können Sie sich bei der folgenden Abfrage von 'valid_range' in der Funktion inspirieren lassen.
+}
 
 ## Verarbeiten der Daten
 
@@ -61,9 +71,6 @@ start_year <- 2001
 end_year <- 2010
 ```
 
-Der *crop* Befehl schneidet eine von uns vordefinierte Region (mittels einer Hilfsfunktion des Pakets FEglobaleOekologie (getOption("fegloekLUCExtent")) aus den Daten aus. Diese Region muss als zusätzliches/ optionales Funktionsargument der Funktion 'geotiff2df()' übergeben werden. Die Begrenzungsdaten liegen in der UTM-Projektion vor. Um Ländergrenzen dazustellen zu können müssen wir zunächst die vorhandene Karte auf die jeweilige Projektion der Region umprojiziert. Das wird in der von uns geschriebenen Funktion 'borderSubset()' gemacht.
-
-Anschliessend wird für jedes Jahr eine neue Spalte erzeugt, die Wald und nicht bewaldete Gebiete unterscheidet. Die Klassifikation in Wald / Nicht-Wald erfolgt mittels der zuletzt definierten Variable in LCT3lookuptable. Anschließend wird die Anzahl der bewaldeten und unbewaldeten Pixel pro Jahr gezählt und in dem data.frame tsForest gespeichert.
 
 ```{r, echo=FALSE, results="hide", message=FALSE, warning=FALSE, fig.width=5, fig.height=4, fig.margin=TRUE}
 forestExtent <- getOption("fegloekLUCExtent")
@@ -117,6 +124,11 @@ for (year in start_year:end_year) {
   }
 }
 ```
+
+Der *crop* Befehl schneidet eine von uns vordefinierte Region (mittels einer Hilfsfunktion des Pakets FEglobaleOekologie (getOption("fegloekLUCExtent")) aus den Daten aus. Diese Region muss als zusätzliches/ optionales Funktionsargument der Funktion 'geotiff2df()' übergeben werden. Die Begrenzungsdaten liegen in der UTM-Projektion vor. Um Ländergrenzen dazustellen zu können müssen wir zunächst die vorhandene Karte auf die jeweilige Projektion der Region umprojiziert. Das wird in der von uns geschriebenen Funktion 'borderSubset()' gemacht.
+
+Anschliessend wird für jedes Jahr eine neue Spalte erzeugt, die Wald und nicht bewaldete Gebiete unterscheidet. Die Klassifikation in Wald / Nicht-Wald erfolgt mittels der zuletzt definierten Variable in LCT3lookuptable. Anschließend wird die Anzahl der bewaldeten und unbewaldeten Pixel pro Jahr gezählt und in dem data.frame tsForest gespeichert.
+
 
 \marginnote{
 \textbf{Aufgabe}\\
@@ -285,8 +297,15 @@ gganimate(p)
 
 3. Beschriften Sie die x-Achse des Zeitreihen-Plots mit ganzen Zahlen damit es eher einer Zeitachse mit Jahren entspricht (?scale_x_continuous). **(0.5 Punkte)**
 
-4. Wählen Sie eine sinnvolle Farbgebung aus. Hilfe gibt es auf [docs.ggplot2.org](http://docs.ggplot2.org/current/) **(1 Punkt)**
+4. Wählen Sie eine für die Plots eine sinnvolle Farbgebung aus. Hilfe gibt es wie immer auf [docs.ggplot2.org](http://docs.ggplot2.org/current/) **(1 Punkt)**
 
 5. Modifizieren Sie den Plot indem sie die Balkendarstellung durch Linien ersetzen. **(1 Punkt)**
+
+6. Die Ausführen ihres Skriptes bricht ab und in der Konsole von Rstudio entdecken Sie die Fehlermeldung file does not exist". Beschreiben Sie kurz Ihr Vorgehen um den Fehler zu beheben/ einzugrenzen. **(0.5 Punkte)**
+
+7. Mit welcher Funktion können Sie in R Spalten an einen data.frame anhängen? **(1 Punkt)**
+
+8. Nennen Sie mindestens eine Funktion mit der man in R die Anzahl der Zeilen in einem data.frame herausfinden kann. **(0.5 Punkte)**
+
 
 # Literatur

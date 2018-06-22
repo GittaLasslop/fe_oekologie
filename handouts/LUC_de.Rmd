@@ -244,7 +244,7 @@ cnt = 1
 
 for (year in start_year:end_year) {
   file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
-  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop=forestExtent, valid_range = c(0, 253))
+  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop_extent=forestExtent, valid_range = c(0, 253))
 
   # reproject border lines, if not yet done
   if (!exists("regionmap")) {
@@ -289,7 +289,7 @@ p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
 p <- p + xlab("easting")
 p <- p + ylab("northing")
 
-gganimate(p)
+gganimate(p, "meine_animation.html")
 
 ```
 
@@ -306,11 +306,11 @@ gganimate(p)
 
 4. Modifizieren Sie den Plot indem sie die Balkendarstellung durch Linien ersetzen. **(1 Punkt)**
 
-5. Die Ausführen ihres Skriptes bricht ab und in der Konsole von Rstudio entdecken Sie die Fehlermeldung file does not exist". Beschreiben Sie kurz Ihr Vorgehen um den Fehler zu beheben/ einzugrenzen. **(1 Punkte)**
+5. Die Ausführen ihres Skriptes bricht ab und in der Konsole von Rstudio entdecken Sie die Fehlermeldung file does not exist". Beschreiben Sie kurz Ihr Vorgehen um den Fehler zu beheben/ einzugrenzen. **(1 Punkt)**
 
 6. Mit welcher Funktion können Sie in R Spalten an einen data.frame anhängen? **(1 Punkt)**
 
-7. Nennen Sie mindestens eine Funktion mit der man in R die Anzahl der Zeilen in einem data.frame herausfinden kann. **(1 Punkte)**
+7. Nennen Sie mindestens eine Funktion mit der man in R die Anzahl der Zeilen in einem data.frame herausfinden kann. **(1 Punkt)**
 
 
 # Literatur

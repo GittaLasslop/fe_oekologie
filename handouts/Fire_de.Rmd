@@ -1,9 +1,9 @@
 ---
 title: "Fernerkundung globale Ökologie: 5. Feuer"
-author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
-lang: de-DE
-bibliography: /home/jsteinkamp/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+#lang: de-DE
+bibliography: /home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2018/handouts/literatur.bib
 output:
   tufte::tufte_handout:
 ##    latex_engine: xelatex
@@ -13,23 +13,46 @@ output:
 ##    toc: true
     highlight: default
 ---
-
+# Evaluierung?
 # Feuer
 
-MODIS Kürzel: [MCD45A1](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd45a1)
+MODIS Kürzel: [MCD45A1](https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/burned-area/MCD45A1/). Die Webseite zu diesem Product wurde leider vor ein paar Wochen offline genommen, da schon neue Produkte verfügbar sind. Daher ist online keine ausführliche Beschreibung mehr vorhanden.
 
 ## Literatur
 @roy_collection_2008; @giglio_global_2006
 
 ## Initialisieren
+Sollten Sie eine Fehlermeldung beim Laden der Pakete bekommen installieren Sie diese bitte als erstes nochmal neu mit dem code aus der 1. Stunde:
+```{r, message=FALSE, warning=FALSE,eval=FALSE}
+for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal", "devtools")) {
+  if (!require(p, character.only=TRUE)) {
+    install.packages(p)
+    library(p, character.only=TRUE)
+  }
+}
+
+library("devtools")
+install_github("joergsteinkamp/FEglobaleOekologie")
+
+```
+
 Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
 library(raster)
 library(plyr)
 library(ggplot2)
-library(FEglOek)
-fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
-fegloekOptions(region="NWBRAZIL")
+library(FEglobaleOekologie)
+fegloekOptions(baseDir = "/home/gitta/R/Lehre/")
+fegloekOptions(region="SAFRICA")
+fegloekInit()
+```
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+library(raster)
+library(plyr)
+library(ggplot2)
+library(FEglobaleOekologie)
+fegloekOptions(baseDir = "IhrBaseDir")
+fegloekOptions(region="SAFRICA")
 fegloekInit()
 ```
 Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.
@@ -37,9 +60,9 @@ Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Vari
 source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
 source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
 ```
-Download der Daten
-```{r, message=FALSE, warning=FALSE}
-downloadData("Fire")
+Download der Daten von https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2 (Fire_region.zip), die entpackten Dateien sollen in folgendem Verzeichnis liegen.
+```{r, message=FALSE, warning=FALSE,eval=FALSE}
+file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
 ## Einlesen und verarbeiten der Daten
@@ -75,12 +98,12 @@ können Sie durch obige Maskierung ebenfalls aus dem Datensatz entfernen.
 Im Folgendem werden monatliche Feuerdaten eingelesen und gezählt, wie viele
 Pixel pro Monat gebrannt haben. Die Ergebnisse werden in den data.frames
 tsFire und tsLCTFire gespeichert. Die Schleife dauert recht lange, verlieren Sie nicht
-die Geduld oder gehen Sie Essen. Sie können die Zeile "message"
+die Geduld oder gehen Sie Essen. Sie können die Zeile "print"
 aktivieren, um eine Fortschrittsanzeige zu bekommen.
 
 ```{r, message=FALSE}
 files  <- list.files(data.dir, pattern="burndate.tif$", full.names=TRUE)
-date   <- extractMODISDate(files)
+date   <- extractDate(files)
 tsFire <- data.frame(date=date, count=0)
 
 if (exists("tsLCTFire"))
@@ -88,22 +111,21 @@ if (exists("tsLCTFire"))
 
 for (i in 1:length(files)) {
   dfFire <- geotiff2df(files[i], "burndate", valid_range=c(0, 366))
+  dfMerged <- merge(dfFire, dfLCT, by=c("x", "y"))
   if (nrow(dfFire) > 0) {
-    dfMerged <- merge(dfFire, dfLCT, by=c("x", "y"))
     tsFire$count[i] = nrow(dfMerged)
-  }
+  
 
-  dfFire = merge(dfFire, dfLCT, by=c("x", "y"))
-
-  if (exists("tsLCTFire") && nrow(dfFire) > 0) {
+  if (exists("tsLCTFire")) {
     tsLCTFire <- rbind(tsLCTFire,
-                       cbind(ddply(dfFire, c("name"), summarize,
+                       cbind(ddply(dfMerged, c("name"), summarize,
                                    count=length(burndate)), date=date[i]))
-  } else if (nrow(dfFire) > 0) {
-    tsLCTFire <- cbind(ddply(dfFire, c("name"), summarize,
+  } else {
+    tsLCTFire <- cbind(ddply(dfMerged, c("name"), summarize,
                              count=length(burndate)), date=date[i])
   }
-  message(paste0(round(i / (length(files)) * 100, 1), "% "))
+  }
+#  print(paste0(round(i / (length(files)) * 100, 1), "% "))
 }
 ```
 
@@ -177,6 +199,7 @@ werden (crop), damit die "Feuer" besser zu sehen sind.
 }
 ```{r, eval=FALSE}
 rFire <- raster(files[1])
+rFire[rFire>366]=NA
 rFire <- crop(rFire, fireExtent)
 regionmap <- borderSubset(rFire)
 ```
@@ -184,7 +207,7 @@ regionmap <- borderSubset(rFire)
 ```{r, eval=FALSE}
 files <- list.files(data.dir, pattern='.*burndate.tif$',
                     full.names=TRUE)
-date  <- extractMODISDate(files)
+date  <- extractDate(files)
 ```
 
 Jeder Zeitschritt wird einzeln eingelesen und als Grafik  ausgegeben.
@@ -221,7 +244,7 @@ for (i in 1:length(files)) {
   p <- p + labs(title = paste("Fire", date[i]))
   print(p)
 
-  message(paste0(round(i / (length(files)) * 100, 1), "% "))
+  print(paste0(round(i / (length(files)) * 100, 1), "% "))
 }
 dev.off()
 ```
@@ -229,7 +252,11 @@ dev.off()
 
 \marginnote{
 \textbf{freiwillige Zusatzaufgabe}\\
-Die Einzelbilder anschließend können zu einem Film zu zusammengesetzt werden.
+Die Einzelbilder können anschließend zu einem Film zusammengesetzt werden.
 }
+# Hausaufgaben
+1. Wie können Sie eine Abbildung mit dem mittleren Jahresgang der Feuersaisonalität machen? Gehen Sie analog zur Hausaufgabenlösung des PHEN handouts vor.
+2. Ist die maximale Feueraktivität für alle land cover typen im gleichen Monat? Um dies Abschätzen zu können, fertigen Sie eine Abbildung mit geom_line() der Zeitreihe an in der die Farbe der Linie den Landbedeckungstypen angibt. Da die Feueraktivität eventuell für die verschiedenen Landbedeckungstypen sehr unterschiedlich ist könnte es evetuell sinnvoll sein den Logarithmus der Feueraktivität abzubilden. Welche zusätzlichen Zeilen code und/oder welche Änderungen sind dafür notwendig?
+3. 
 
 # Literatur

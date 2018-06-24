@@ -211,7 +211,7 @@ date  <- extractDate(files)
 ```
 
 Jeder Zeitschritt wird einzeln eingelesen und als Grafik  ausgegeben.
-Diese Bilder können anschließend in eine Animation umgewandelt werden (freiwillig).
+Diese Bilder können anschließend in eine Animation umgewandelt werden.
 
 ```{r, eval=FALSE}
 png(filename=file.path(getOption("fegloekFigDir"), "Fire_%03d.png"), width=800, height=600)
@@ -252,11 +252,14 @@ dev.off()
 
 \marginnote{
 \textbf{freiwillige Zusatzaufgabe}\\
-Die Einzelbilder können anschließend zu einem Film zusammengesetzt werden.
+Die Einzelbilder können anschließend zu einem Film zusammengesetzt werden. Erinnern Sie sich an unsere Übung LUC.
 }
-# Hausaufgaben
-1. Wie können Sie eine Abbildung mit dem mittleren Jahresgang der Feuersaisonalität machen? Gehen Sie analog zur Hausaufgabenlösung des PHEN handouts vor.
-2. Ist die maximale Feueraktivität für alle land cover typen im gleichen Monat? Um dies Abschätzen zu können, fertigen Sie eine Abbildung mit geom_line() der Zeitreihe an in der die Farbe der Linie den Landbedeckungstypen angibt. Da die Feueraktivität eventuell für die verschiedenen Landbedeckungstypen sehr unterschiedlich ist könnte es evetuell sinnvoll sein den Logarithmus der Feueraktivität abzubilden. Welche zusätzlichen Zeilen code und/oder welche Änderungen sind dafür notwendig?
-3. 
+
+# Aufgaben
+1. Erstellen Sie eine Abbildung des mehrjährigen, mittleren Verlaufs der Feuerdynamik? Gehen Sie dabei  analog zur Hausaufgabenlösung des Phänologie Handouts vor. **(3 Punkte)**
+
+2. Erreicht die Feueraktivität für alle Landnutzungsklassen im selben Monat ihr Maximum? Um dies Abschätzen zu können erstellen Sie ein Liniendiagram (mit geom_line()) der Zeitreihe an. Die Farbe der Linie soll die Landbedeckungstypen darstellen. Da die Größenordnung der Feueraktivitäten der einzelnen Landbedeckungstypen eventuell sehr unterschiedlich ist könnte es sinnvoll sein den Logarithmus der Feueraktivität zu benutzen. Welche zusätzlichen Zeilen code und/ oder welche Änderungen sind dafür notwendig? **(2 Punkte)**
+
+3. ?? 
 
 # Literatur

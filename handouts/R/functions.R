@@ -1,6 +1,3 @@
-#' @importFrom raster raster crop rasterToPoints
-## erweitern mit scale_factor und valid_range für PHEN und folgende
-## erweitern mit crop für VegDyn und LUC
 
 geotiff2df <- function(file, name="value", crop_extent=NA, valid_range=NA, scale_factor=NA) {
  rast <- raster(file)
@@ -22,4 +19,20 @@ geotiff2df <- function(file, name="value", crop_extent=NA, valid_range=NA, scale
  df <- as.data.frame(rasterToPoints(rast))
  colnames(df) <- c("x", "y", name)
  return(df)
+}
+
+
+extractDate <- function(fnames) {
+  date.str.pos <- regexpr("[0-9]{4}[.-][0-9]{2}[.-][0-9]{2}", fnames)
+  date.str <- substr(fnames, as.numeric(date.str.pos),
+                     as.numeric(date.str.pos) + attr(date.str.pos, "match.length") -1)
+  if (all(grepl("-", date.str))) {
+    dates <- as.Date(date.str, format="%Y-%m-%d")
+  } else if (all(grepl(".", date.str))) {
+    dates <- as.Date(date.str, format="%Y.%m.%d")
+  } else {
+    warning("Problem extracting dates from given filenames (fnames). Tried my best, but don't trust the results!")
+    dates <- as.Date(date.str)
+  }
+  return(dates)
 }

@@ -198,7 +198,7 @@ der Karte sichtbar wird. Überlegen Sie selbst, ob Sie in Ihrer Region weiter ma
 oder zu einer anderen Region wechseln sollten.
 -------------------------------------------------------
 
-Die Ländergrenzen werden auf UTM umprojiziert.
+Die Ländergrenzen werden mit borderSubset auf unseren Kartenausschnitt zugeschnitten und auf UTM umprojiziert.
 \marginnote{
 \textbf{Aufgabe}\\
 Auch wenn die Angabe in km$^2$ groß erscheint, sind die Feuerpixel doch kaum
@@ -264,10 +264,10 @@ print(paste0(round(i / (length(files)) * 100, 1), "% "))
 
 
 # Aufgaben
-1. Erstellen Sie eine Abbildung des mehrjährigen, mittleren Verlaufs der Feuerdynamik? Gehen Sie dabei  analog zur Hausaufgabenlösung des Phänologie Handouts vor. **(3 Punkte)**
+1. Erstellen Sie eine Abbildung der mehrjährigen, Monatsmittel der Feuerdynamik? Gehen Sie dabei  analog zur Hausaufgabenlösung des Phänologie Handouts vor. **(3 Punkte)**
 
 2. Erreicht die Feueraktivität für alle Landnutzungsklassen im selben Monat ihr Maximum? Um dies Abschätzen zu können erstellen Sie ein Liniendiagram (mit geom_line()) der Zeitreihe an. Die Farbe der Linie soll die Landbedeckungstypen darstellen. Da die Größenordnung der Feueraktivitäten der einzelnen Landbedeckungstypen eventuell sehr unterschiedlich ist könnte es sinnvoll sein den Logarithmus der Feueraktivität zu benutzen. Welche zusätzlichen Zeilen code und/ oder welche Änderungen sind dafür notwendig? **(2 Punkte)**
 
-3. ?? 
+3. Beschreiben Sie was der Aufruf geom_raster(aes(fill=state)) und der Aufruf geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group)) zu dem Plotobjekt hinzufügt. **(2 Punkt)**
 
 # Literatur

@@ -13,7 +13,11 @@ output:
 ##    toc: true
     highlight: default
 ---
-# Evaluierung?
+# Evaluierung
+26.06.2018, 10:00 - 12:00 Uhr
+
+http://r.sd.uni-frankfurt.de/85825621
+
 # Feuer
 
 MODIS Kürzel: [MCD45A1](https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/burned-area/MCD45A1/). Die Webseite zu diesem Product wurde leider vor ein paar Wochen offline genommen, da schon neue Produkte verfügbar sind. Daher ist online keine ausführliche Beschreibung mehr vorhanden.
@@ -22,7 +26,7 @@ MODIS Kürzel: [MCD45A1](https://ladsweb.modaps.eosdis.nasa.gov/missions-and-mea
 @roy_collection_2008; @giglio_global_2006
 
 ## Initialisieren
-Sollten Sie eine Fehlermeldung beim Laden der Pakete bekommen installieren Sie diese bitte als erstes nochmal neu mit dem Code aus der 1. Stunde:
+Sollten Sie eine Fehlermeldung beim Laden der Pakete bekommen, installieren Sie diese bitte als erstes nochmal neu mit dem Code aus der 1. Stunde:
 ```{r, message=FALSE, warning=FALSE,eval=FALSE}
 for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal", "devtools")) {
   if (!require(p, character.only=TRUE)) {
@@ -70,7 +74,7 @@ Download der Daten von https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU
 file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
-## Einlesen und verarbeiten der Daten
+## Einlesen und Verarbeiten der Daten
 
 Laden der Landnutzungsklassen und erzeugen eine Maske, bei der Land 1 ist,
 Wasser und Unklassifiziert 0. Anzeigen der Gesamtpixelzahl und Anzahl der Landpixel
@@ -101,8 +105,8 @@ können Sie durch obige Maskierung ebenfalls aus dem Datensatz entfernen.
 }
 
 Im Folgendem werden monatliche Feuerdaten eingelesen und gezählt, wie viele
-Pixel pro Monat gebrannt haben. Die Ergebnisse werden in den data.frames
-tsFire und tsLCTFire gespeichert. Die Schleife dauert recht lange, verlieren Sie nicht
+Pixel pro Monat gebrannt haben. Die Gesamtanzahl der brennenden Pixel pro Monat wird im data.frame tsFire, die Anzahl der Pixel pro Landbedeckungsklasse im data.frame tsLCTFire gespeichert.
+Die Schleife dauert recht lange, verlieren Sie nicht
 die Geduld oder gehen Sie Essen. Sie können die Zeile "print"
 aktivieren, um eine Fortschrittsanzeige zu bekommen.
 
@@ -133,16 +137,21 @@ for (i in 1:length(files)) {
 #  print(paste0(round(i / (length(files)) * 100, 1), "% "))
 }
 ```
-
 ## Darstellen der Daten
+Wie häufig brennt es in der Region Ihrer Wahl? Erstellen Sie mit ggplot ein Histogramm für die Variable count im dataframe tsFire. Benutzen sie dafür geom_histogram.
+```{r, eval=FALSE}
+p <- ggplot(data=??, aes(??))
+p <- p + geom_histogram(??)
+```
+Wechseln Sie eventuell die Region fall Sie feststellen dass es sehr wenig brennt.
 
-Erzeugen Sie eine PDF Datei, mit der Zeitserie:
+Erzeugen Sie eine PDF Datei, mit der Zeitreihe:
 
 \marginnote{
 \textbf{Aufgabe}\\
 Welche Einheit muss auf der y-Achse stehen?
 
-Überlegen Sie, wie Sie das als Anteil in Prozent der gesamten
+Überlegen Sie, wie Sie das als Anteil in Prozent der gesammten
 Landfläche berechnen können?
 }
 
@@ -163,11 +172,12 @@ dev.off()
 print(p)
 ```
 
-Um heraus zu finden, was gebrannt hat, wird hier die Fläche nach Landnutzung
-klassifiziert und für jede Landbedeckungsklasse eine Zeitreihe geplottet.
+Um heraus zu finden, was gebrannt hat, wurden die verbrannten Pixel auch
+nach Landbedeckungsklasse getrennt gespeichtert. Plotten Sie jetzt die Zeitreihen
+getrennt für jede Landbedeckungsklasse. Ergänzen Sie dafür den Befehl facet_wrap im code.
 
 
-```{r}
+```{r, echo=FALSE}
 p <- ggplot(tsLCTFire, aes(x=date, y=count))
 p <- p + geom_bar(stat="identity",fill="red")
 p <- p + scale_x_date()
@@ -175,6 +185,15 @@ p <- p + xlab("Datum")
 p <- p + ylab("burned")
 p <- p + facet_wrap(~name, ncol=3)
 ```
+```{r, eval=FALSE}
+p <- ggplot(tsLCTFire, aes(x=date, y=count))
+p <- p + geom_bar(stat="identity",fill="red")
+p <- p + scale_x_date()
+p <- p + xlab("Datum")
+p <- p + ylab("burned")
+p <- p + facet_wrap(~???, ncol=3)
+```
+
 ```{r, eval=FALSE}
 file <- paste0(getOption("fegloekRegion"), "_FireTSLCT.pdf")
 pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=12, height=6)
@@ -195,28 +214,28 @@ der Karte sichtbar wird. Überlegen Sie selbst, ob Sie in Ihrer Region weiter ma
 oder zu einer anderen Region wechseln sollten.
 -------------------------------------------------------
 
-Die Ländergrenzen werden mit borderSubset auf unseren Kartenausschnitt zugeschnitten und auf UTM umprojiziert.
 \marginnote{
 \textbf{Aufgabe}\\
-Auch wenn die Angabe in km$^2$ groß erscheint, sind die Feuerpixel doch kaum
-zu sehen. Definieren Sie einen Bereich (fireExtent) auf den die Bilder zugeschnitten
-werden (crop), damit die "Feuer" besser zu sehen sind.
+Füre eine Animation sind die Datenmengen sehr groß definieren Sie daher einen Bereich (fireExtent) auf den die Bilder zugeschnitten
+werden (crop), um die Datenmengen zu reduzieren. Testen Sie dafür einige Monate 
+und benutzen Sie den plot(rFire) Befehl um schnell zu sehen ob und wo es brennt.
 }
 ```{r, eval=FALSE}
 rFire <- raster(files[1])
 rFire[rFire>366]=NA
+plot(rFire)
 rFire <- crop(rFire, fireExtent)
-regionmap <- borderSubset(rFire)
+plot(rFire)
 ```
-
+Für die Beschriftung der einzelnen Zeitschritte extrahieren wir das Datum aus den Dateinamen.
 ```{r, eval=FALSE}
 files <- list.files(data.dir, pattern='.*burndate.tif$',
                     full.names=TRUE)
 date  <- extractDate(files)
 ```
 
-Jeder Zeitschritt wird einzeln eingelesen und als Grafik  ausgegeben.
-Diese Bilder können anschließend in eine Animation umgewandelt werden.
+Jeder Zeitschritt wird einzeln eingelesen und in einer Liste gespeichert, die data.frames dieser liste werden im Anschluss aneinander gefügt. Wählen Sie einen kleineren Bereich, indem Sie fireExtent neu definieren, wenn es mit der Animation zu lange dauert.
+
 
 ```{r, eval=FALSE}
 ## empty list of data.frames (will be combined after loop)
@@ -236,33 +255,30 @@ for (i in 1:length(files)) {
   dfFire$state[dfFire$burndate == 10000] = "insufficient data"
   dfFire$state <- factor(dfFire$state, levels=c("unburned", "burned",
                  "snow or high aerosol", "water", "insufficient data"))
-  dfFire$year = i
+  dfFire$date = date[i]
   list_of_dfFires[[i]]=dfFire
 }
 ## Verknuepfung der einzelnen dfLCT data.frames zu einem grossen data.frame
 dfFireAll <- do.call("rbind", list_of_dfFires)
 
-p <- ggplot(dfFireAll, aes(x=x, y=y, frame=year))
+p <- ggplot(dfFireAll, aes(x=x, y=y, frame=date))
 p <- p + geom_raster(aes(fill=state))
-p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
 p <- p + scale_fill_manual(values=c("unburned"="darkgreen", "burned"="orange",
                  "snow or high aerosol"="lightyellow", "water"="lightblue",
                  "insufficient data"="grey60"), drop=FALSE)
-p <- p + coord_fixed(xlim=c(min(dfFire$x), max(dfFire$x)),
-                       ylim=c(min(dfFire$y), max(dfFire$y)))
 p <- p + xlab("easting")
 p <- p + ylab("northing")
-p <- p + labs(title = paste("Fire", date[i]))
-gganimate(p)
+p <- p + labs(title = "Fire ")
+gganimate(p,file='Fire.html')
 
 ```
 
 
 # Aufgaben
-1. Erstellen Sie eine Abbildung der mehrjährigen, Monatsmittel der Feuerdynamik? Gehen Sie dabei  analog zur Hausaufgabenlösung des Phänologie Handouts vor. **(3 Punkte)**
+1. Erstellen Sie eine Abbildung der mehrjährigen Monatsmittel der Feuerdynamik (basierend auf tsFire)! Gehen Sie dabei analog zur Hausaufgabenlösung des Phänologie Handouts vor. **(3 Punkte)**
 
-2. Erreicht die Feueraktivität für alle Landnutzungsklassen im selben Monat ihr Maximum? Um dies Abschätzen zu können erstellen Sie ein Liniendiagram (mit geom_line()) der Zeitreihe an. Die Farbe der Linie soll die Landbedeckungstypen darstellen. Da die Größenordnung der Feueraktivitäten der einzelnen Landbedeckungstypen eventuell sehr unterschiedlich ist könnte es sinnvoll sein den Logarithmus der Feueraktivität zu benutzen. Welche zusätzlichen Zeilen code und/ oder welche Änderungen sind dafür notwendig? **(2 Punkte)**
+2. Erreicht die Feueraktivität für alle Landnutzungsklassen im selben Monat ihr Maximum? Um dies Abschätzen zu können erstellen Sie ein Liniendiagram (mit geom_line()) der Zeitreihe. Die Farbe der Linie soll die Landbedeckungstypen darstellen. Da die Größenordnung der Feueraktivitäten der einzelnen Landbedeckungstypen eventuell sehr unterschiedlich ist könnte es sinnvoll sein den Logarithmus der Feueraktivität zu benutzen. Welche zusätzlichen Zeilen code und/ oder welche Änderungen sind dafür notwendig? **(2 Punkte)**
 
-3. Beschreiben Sie was der Aufruf geom_raster(aes(fill=state)) und der Aufruf geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group)) zu dem Plotobjekt hinzufügt. **(2 Punkt)**
+3. Beschreiben Sie was der Aufruf geom_raster(aes(fill=state)) und der Aufruf geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group)) zu dem Plotobjekt hinzufügt. **(2 Punkte)**
 
 # Literatur

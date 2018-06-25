@@ -41,6 +41,7 @@ Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
 library(raster)
 library(plyr)
 library(ggplot2)
+library(gganimate)
 library(FEglobaleOekologie)
 fegloekOptions(baseDir = "/home/gitta/R/Lehre/")
 fegloekOptions(region="SAFRICA")
@@ -54,6 +55,13 @@ library(FEglobaleOekologie)
 fegloekOptions(baseDir = "IhrBaseDir")
 fegloekOptions(region="SAFRICA")
 fegloekInit()
+
+## Installation des Zusatzpakets
+## library(devtools)
+## devtools::install_github("dgrtwo/gganimate")
+
+## laden des neuen Pakets
+library(gganimate)
 ```
 Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.
 ```{r}
@@ -214,7 +222,8 @@ Jeder Zeitschritt wird einzeln eingelesen und als Grafik  ausgegeben.
 Diese Bilder können anschließend in eine Animation umgewandelt werden.
 
 ```{r, eval=FALSE}
-png(filename=file.path(getOption("fegloekFigDir"), "Fire_%03d.png"), width=800, height=600)
+## empty list of data.frames (will be combined after loop)
+list_of_dfFires <- list()
 
 for (i in 1:length(files)) {
   dfFire <- geotiff2df(files[i], "burndate", crop=fireExtent)
@@ -230,30 +239,29 @@ for (i in 1:length(files)) {
   dfFire$state[dfFire$burndate == 10000] = "insufficient data"
   dfFire$state <- factor(dfFire$state, levels=c("unburned", "burned",
                  "snow or high aerosol", "water", "insufficient data"))
+  dfFire$year = i
 
-  p <- ggplot(dfFire, aes(x=x, y=y))
-  p <- p + geom_raster(aes(fill=state))
-  p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
-  p <- p + scale_fill_manual(values=c("unburned"="darkgreen", "burned"="orange",
+}
+## Verknuepfung der einzelnen dfLCT data.frames zu einem grossen data.frame
+dfFireAll <- do.call("rbind", list_of_dfFires)
+
+p <- ggplot(dfFire, aes(x=x, y=y, frame=year))
+p <- p + geom_raster(aes(fill=state))
+p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
+p <- p + scale_fill_manual(values=c("unburned"="darkgreen", "burned"="orange",
                  "snow or high aerosol"="lightyellow", "water"="lightblue",
                  "insufficient data"="grey60"), drop=FALSE)
-  p <- p + coord_fixed(xlim=c(min(dfFire$x), max(dfFire$x)),
+p <- p + coord_fixed(xlim=c(min(dfFire$x), max(dfFire$x)),
                        ylim=c(min(dfFire$y), max(dfFire$y)))
-  p <- p + xlab("easting")
-  p <- p + ylab("northing")
-  p <- p + labs(title = paste("Fire", date[i]))
-  print(p)
+p <- p + xlab("easting")
+p <- p + ylab("northing")
+p <- p + labs(title = paste("Fire", date[i]))
+print(p)
 
-  print(paste0(round(i / (length(files)) * 100, 1), "% "))
-}
-dev.off()
+print(paste0(round(i / (length(files)) * 100, 1), "% "))
+
 ```
 
-
-\marginnote{
-\textbf{freiwillige Zusatzaufgabe}\\
-Die Einzelbilder können anschließend zu einem Film zusammengesetzt werden. Erinnern Sie sich an unsere Übung LUC.
-}
 
 # Aufgaben
 1. Erstellen Sie eine Abbildung des mehrjährigen, mittleren Verlaufs der Feuerdynamik? Gehen Sie dabei  analog zur Hausaufgabenlösung des Phänologie Handouts vor. **(3 Punkte)**

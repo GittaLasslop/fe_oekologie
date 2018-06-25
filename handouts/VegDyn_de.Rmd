@@ -1,7 +1,7 @@
 ---
-title: "Fernerkundung globale Ökologie: 3. Vegetationsdynamik"
-author: "[Steinkamp](mailto:joerg.steinkamp@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
-bibliography: ~/Cloud/Dropbox/etc/texmf/bib/zotero.bib
+title: "Fernerkundung globale Ökologie: 5. Vegetationsdynamik"
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+bibliography: literatur.bib
 classoption: a4paper
 lang: de-DE
 output:
@@ -16,101 +16,157 @@ output:
 
 # Vegetationsdynamik
 
-Unter Vegetationsdynamik wird hier die Vegetationsperiode verstanden. Das hier verwendete MODIS Kürzel ist: [MCD12Q2](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q2).
+Im Rahmen dieser Übung verstehen wir unter Vegetationsdynamik den Verlauf bzw. die Dauer der Vegetationsperiode. Unser heutiges MODIS Produkt ist [MCD12Q2](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q2). Weiterhin werden wir heute eine grundlegende Technik der Geodaten-Analyse behandeln: die Kombination unterschiedlicher Datenquellen zur Analyse einer Fragestellung.
 
 ## Literatur
 
-@buitenwerf_three_2015; @ganguly_land_2010; @soudani_evaluation_2008; @zhang_global_2006; @zhang_monitoring_2003 
+Die relevante Literatur für heute ist: @Buitenwerf2015Threedecadesmultidimensional; @Ganguly2010Landsurfacephenology; @Soudani2008Evaluationonsetgreenup; @Zhang2006Globalvegetationphenology; @Zhang2003Monitoringvegetationphenology 
 
 ## Initialisieren
+
 Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
+
 ```{r, message=FALSE, warning=FALSE}
 library(raster)
 library(ggplot2)
 library(reshape2)
-library(FEglOek)
-fegloekOptions(baseDir = "/data/Lehre/FE_Oekologie")
-fegloekOptions(region="NWBRAZIL")
+library(FEglobaleOekologie)
+fegloekOptions(baseDir =
+               "/Users/cwerner/Dropbox/Documents/2018/teaching/fe_oekologie_2018/handouts")
+fegloekOptions(region="NEUROPE")
 fegloekInit()
 ```
 
-Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.
-```{r}
-source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
-source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
+Die benötigten Fernerkundungsdaten finden Sie online: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
+Laden Sie dort die Datei "VegDyn_{REGION}.zip" und verschieben Sie die entzippten Dateien in den folgenden Ordner:
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 ```
 
-Download der Daten
-```{r, message=FALSE, warning=FALSE}
-downloadData("VegDyn")
+Bitte beachten Sie, dass Sie heute mindestens zwei Regionen herunterladen müssen. Wiederholen Sie dazu den obigen Schritt. Ausserdem benötigen wir wieder den data.frame LCT3lookuptable. Diesen finden Sie in der Datei variables.R. Es ist empehlenswert, dass Sie das Skript kopieren um die zwei Regionen getrennt bearbeiten zu können und nicht durcheinander kommen.
+
+Um eine externe Datei (variables.R) in unser heutiges Skript zu importieren benutzen wir den Befehl 'source()'. Beachten Sie, dass sich die Datei variables.R im Unterverzeichnis R erwartet wird. Ein möglicher Pfad wäre also:
+
+```{r echo=FALSE, out.width="100%", fig.align="center", fig.cap="Verzeichnisstruktur"}
+knitr::include_graphics("RStudio_folders.png")
 ```
+
+```{r, message=FALSE, warning=FALSE, eval=TRUE}
+source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), 
+       encoding=getOption("encoding"))
+source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), 
+       encoding=getOption("encoding"))
+```
+
+Durch diese Befehlszeilen sollten (unter anderem) der data.frame 'LCT3lookuptable' sowie die Funktion 'extractDate()' für das Skript verfügbar sein.
+
 
 ## Einlesen der Daten
 
-Ähnlich zur Phenologie wird hier eine Zeitreihe mit den Dateien erzeugt.
-Dies geschieht für den Anfang und das Ende der Vegetationsperiode. Die Daten
-liegen schon in geografischen Koordinaten vor und nicht in UTM.
+Ähnlich zu unserer Sitzung "Phänologie" wird heute eine Zeitreihe aus den Dateien erzeugt.
+Dies geschieht für den Anfang und das Ende der Vegetationsperiode. Bitte beachten Sie dass die Daten schon in geografischen Koordinaten und nicht im UTM-Format vorliegen.
+Zunächst lesen wir alle Dateien welche mit dem jeweiligen angegebenen Namensmustern im Verzeichnis data.dir gefunden werden. Dann werden diese mit dem Befehl 'stack()' zu einem 3-dimensionalen Raster zusammengefügt.
 
 ```{r, message=FALSE, warning=FALSE}
 data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
-files <- list.files(data.dir, pattern="Increase.Num_Modes_01.tif$", full.names=TRUE)
-stackVegStart <- stack(files)
-files <- list.files(data.dir, pattern="Minimum.Num_Modes_01.tif$", full.names=TRUE)
-stackVegEnd <- stack(files)
+files1 <- list.files(data.dir, pattern="Increase.Num_Modes_01.tif$", full.names=TRUE)
+stackVegStart <- stack(files1)
+files2 <- list.files(data.dir, pattern="Minimum.Num_Modes_01.tif$", full.names=TRUE)
+stackVegEnd <- stack(files2)
 ```
 
 ## Verarbeiten der Daten
 
-Am den ebenfalls zuvor benutzten Punkten wird eine Zeitreihe extrahiert.
+Nun erzeugen wir für einige zuvor schon definierte Punkte aus diesem 3D-Raster Zeitreihen. Die Punkte sind für jede Region vorgegeben (schauen Sie sich das Ergebnis des Befehls getOption("fegloekPoints") in der Konsole an).
+
+```{r, message=FALSE, warning=FALSE}
+focus_points <- getOption("fegloekPoints")
+print(focus_points)
+```
+
+Um die Daten extrahieren zu können wird mit SpatialPoints ein georeferenzierte Objekt aus dem data.frame focus_points erzeugt. Mit dem Befehl 'extract()' werden dann an diesen Punkten die Daten aus den Raster-Dateien entnommen und in den data.frames 'dfVegStart' und 'dfVegEnd' gespeichert.
 
 ```{r}
-sPoints  <- SpatialPoints(getOption("fegloekPoints"),
+sPoints  <- SpatialPoints(focus_points,
                           proj4string=CRS("+proj=longlat +ellps=WGS84"))
+
 dfVegStart <- extract(stackVegStart, sPoints, df=TRUE)
 dfVegStart = dfVegStart[, -1]
 dfVegEnd   <- extract(stackVegEnd, sPoints, df=TRUE)
 dfVegEnd   = dfVegEnd[, -1]
-vegDate    <- extractMODISDate(colnames(dfVegStart))
+
+# die Funktion extractDate befindet sich in der Datei R/functions.R !
+vegDate    <- extractDate(colnames(dfVegStart))
+
+# schauen wir uns den erzeugten Vektor an:
+print(vegDate)
+
+
 ```
 
-Setzen Sie ungültige Werte gleich NA, transponieren und wandeln Sie die
-Geodaten in einen data.frame um.
+**Aufgabe:**
 
-```{r}
+Setzen Sie nun ungültige Werte der data.frames dfVegStart und dfVegEnd auf NA (also ungültig bzw. nicht-existent). Den NA Wert (auch Füllwert genannt) finden Sie auf der MODIS homepage des Produkts MCD12Q2:
+https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q2. Speichern Sie den fill_value in der Variable veg_fill_value.
+*Tipp:* Falls Sie vergessen haben wie Sie Werte eines data.frames oder vector ersetzen können schauen Sie im Handout der Sitzung Phänologie nach.
+
+```{r, echo=FALSE, results="hide", message=FALSE, warning=FALSE}
 vegInvalid <- 32767
 dfVegStart[dfVegStart==vegInvalid] = NA
 dfVegEnd[dfVegEnd==vegInvalid] = NA
-dfVegStart = as.data.frame(t(dfVegStart))
-dfVegEnd   = as.data.frame(t(dfVegEnd))
+
+# data.frame transponieren
+dfVegStart_transp = as.data.frame(t(dfVegStart))
+dfVegEnd_transp   = as.data.frame(t(dfVegEnd))
+
 ```
 
-Berechnen Sie aus dem Anfang und dem Ende die Dauer der Vegetationsperiode für jedes Jahr.
+```{r, eval=FALSE}
 
-```{r}
-dfGSL <- dfVegEnd - dfVegStart
+#vegInvalid <- ???
+#
+#dfVegStart ???
+#dfVegEnd   ???
+
+# data.frame transponieren
+dfVegStart_transp = as.data.frame(t(dfVegStart))
+dfVegEnd_transp   = as.data.frame(t(dfVegEnd))
 ```
 
-Verschmelzen des Datensatzes zur besseren Darstellung. Dabei werden alle Spalten außer 'date' in eine Spalte ('value') geschrieben und eine neue Spalte ('variable') mit den vorherigen Spaltennames als Wert wird erzeugt. 
+Um zu verstehen das der Befehl 't()' bewirkt vergleichen Sie auf der Konsole die Ausgabe für 'dfVegStart' und 'dfVegStart_transp'.
+Nun berechnen wir aus dem Anfang und dem Ende die Dauer der Vegetationsperiode für jedes Jahr:
 
 ```{r}
+dfGSL <- dfVegEnd_transp - dfVegStart_transp
 dfGSL$date = vegDate
+```
+
+**Aufgabe:**
+Verschmelzen den data.frame mit 'melt()' um ihn für die graphische Ausgabe mit ggplot vorzubereiten. Wir wollen dass alle Spalten mit Ausnahme der Spalte 'date' verschmolzen werden (die Ausnahme wird mit dem Argument 'id.vars="date"' angegeben).
+
+```{r, echo=FALSE}
 melted.dfGSL <- melt(dfGSL, id.vars="date")
+```
+
+```{r, eval=FALSE}
+# melted.dfGSL <- ???
 ```
 
 ## Grafikausgabe
 
-Eine PDF-Datei zum Schreiben öffnen und erzeugen der Grafik.
+Nun öffnen wir eine PDF-Datei und plotten den Verlauf der Vegetationsperiode.
 
 ```{r}
-p <- ggplot(melted.dfGSL, aes(date, value))
+p <- ggplot(melted.dfGSL, aes(x=date, y=value))
 p <- p + geom_line()
 p <- p + scale_x_date()
-p <- p + xlab("Datum") + ylab("Vegetationsperiode [Tagen]")
+p <- p + xlab("Datum") + ylab("Vegetationsperiode [Tage]")
 p <- p + facet_wrap(~variable, ncol=1)
 ```
 ```{r, eval=FALSE}
-file <- paste0(getOption("fegloekRegion"), "_GSL.pdf")
-pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=8, height=8)
+file_plot1 <- paste0(getOption("fegloekRegion"), "_GSL.pdf")
+pdf(file.path(getOption("fegloekFigDir"), file_plot1), paper="special", width=8, height=8)
 print(p)
 dev.off()
 ```
@@ -141,18 +197,25 @@ null ist, setzen Sie auf NA.
 ```{r}
 data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 years <- c(2006:2010)
-if (exists("rGSL")) rm(rGSL)
+if (exists("rGSL")){
+  rm(rGSL)
+}
+
 for (y in years) {
-  file <- file.path(data.dir, 
+  print(y)
+  # daten lesen 
+  file1 <- file.path(data.dir, 
           paste0("MCD12Q2_", y, "-01-01.Onset_Greenness_Increase.Num_Modes_01.tif"))
-  rVegStart <- raster(file)
+  rVegStart <- raster(file1)
   rVegStart = crop(rVegStart, getOption("fegloekVegDynExtent"))
   rVegStart[rVegStart==32767] = NA
-  file <- file.path(data.dir, 
+  
+  file2 <- file.path(data.dir, 
           paste0("MCD12Q2_", y, "-01-01.Onset_Greenness_Minimum.Num_Modes_01.tif"))
-  rVegEnd <- raster(file)
+  rVegEnd <- raster(file2)
   rVegEnd = crop(rVegEnd, getOption("fegloekVegDynExtent"))
   rVegEnd[rVegEnd==32767] = NA
+  
   if (exists("rGSL")) {
     rNewGSL = rVegEnd - rVegStart
     rGSL[is.finite(rNewGSL)] = rGSL[is.finite(rNewGSL)] + rNewGSL[is.finite(rNewGSL)]
@@ -168,18 +231,19 @@ rGSL <- rGSL / rValid
 rGSL[rGSL==0] = NA
 ```
 
-Umwandeln zu einem data.frame und umbenennen der Spalten.
+Wir wandeln die Daten in einen data.frame um und benennen der Spalten neu.
 
 ```{r}
 dfGSL <- as.data.frame(rasterToPoints(rGSL))
 colnames(dfGSL) <- c("long", "lat", "GSL")
 ```
-Laden der Landklassifikation, anpassen der Vegetationsperiode
-und verbinden mit der LCT Klassifizierung.
+
+Nun laden wir die Landklassifikation. Damit die unterschiedlichen Datensätze verrenchent werden können muss evtl. die Auflösung angepasst werden. Dies erfolgt mit dem raster-Befehl 'resample'. Die methode 'ngb' gibt dabei an, dass wir die 'nearest neighbor' methode verwenden wollen. Im Anschluss vereinen wir die Datensätze.
+
 
 ```{r}
-file <- file.path(data.dir, "MCD12Q1_GEO_hres_2010-01-01.Land_Cover_Type_3.tif")
-rLCT <- raster(file)
+file3 <- file.path(data.dir, "MCD12Q1_GEO_hres_2010-01-01.Land_Cover_Type_3.tif")
+rLCT <- raster(file3)
 rLCT = crop(rLCT, getOption("fegloekVegDynExtent"))
 rLCT = resample(rLCT, rGSL, method="ngb")
 dfLCT <- as.data.frame(rasterToPoints(rLCT))
@@ -190,8 +254,8 @@ dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
 Ein digitales Höhenmodel (GTOPO30) wird geladen.
 
 ```{r}
-file  <- file.path(data.dir, "GTOPO30.tif")
-rGtopo <- raster(file)
+file4  <- file.path(data.dir, "GTOPO30.tif")
+rGtopo <- raster(file4)
 rGtopo = crop(rGtopo, getOption("fegloekVegDynExtent"))
 rGtopo = resample(rGtopo, rGSL, method="ngb")
 dfGtopo <- as.data.frame(rasterToPoints(rGtopo))
@@ -221,8 +285,8 @@ p = p + ylab("Vegetationsperiode [Tage]")
 p = p + facet_wrap(~name, ncol=3, scale="free_y")
 ```
 ```{r, eval=FALSE}
-file <- paste0(getOption("fegloekRegion"), "_GSL.png")
-png(file.path(getOption("fegloekFigDir"), file), width=1024, height=800)
+file_plot2 <- paste0(getOption("fegloekRegion"), "_GSL.png")
+png(file.path(getOption("fegloekFigDir"), file_plot2), width=1024, height=800)
 dev.off()
 ```
 ```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.ext='png', dpi=150, fig.width=8, fig.height=8}
@@ -231,16 +295,18 @@ print(p)
 
 # Hausaufgaben
 
-1. Erzeugen Sie einen Plot mit allen Landbedeckungsklassen in einem Panel und färben diese unterschiedlich ein (Funktionen facet_wrap, scale_color_manual).
+1. Prüfen Sie die Position der 4 Fokuspunkte ihrer Region mit Google Maps. Interpretieren Sie mit dieser Zusatzinformation ihren Linienplot. Können Sie unterschiedliche Vegetationsperioden der 4 Punkte durch diese Zusatzinformation besser einordnen? Falls sie 'missing data' Werte in ihrer Abbildung haben: was könnte bei ihrer Region der Grund sein? **(2 Punkte)**
 
-2. Nutzen Sie eine andere Variable, die mit der Länge der Vegetationsperiode korrelieren könnte und wiederholen Sie den zweiten Teil damit.
+2. Wir haben heute unter anderem eine Interpolation zweier Raster-Datensätze durchgeführt (Befehl resample). Erläutern Sie warum wir dies durchführen mussten. Überlegen Sie ausserdem was die methodischen Unterschiede zwischen 'bilinear' und 'ngb' sind. Welche Methode würden Sie verwenden wenn Temperatur, NPP, oder NDVI Werte interpoliert werden sollen - welche Methode würden Sie für die Interpolation von Landnutzungsklassen verwenden? Begründen Sie Ihre Entscheidung. **(2 Punkte)**
 
-3. Handelt es sich bei den betrachteten Zusammenhängen um signifikante lineare Korrelationen (Funktion lm)?
+3. Wir verwenden heute in Plot2 ein neues geom: *geom_smooth()*. Begründen Sie kurz warum Sie in PLot2 unterschiede in der 'Dicke' der Unsicherheitsbänder in den einzelnen Landnutzungs-Panelen sehen. Ausserdem: was bedeutet das Argument 'se=TRUE'? **(2 Punkte)**
 
-# Freiwillige Zusatzaufgabe
+4. Erzeugen Sie einen neuen Plot basierend auf Plot2 indem Sie allen Landbedeckungsklassen in einem Panel darstellen. Färben Sie die Daten der einzelnen Landnutzungsklassen unterschiedlich ein (Hinweis: kopieren Sie die Plotbefehle der Übung und passen sie relevante ggplot Befehle an; Tipp: u.a. facet_wrap, scale_color_manual) **(3 Punkte)**
 
-1. Oder wer noch tiefer einsteigen will: Gibt es signifikante nicht-lineare Korrelationen (Funktionen glm, nlm)?
+5. Erzeugen Sie einen weitere Abbildung in der Sie eine andere sinnvolle Variable mit GSL in Beziehung setzen (Hinweis: die Daten existieren schon in unserem data.frame). **(2 Punkte)**
 
-2. Verbessert sich das Ergebnis der (nicht-)linearen Korrelation, wenn die Vegetationsperiode von zwei Variablen abhängt?
+6. Vergleichen Sie die Ergebnisse von PLot2 für zwei verschiedenen Regionen (wiederholen Sie dazu das Skript mit einer Region der Vergleichszone: temperate - tropisch oder temperat - boreal). Beschreiben Sie die Ergebnisse und diskutieren Sie ihre Beobachtungen.**(3 Punkte)**  
+
+7. In unserem heutigen Skript verwenden wir zwei unterschiedliche Ausgabe-Befehle (*pdf()*, *png()*). Betrachten Sie die Zeilen im Code und die jeweilige Hilfe-Seite. Beschreiben Sie die Unterschiede - wann wuerden Sie welches Kommando bevorzugen? **(2 Punkte)**
 
 # Literatur

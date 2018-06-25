@@ -22,7 +22,7 @@ MODIS Kürzel: [MCD45A1](https://ladsweb.modaps.eosdis.nasa.gov/missions-and-mea
 @roy_collection_2008; @giglio_global_2006
 
 ## Initialisieren
-Sollten Sie eine Fehlermeldung beim Laden der Pakete bekommen installieren Sie diese bitte als erstes nochmal neu mit dem code aus der 1. Stunde:
+Sollten Sie eine Fehlermeldung beim Laden der Pakete bekommen installieren Sie diese bitte als erstes nochmal neu mit dem Code aus der 1. Stunde:
 ```{r, message=FALSE, warning=FALSE,eval=FALSE}
 for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal", "devtools")) {
   if (!require(p, character.only=TRUE)) {
@@ -33,7 +33,7 @@ for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal
 
 library("devtools")
 install_github("joergsteinkamp/FEglobaleOekologie")
-
+install_github("dgrtwo/gganimate")
 ```
 
 Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
@@ -46,6 +46,8 @@ library(FEglobaleOekologie)
 fegloekOptions(baseDir = "/home/gitta/R/Lehre/")
 fegloekOptions(region="SAFRICA")
 fegloekInit()
+
+library(gganimate)
 ```
 ```{r, message=FALSE, warning=FALSE, eval=FALSE}
 library(raster)
@@ -56,11 +58,6 @@ fegloekOptions(baseDir = "IhrBaseDir")
 fegloekOptions(region="SAFRICA")
 fegloekInit()
 
-## Installation des Zusatzpakets
-## library(devtools)
-## devtools::install_github("dgrtwo/gganimate")
-
-## laden des neuen Pakets
 library(gganimate)
 ```
 Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.

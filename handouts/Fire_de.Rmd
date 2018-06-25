@@ -237,12 +237,12 @@ for (i in 1:length(files)) {
   dfFire$state <- factor(dfFire$state, levels=c("unburned", "burned",
                  "snow or high aerosol", "water", "insufficient data"))
   dfFire$year = i
-
+  list_of_dfFires[[i]]=dfFire
 }
 ## Verknuepfung der einzelnen dfLCT data.frames zu einem grossen data.frame
 dfFireAll <- do.call("rbind", list_of_dfFires)
 
-p <- ggplot(dfFire, aes(x=x, y=y, frame=year))
+p <- ggplot(dfFireAll, aes(x=x, y=y, frame=year))
 p <- p + geom_raster(aes(fill=state))
 p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
 p <- p + scale_fill_manual(values=c("unburned"="darkgreen", "burned"="orange",
@@ -253,9 +253,7 @@ p <- p + coord_fixed(xlim=c(min(dfFire$x), max(dfFire$x)),
 p <- p + xlab("easting")
 p <- p + ylab("northing")
 p <- p + labs(title = paste("Fire", date[i]))
-print(p)
-
-print(paste0(round(i / (length(files)) * 100, 1), "% "))
+gganimate(p)
 
 ```
 

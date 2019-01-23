@@ -1,4 +1,4 @@
-# ToDo List and notepad for FE Oekologie Course 2019 update
+# ToDo list and notepad for "Fernerkundung für Global Ökologie" course (SS2019 update)
 
 ## Items
 

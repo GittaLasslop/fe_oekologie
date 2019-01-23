@@ -31,9 +31,9 @@ knitr::include_graphics("screenshot_rstudio_annotated.png")
 
 # R als Taschenrechner
 
-Wir nutzen R zunächst für einfache Rechenaufgaben:
+Wir nutzen R zunächst für einfache Rechenaufgaben. Geben Sie in der Konsole die folgenden Rechnungen gefolgt von Enter ein:
 
-```{r}
+```{r,eval=FALSE}
 1 + 1
 73579 * 34684434
 sin(pi / 4)
@@ -51,8 +51,7 @@ Wofür steht "e+12" hinter einer Zahl?
 
 
 Variablen speichern Werte, die wir ihnen zuweisen. In R funktioniert das
-durch die Zeichen "=" und "<-", wobei "<-" bevorzugt werden sollte, wenn
-Variablen definiert werden. 
+durch die Zeichen "=" und "<-". Über den Variablennamen können wir die Werte wieder abrufen bzw. auf sie zugreifen.
 
 Mit diesen Variablen kann man dann weiter rechnen oder sie verändern.
 
@@ -78,12 +77,17 @@ dozentenNamen
 ```{r}
 x <- 56
 y <- 8
-ergebnis <- x / y
-ergebnis
-i <- 1
-i = i + 1
-i
+z <- x-y
+z = z+1
+x = z+y
 ```
+
+-------------------------------------
+**Aufgabe**
+
+Welchen Wert hat jetzt die Variable x?
+-------------------------------------
+
 Mit dem Befehl 
 ```{r}
 ls()
@@ -141,16 +145,31 @@ x[c(3,7:10)]
 ```
 **Hinweis:** *In R wird auf das erste Element mit dem Index 1 zugegriffen, die meisten anderen Programmiersprachen (Python, C/C++) indizieren das erste Element mit 0.*
 
+-------------------------------------
+**Aufgabe**
+
+Speichern Sie das 5. bis 8. Element der Variablen x in die Variable y.
+-------------------------------------
+
+
 ### Kategorische Variablen: Faktoren
 Faktoren beinhalten nominale Daten (eine qualitative Merkmalsausbildung ohne natürliche Ordnung oder Reihenfolge).
 ```{r}
 geschlecht <- c("m", "m", "w", "m", "w", "w", "w", "m", "m", "w", "m", "w")
 str(geschlecht)
-geschlecht.factor <- as.factor(geschlecht)
-str(geschlecht.factor)
-as.numeric(geschlecht.factor)
+geschlechtF <- as.factor(geschlecht)
+str(geschlechtF)
+as.numeric(geschlechtF)
 ```
-Sobald die Variable als Faktor definiert ist, wird erkannt wieviele eindeutige Kategorien (levels) vorhanden sind. Die Werte der Variablen können dann nur auf eine der vorhandenen Kategorien gesetzt werden.
+Sobald die Variable als Faktor definiert ist, wird erkannt wieviele eindeutige Kategorien (levels) vorhanden sind. Die Werte der Variablen können dann nur auf eine der vorhandenen Kategorien gesetzt werden (der letzte Buchstabe "F" im Variablennamen deutet hier auf den Variablentyp hin).
+
+-------------------------------------
+**Aufgabe**
+standorte <- c("arable", "forest", "urban", "bare", "water", "grass", "arable", "forest", "urban", "bare", "bare", "arable", "water", "grass", "grass", "forest")
+
+Wandeln Sie die Variable *standorte* in einen Faktor um und geben Sie die Anzahl der individuellen Kategorien aus. 
+-------------------------------------
+
 
 ## Zweidimensionale Variablen
 
@@ -160,17 +179,28 @@ Sobald die Variable als Faktor definiert ist, wird erkannt wieviele eindeutige K
 ```{r}
 y=matrix(1:12, 3, 4)
 ```
-Um auf Elemente einer Matrix zuzugreifen müssen nun beide Dimensionen angegeben werden:
+Um auf Elemente einer Matrix zuzugreifen müssen nun beide Dimensionen angegeben werden, wird eine Dimension leer gelassen, so wird die gesammte Zeile bzw. Spalte zurückgegeben:
 ```{r}
 y[3,4]
 y[1:2,3:4]
+y[1:2,]
+
 ```
+
+Eine Matrix kann mit Skalaren oder Vektoren verrechnet werden. Ein kleines Beispiel:
+```{r}
+a <- y * 10
+b <- y - 0.1
+a
+b
+```
+
 
 ### Dataframe
 *Schema*: data.frame(Spalte1=Werte1, Spalte2=Werte2, ...)   
-"Werte1" und "Werte2" müssen hierbei die gleiche Länge haben bzw. ein Vielfaches des jeweils anderen sein.
-Im Gegensatz zu einer Matrix kann ein data.frame aus Spalten mit unterschiedlichen Variablentypen 
-aufgebaut sein. Ausserdem werden den Spalten Namen zugewiesen. Die Datenstruktur ähnelt dadurch einer Datentabelle, wobei die Zeilen als einzelne Beobachtungen und die Spalten als einzelne Variablen interpretiert werden können. Viele Funktionen in R erwarten einen data.frame als input, er ist daher ein sehr häufig verwendeter Datentyp in R.
+"Werte1" und "Werte2" müssen hierbei die gleiche Länge haben bzw. ein Vielfaches des jeweils Anderen sein.
+Im Gegensatz zu einer Matrix kann ein *data.frame* aus Spalten mit unterschiedlichen Variablentypen 
+aufgebaut sein. Ausserdem werden den Spalten Namen zugewiesen. Die Datenstruktur ähnelt dadurch einer Tabelle, wobei die Zeilen als einzelne Beobachtungen und die Spalten als einzelne Variablen interpretiert werden können. Viele Funktionen in R erwarten einen *data.frame* als input, er ist daher ein sehr häufig verwendeter Datentyp in R.
 
 ```{r}
 df=data.frame(x=1:3, y=4:6, z=letters[1:3])
@@ -192,6 +222,21 @@ Auf einzelne Elemente des data.frame kann per Zeilen- und Spaltenindex oder per 
 df[1,2]
 df[2,c('x','y')]
 ```
+
+-------------------------------------
+**Aufgabe**
+
+Erstellen Sie einen *data.frame* "Tabelle" mit den Spalten "Latitude", "Longitude", "Landcover". Die Spalte "Landcover" soll den Typ Faktor haben.
+
+lat = c(50.11, 23.9, 50.2)
+lon = c(8.68, 32.9, 8.2)
+lu  = c("urban", "water", "forest")
+
+Führen Sie außerdem den Befehl *summary* aus: summary(Tabelle)
+
+-------------------------------------
+
+
 ### Konvertierung zwischen Matrizen und data.frames
 Zwischen den beiden Datentypen kann wie folgt konvertiert werden:
 ```{r}
@@ -204,13 +249,23 @@ y
 
 ## Mehrdimensionale Variablen
 
-
 ### Array
 *Schema* array(Werte, Dimensionen)
+Im Vergleich zur zwei-dimensionalen *matrix* ist bei einem *array* die Anzahl der Dimensionen nicht beschränkt. 
 ```{r}
-array(1:(2 * 3 * 4), c(3, 4, 2))
+multidim <- array(1:(2 * 3 * 4), c(3, 4, 2))
+multidim
+```
+Beim Aufruf der Funktion werden erst die Werte dann die Dimensionen übergeben. Ein häufiges Beispiel für 3-d arrays sind Daten, die über Raum- und Zeitkoordinaten verfügen (x,y,t). Oft wollen wir dann beispielsweise den Mittelwert über die Zeit berechnen. Dies können Sie mit der Funktion *apply*, der Angabe der Dimensionen, die erhalten bleiben sollen (x,y) und der zu berechnenden Statistik (Mittelwert: *mean*) erreichen:   
+```{r}
+apply(multidim,c(1,2),mean)
 ```
 
+-------------------------------------
+**Aufgabe**
+
+Berechnen Sie analog das räumliche Mittel.
+-------------------------------------
 
 # Funktionen
 

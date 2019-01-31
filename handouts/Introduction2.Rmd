@@ -22,7 +22,7 @@ Nach der Einführung in das Programmieren im Allgemeinen und die Syntax von R in
 
 3) Üben wie man den Überblick darüber behält was in einem R skript passiert und welchen Daten in den einzelnen Variablen abgespeichert sind.
 
-4) Einfache Abbildungen erstellen.
+4) Abbildungen mit Hilfe der *plot()* Funktion erstellen.
 
 ## Ordnerstruktur
 
@@ -192,6 +192,6 @@ dev.off()
 Beim Lesen von Textdateien können verschiedene Parameter übergeben werden die die Struktur der Datei (Header, Trennzeichen) definieren.
 Nach dem Einlesen sollten die Daten z.B. mit *summary()*, *dim()*, *class()*, überprüft werden. Einfache Abbildungen helfen schnell zu überprüfen ob beim Lesen der Daten alles geklappt hat und die Daten keine groben Fehler enthalten. Dafür gibt es die Funktion *plot()*. 
 
-Zum Lesen von räumlichen Daten aus .tif Dateien verwenden wir das Paket raster. Einzelne Dateien können mit der Funktion *raster()* gelesen werden, mehrere Dateien mit der Funktion *stack()*. Die Funktion *plot()* kann auch auf diese raster Objekte angewendet werden.
+Zum Lesen von räumlichen Daten aus .tif Dateien verwenden wir das Paket raster. Einzelne Dateien können mit der Funktion *raster()* gelesen werden, mehrere Dateien mit der Funktion *stack()*. Die Daten der einzelnen Dateien sind dann in den Layern des RasterStack (Stapel) zu finden. Die Funktion *plot()* kann auch auf diese raster Objekte angewendet werden. Die Informationen über das Raster Objekt werden in der Konsole ausgegeben wenn man den Variablennamen gefolgt von Enter dort eingibt.
 
 Mit der Funktion png() können Abbildungen in .png Dateien abgespeichert werden. 

@@ -12,16 +12,17 @@ output:
 
 # Kurzbeschreibung
 [R](https://cran.r-project.org/) ist eine Programmiersprache und Programmierumgebung zur statistischen Auswertung und graphischen Darstellung von Daten.
-R ist Open-Source-Software, was bedeutet dass die Nutzung (zumeist) kostenfrei und der source code öffentlich verfügbar ist. Unter www.r-project.org finden sich umfassende Informationen zu R.   
+R ist Open-Source-Software, was bedeutet dass die Nutzung (zumeist) kostenfrei und der Source Code öffentlich verfügbar ist. Unter www.r-project.org finden sich umfassende Informationen zu R.   
 
-Die Standarddistribution kann durch zahlreiche Pakete erweitert werden, die dann speziellere Methoden beinhalten. Diese Pakete sind online verfügbar (z.B. auf dem Internetportal cran.org) und können auf Ihrem System nachinstalliert werden.
-
+Die Standarddistribution kann durch zahlreiche Pakete erweitert werden, die dann speziellere Methoden beinhalten. Diese Pakete sind online verfügbar (z.B. auf dem Internetportal cran.org) und können auf Ihrem System nachinstalliert werden. 
 Der Aufruf des Programms R startet eine Konsole in der Befehle ausgeführt werden können. Zur Dokumentation einer Datenanalyse oder zur Entwicklung von Methoden ist es jedoch hilfreich weitere Tools zur Verfügung zu haben. 
 Diese werden in Entwicklungsumgebungen zusammengefasst.
 
 # RStudio
 
-[RStudio](https://www.rstudio.com/) ist eine Entwicklungsumgebung für R. Hier können Skripte in einem Texteditor geschrieben und getestet werden. Die wichtigsten Teile in RStudio sind der Editor und die Konsole (Figure 1). Im Editor werden Skripte geöffnet, editiert und als Textdateien gespeichert. In der Konsole werden die Programme oder einzelne Befehle ausgeführt und die Rückmeldung der einzelnen Befehle erfolgt hier. Aus dem Editor heraus können auch einzelne Zeilen mit "Run" (bzw. Ctrl+Enter) in der Konsole ausführen. Ausserdem gibt es noch eine Übersicht über bereits benutzte Befehle (History), bestehende Variablen (Environment), Dateien, Hilfe, Abbildungen, Übersicht über installierte Pakete und anderes.
+[RStudio](https://www.rstudio.com/) ist eine Entwicklungsumgebung für R (Figure 1). Der wichtigste Teil dieser Software ist ein Texteditor mit dem wir R-Programme schreiben, modifizieren und als Textdateien speichern. Diese Programme, auch Skripte genannt, sind eine Abfolge von Befehlen und Funktionsaufrufen die bei Ausführung des Skripts sequentiell abgearbeitet werden. Skripte erleichtern die Datenanalyse da sie den Ablauf klar dokumentieren (Reproduzierbarkeit), eine effiziente Widerholung ähnlicher Analysen ermöglichen, und den Arbeitsaufwand bei repetitiven Aufgaben sehr reduzieren.
+
+Die zweite wichtige Komponente in der Entwicklungsumgebung RStudio ist die Konsole. In der Konsole werden die Programme oder einzelne Befehle ausgeführt und die Ergebnisse der einzelnen Befehle werden hier ausgegeben. Aus dem Editor heraus können Sie auch einzelne Zeilen mit "Run" (bzw. Ctrl+Enter) in der Konsole ausführen. Ausserdem gibt es noch eine Übersicht über bereits benutzte Befehle (History), bestehende Variablen (Environment), Dateien, Hilfe, Abbildungen, sowie eine Übersicht über installierte Pakete.
 
 ```{r echo=FALSE, out.width="100%", fig.align="center", fig.cap="Benutzeroberfläche der RStudio Entwicklungsumgebung."}
 knitr::include_graphics("screenshot_rstudio_annotated.png")
@@ -44,7 +45,7 @@ sin(pi / 4)
 -------------------------------------
 **Aufgabe**
 
-Wofür steht "e+12" hinter einer Zahl?
+Führen Sie die Berechnungen in der Konsole aus. Schreiben Sie dann ein Skript mit diesen Berechnugnen und führen Sie es aus. Testen Sie auch die zeilenweise Ausführung!
 -------------------------------------
 
 # Variablen
@@ -52,14 +53,13 @@ Wofür steht "e+12" hinter einer Zahl?
 
 Variablen speichern Werte, die wir ihnen zuweisen. In R funktioniert das
 durch die Zeichen "=" und "<-". Über den Variablennamen können wir die Werte wieder abrufen bzw. auf sie zugreifen.
-
 Mit diesen Variablen kann man dann weiter rechnen oder sie verändern.
 
 Es sollten möglichst selbsterklärende Namen für Variablen gewählt werden bzw.
 aus dem Kontext sollte sich erschließen, was sie bedeuten.  
 Variablennamen können aus Buchstaben (klein oder groß wird unterschieden) 
 Ziffern und dem Punkt ('.') zusammengesetzt werden. Variablennamen
-dürfen kein Leerzeichen beinhalten und nicht mit einer Zahl beginnen. Variablennamen können
+dürfen **kein Leerzeichen** beinhalten und nicht mit einer Zahl beginnen. Variablennamen können
 aus mehreren Wörtern zusammengesetzt sein. Zur besseren Lesbarkeit kann der Anfang
 des zweiten Wortes hervorgehoben werden, zum Beispiel kann "dozentenNamen",
 "dozenten.namen" oder "dozenten_namen" in R benutzt werden, wobei wir bei
@@ -92,20 +92,20 @@ Mit dem Befehl
 ```{r}
 ls()
 ```
-werden alle existierenden Variablen angezeigt.
+werden alle momentan existierenden Variablen angezeigt. Eine Übersicht dieser Variablen finden Sie auch im "Environment" Fenster. 
 
 
 ## Nulldimensionale Variablen
 
 
-Atomare Variablen bestehen nur aus einem Wert. Alle anderen Variablenarten sind aus ihnen aufgebaut.
+Atomare Variablen bestehen nur aus exakt einem Wert. Alle anderen Variablenarten sind aus ihnen aufgebaut.
 Es gibt verschiedene Typen von Werten, die in Variablen gespeichert werden dürfen:
 
 * Boolean oder Logisch: 0 oder 1 bzw. **FALSE** oder **TRUE**
 * Numerisch: z.B. -1, 0, 3.1415 oder 2.9979e8, R unterscheidet zwischen ganzen Zahlen oder Dezimalzahlen nur in Einzelfällen.
 * Character: Schriftzeichen (Buchstaben, Sonderzeichen).
 
-Den **Datentyp** kann man sich in R mit der Funktion
+Den **Datentyp** einer Variable kann man sich in R mit der Funktion
 ```{r}
 class(TRUE)
 class(1.1)
@@ -122,33 +122,34 @@ class(character)
 ## Eindimensionale Variablen/ Vektor
 
 ```{r}
-x <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+x1 <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 ```
 wobei "c" für "combine" steht. Einfacher:
 ```{r}
-x <- 1:13
+x1 <- 1:13
 ```
 Mit der Funktion **seq(start, ende, schrittweite)** können Zahlenfolgen mit gegebenem Schrittweite erzeugt werden:
 ```{r}
-seq(2,20,2)
+x2 <- seq(2,20,2)
 ```
 
 Da Vektoren eine homogene Datenstruktur sind (alle Elemente sind vom gleichen Datentyp) kann man mit ihnen rechnen:
 ```{r}
-x / 2 + 1
+x1 / 2 + 1
 ```
 Auf einen einzelnen Abschnitt des Vektors oder auf einzelne Elemente kann mit eckigen Klammern zugegriffen werden.
 ```{r}
-x[3]
-x[7:10]
-x[c(3,7:10)]
+x1[3]
+x1[7:10]
+x1[c(3,7:10)]
 ```
 **Hinweis:** *In R wird auf das erste Element mit dem Index 1 zugegriffen, die meisten anderen Programmiersprachen (Python, C/C++) indizieren das erste Element mit 0.*
 
 -------------------------------------
 **Aufgabe**
 
-Speichern Sie das 5. bis 8. Element der Variablen x in die Variable y.
+Speichern Sie das 5. bis 8. Element der Variablen x in die Variable y1. Anschliessend speichern Sie das 2. sowie die Elemente 4 bis 6 in die Variable y2. Wie lautet das 3. Element in y2?
+
 -------------------------------------
 
 
@@ -168,6 +169,12 @@ Sobald die Variable als Faktor definiert ist, wird erkannt wieviele eindeutige K
 standorte <- c("arable", "forest", "urban", "bare", "water", "grass", "arable", "forest", "urban", "bare", "bare", "arable", "water", "grass", "grass", "forest")
 
 Wandeln Sie die Variable *standorte* in einen Faktor um und geben Sie die Anzahl der individuellen Kategorien aus. 
+
+himmelsrichtungen <- c("nord", "sued", "Nord", "sued", "ost", "west", "sued", "NORD")
+
+Wandeln Sie auch die Variable *himmelsrichtungen* in einen Faktor um. Welches Problem tritt hier auf? Warum? 
+
+
 -------------------------------------
 
 
@@ -226,15 +233,29 @@ df[2,c('x','y')]
 -------------------------------------
 **Aufgabe**
 
-Erstellen Sie einen *data.frame* "Tabelle" mit den Spalten "Latitude", "Longitude", "Landcover". Die Spalte "Landcover" soll den Typ Faktor haben.
+Erstellen Sie einen *data.frame* "Tabelle1" mit den Spalten "Latitude", "Longitude", "Landcover". Die Spalte "Landcover" soll den Typ Faktor haben.
 
 lat = c(50.11, 23.9, 50.2)
 lon = c(8.68, 32.9, 8.2)
 lu  = c("urban", "water", "forest")
 
-Führen Sie außerdem den Befehl *summary* aus: summary(Tabelle)
+Geben Sie den erstellten data.frame aus und führen Sie außerdem den Befehl *summary* aus: summary(Tabelle1)
 
 -------------------------------------
+
+-------------------------------------
+**Aufgabe**
+
+Erstellen Sie einen *data.frame* "Tabelle2" mit den Spalten "Latitude", "Longitude", "Landcover". Die Spalte "Landcover" soll den Typ Faktor haben.
+
+lat = c(50.11, 23.9, 50.2, 0.0)
+lon = c(8.68, 32.9, 8.2, -10.5)
+lu  = c("urban", "water")
+
+Geben Sie den erstellten data.frame aus und führen Sie außerdem den Befehl *summary* aus: summary(Tabelle2). Was fällt Ihnen auf?
+
+-------------------------------------
+
 
 
 ### Konvertierung zwischen Matrizen und data.frames
@@ -252,35 +273,52 @@ y
 ### Array
 *Schema* array(Werte, Dimensionen)
 Im Vergleich zur zwei-dimensionalen *matrix* ist bei einem *array* die Anzahl der Dimensionen nicht beschränkt. 
+Beim Aufruf der Funktion werden erst die Werte dann die Dimensionen übergeben. Ein häufiges Beispiel für 3-d arrays sind Daten, die über Raum- und Zeitkoordinaten verfügen (x,y,t). 
+
 ```{r}
 multidim <- array(1:(2 * 3 * 4), c(3, 4, 2))
 multidim
 ```
-Beim Aufruf der Funktion werden erst die Werte dann die Dimensionen übergeben. Ein häufiges Beispiel für 3-d arrays sind Daten, die über Raum- und Zeitkoordinaten verfügen (x,y,t). Oft wollen wir dann beispielsweise den Mittelwert über die Zeit berechnen. Dies können Sie mit der Funktion *apply*, der Angabe der Dimensionen, die erhalten bleiben sollen (x,y) und der zu berechnenden Statistik (Mittelwert: *mean*) erreichen:   
+
+Mit dem Befehl *dim()* können Sie sich die Form eines mehrdimensionalen Arrays ausgeben lassen
 ```{r}
-apply(multidim,c(1,2),mean)
+dim(multidim)
 ```
 
--------------------------------------
-**Aufgabe**
-
-Berechnen Sie analog das räumliche Mittel.
--------------------------------------
 
 # Funktionen
 
-Komplizierte Berechnungen oder Schritte, die mehrmals durchgeführt werden, sollten in Funktionen gekapselt werden. Funktionen werden mit dem keyword **function** definiert und einem Funktionsnamen zugewiesen. Beim Aufruf können der Funktion Parameter übergeben werden, mit denen Berechnungen durchgeführt werden. Das Ergebnis wird dann von der Funktion zurückgegeben. Parametern können auch Standardwerte übergeben werden (z.B. a=1; wenn a nicht angegeben wird erhält die Variable in der Funktion den Wert 1).
+Komplizierte Berechnungen oder Schritte sollten in Funktionen zusammengefasst werden. So können Berechnungen einfach wiederholt werden und komplexe Berechnungsabläufen klarer strukturiert werden. Funktionen beschreiben oft eine allgemeinere Form einer Befehlsfolge. Durch die Übergabe von Funktionsargumenten kann in jedem Aufruf das Ergebnis für den spezifizerten Fall/ die übergebenen Werte berechnet werden.
+
+Funktionen werden mit dem keyword **function** definiert und einem Funktionsnamen zugewiesen. Die Funktion wird über diesen Funktionsnamen aufgerufen. Dabei können der Funktion Parameter übergeben werden, mit denen Berechnungen durchgeführt werden. Das Ergebnis wird dann mit dem Befehl *return* zurückgegeben. Dieser Rückgabewert muss in eine Variable abgespeichert werden wenn Sie ihn später wieder abrufen wollen. 
 
 ```{r}
-quadratFunktion <- function(x, a=1, b=0, c=0) {
+quadratFunktion <- function(x) {
+  y <- x^2
+  return(y)
+}
+
+quadratFunktion(-3)
+mein_quadrat = quadratFunktion(11)
+```
+
+Der Bereich zwischen den geschweiften Klammern ist der Funktionskörper. Alle Befehle in diesem Bereich werden bei Aufruf der Funktion abgearbeitet.
+
+Parametern können auch Standardwerte übergeben werden (z.B. a=1; wenn a nicht angegeben wird erhält die Variable in der Funktion den Wert 1).
+
+```{r}
+parabelFunktion <- function(x, a=1, b=0, c=0) {
   y <- a * x^2 + b * x + c
   return(y)
 }
 
-quadratFunktion(-3:3)
-quadratFunktion(-3:3, c=-5)
+parabelFunktion(-3:3)
+parabelFunktion(-3:3, c=-5)
 ```
-Die Variablen x,a,b und c existieren dabei nur innerhalb der Funktion, außerhalb können die Variablen mit gleichem Namen definiert sein, durch den Aufruf der Funktion werden diese nicht benutzt oder verändert.
+
+Die Variablen x,a,b und c existieren dabei nur innerhalb der Funktion, außerhalb können die Variablen mit gleichem Namen definiert sein, durch den Aufruf der Funktion werden diese nicht benutzt oder verändert! 
+
+
 # Reservierte Wörter und Variablennamen
 
 Die folgenden Wörter dürfen nicht als Variablennamen verwendet werden da sie
@@ -293,59 +331,6 @@ Teil der Sprache sind.
 Es ist ebenfalls nicht sinnvoll **T** und **F** als Namen für Variablen zu verwenden,
 da dies Kurzformen für **TRUE** und **FALSE** sind und oft zu schwer auffindbaren Fehlern führen.
 
-
-# Klammern
-
-## Funktionsaufruf: ()
-
-Parameter werden in Klammern an Funktionen übergeben. Dies kann entweder als Positions-Argument oder als
-benanntes Argument ("Parameter=Wert") erfolgen. Bei Positions-Argumenten 
-muss die in der Funktion definierte Reihenfolge strikt eingehalten werden, während die Reihenfolge von 
-benannten Argumenten flexibel ist. Es können auch beide Argument-Typen in einem Funktionsaufruf benutzt 
-werden. Hierbei werden zunächst die Positions-Argumente in der definierten Reihenfolge übergeben. Danach
-folgen dann die benannten Argumente. Zwischen der Funktion und der öffnenden Klammer sollte **kein** 
-Leerzeichen stehen.
-
-```{r}
-set.seed(12345)
-rnorm(n=5, mean=2, sd=0.5)
-set.seed(12345)
-rnorm(5, 2, 0.5)
-```
-
-## Index-Zugriff: []
-
-Mit den eckigen Klammern können bestimmte Elemente in einer mehrdimensionalen Variablen
-angesprochen werden. Ausserdem kann eine logische (boolean) Variable gleicher Dimensionalität benutzt werden, um 
-zu defnieren welche Elemente der mehrdimensionalen Ursprungsvariable ausgewählt werden sollen.
-
-```{r}
-x <- array(1:(3 * 4 * 5), c(3, 4, 5))
-x[1, 1, 1]
-x[2, 1, 1]
-x[1:3, 4, 5]
-
-maske <- x > 20
-x[maske]
-
-```
-## Blöcke: \{\}
-
-Die geschweiften Klammern werden benötigt wenn Code nur unter bestimmten Bedingungen
-ausgeführt bzw. wiederholt werden soll oder um den Inhalt von Funktionen zu definieren. Es ist Konvention,
-aber nicht zwingend erforderlich, den Code innerhalb geschweifter Klammern einzurücken, um
-das Programm besser lesbar zu machen.
-
-```{r}
-for (i in 1:3) {
-  message(i)
-}
-if (1 + 1 == 3) {
-  message("Richtig")
-} else {
-  message("Falsch")
-}
-```
 
 
 # Kontrollstrukturen
@@ -372,14 +357,54 @@ if (a > b) {
 if (a < b && b == c) print("ok")
 ```
 
+-------------------------------------
+**Aufgabe**
+
+Wenn die Variable "LC" den Wert "forest" hat soll die Variable "Farbe" den Wert "gruen" erhalten. Falls "LC" den Wert "urban" hat, die Farbe "rot". Für alle anderen Werte in "LC" setzen Sie die Variable "Farbe" auf "grau". 
+
+```{r, eval=FALSE}
+# testen Sie den Kontrollfluss mit weiteren LC Varianten (forest, urban, arable, water, ...)
+
+LC="forest"
+if (){
+  # ...  
+} else if () {
+  # ...
+} else {
+  # ...
+}
+LC
+Farbe
+```
+-------------------------------------
+
+
 ## Schleifen
 
-Die **for**-Schleife haben Sie weiter oben schon gesehen (Abschnitt "Blöcke"). Hierbei wird ein Segment mehrmals
-wiederholt. Der Schleifenzähler wird dabei oft im Schleifen-Block als variabler Index genutzt um auf 
-unterschiedliche Daten zuzugreifen oder aber verschiedene Berechnungen durchzuführen. Weiterhin gibt es die sogenannte
-**while**-Schleife. Hier wir der Kontroll-Block der Schleife so lange ausgeführt bis eine Abbruchbedingung erfüllt ist. 
-Bei diesem Konstrukt ist allerdings Vorsicht geboten, da Programmierfehler zu einer sich endlos wiederholenden Ausführung des Blocks führen können falls die Abbruchbedingung niemals erreicht wird. Es ist darum ratsam bei sochen Konstrukten immer eine zweite Abbruchbedingung zu definieren bei der die Schleife garantiert beendet wird.
+Mit Schleifen kann ein Skript-Teil wiederholt werden. Die gebräuchlichste Art eine Schleife zu definieren ist die *for*-Schleife.
 
+*Schema* for (i in 1:10){Befehlsabfolge}
+
+Der Schleifenzähler (hier: i) wird dabei oft im Schleifen-Block als variabler Index genutzt um auf 
+unterschiedliche Daten zuzugreifen oder aber verschiedene Berechnungen durchzuführen. Bei jedem Durchlauf der Befehlsabfolge ändert sich der Wert der Variable i zum nächsten Element (hier: 1. Durchlauf i=1, 2. Durchlauf i=2, ... bzw. "forest", "urban", ...).
+
+```{r, eval=FALSE}
+
+for(i in 1:5){
+  print(i)
+  print(i^2)
+}
+
+for(LU in c("forest", "urban", "water")){
+  print(LU)
+}
+```
+
+Weiterhin gibt es die sogenannte **while**-Schleife. 
+
+*Schema* while(bedingung==TRUE){Befehlsfolge}
+
+Hier wir der Kontroll-Block der Schleife so lange ausgeführt bis eine Abbruchbedingung erfüllt ist. Bei diesem Konstrukt ist allerdings Vorsicht geboten, da Programmierfehler zu einer sich endlos wiederholenden Ausführung des Blocks führen können falls die Abbruchbedingung niemals erreicht wird. Es ist darum ratsam bei solchen Konstrukten immer eine zweite Abbruchbedingung zu definieren bei der die Schleife garantiert beendet wird. Aus diesem Grund werden wir in diesem Kurs auf *while*-Schleifen verzichten.
 
 ```{r, eval=FALSE}
 i <- 0
@@ -404,57 +429,119 @@ while(i > 0.00001) {
   cnt = cnt + 1
 }
 
-#
-
-
 ```
 
 
-# R und Statistik
+# Klammern
 
-R wurde als Statistik-Sprache entwickelt und deckt somit so ziemlich alle Probleme und Lösungen
-ab. Hier einige wenige der gebräuchlisten Funktionen die für statistische Auswertungen nutzen können:
+Zusammenfassung der unterschiedlichen Klammertypen und ihre Verwendung.
 
-* **rnorm()**: Normalverteilte Zufallswerte
-* **sample()**: Ziehung einer Stichprobe 
-* **hist()**: Erzeuge ein Histogramm
-* **plot()**: Standard Plot-Befehl (Punkt-, Linien-Plots oder von Klassen definierte Plot-Routine) 
-* **boxplot()**: Plotte Box-Whisker-Diagramme
-* **lm()**: Erzeuge eine lineare Regression
+## Funktionsaufruf: ()
+
+Parameter werden in Klammern an Funktionen übergeben. Dies kann entweder als Positions-Argument oder als
+benanntes Argument ("Parameter=Wert") erfolgen. Bei Positions-Argumenten 
+muss die in der Funktion definierte Reihenfolge strikt eingehalten werden, während die Reihenfolge von 
+benannten Argumenten flexibel ist. Es können auch beide Argument-Typen in einem Funktionsaufruf benutzt 
+werden. Hierbei werden zunächst die Positions-Argumente in der definierten Reihenfolge übergeben. Danach
+folgen dann die benannten Argumente. Zwischen der Funktion und der öffnenden Klammer sollte **kein** 
+Leerzeichen stehen.
+
+```{r}
+x <- data.frame(x=1:5, y=6:10)
+mean(x$x)
+```
+
+## Index-Zugriff: []
+
+Mit den eckigen Klammern können bestimmte Elemente in einer mehrdimensionalen Variablen
+angesprochen werden. Ausserdem kann eine logische (boolean) Variable gleicher Dimensionalität benutzt werden, um 
+zu definieren welche Elemente der mehrdimensionalen Ursprungsvariable ausgewählt werden sollen.
+
+```{r}
+x <- array(1:(3 * 4 * 5), c(3, 4, 5))
+x[1, 1, 1]
+x[2, 1, 1]
+x[1:3, 4, 5]
+```
+
+## Blöcke: \{\}
+
+Die geschweiften Klammern werden benötigt wenn Code nur unter bestimmten Bedingungen
+ausgeführt bzw. wiederholt werden soll oder um den Inhalt von Funktionen zu definieren. Es ist Konvention,
+aber nicht zwingend erforderlich, den Code innerhalb geschweifter Klammern einzurücken, um
+das Programm besser lesbar zu machen.
+
+```{r}
+for (i in 1:3) {
+  message(i)
+}
+if (1 + 1 == 3) {
+  message("Richtig")
+} else {
+  message("Falsch")
+}
+```
 
 
-Schauen Sie sich die Hilfeseiten an und nutzen Sie das bisher
-gelernte, um mit den Befehlen zu spielen und sie auszuprobieren.
 
+# Zusätzliche Pakete/ Befehle laden
 
-
-# Externe Befehle laden
-
-Wie in vielen anderen Programmiersprachen kann die Standarddistribution von R durch externe Bibliotheken (Pakete) erweitert werden. Für R existieren umfangreichen Statistik- und Datenanalysepakete (und ständig kommen neue hinzu), welche die vielfältige Einsatzbarkeit ermöglichen. Auch für neu entwickelte statistische Methoden wird häufig ein R Paket vom Entwickler zur Verfügung gestellt und weiterentwickelt.   
-Pakete werden mit **install.packages('Paketname')** installiert. Nachdem das Paket installiert wurde kann es in Skripten mit dem Befehl **library('Paketname')** geladen und die darin enthaltenen Funktionen und Klassen verwendet werden.
+Wie in vielen anderen Programmiersprachen kann die Standarddistribution von R durch externe Bibliotheken (Pakete) erweitert werden. Für R existieren umfangreichen Statistik- und Datenanalysepakete - und ständig kommen neue hinzu.  Auch für neu entwickelte statistische Methoden wird häufig ein R-Paket vom Entwickler zur Verfügung gestellt und weiterentwickelt.   
+Pakete werden mit **install.packages('Paketname')** installiert. Nachdem das Paket installiert wurde kann es in Skripten mit dem Befehl **library('Paketname')** geladen und die darin enthaltenen Funktionen und Klassen verwendet werden. Wir werden in unserem Kurs ausführlich darauf zurückgreifen.
 
 
 # Erste Hilfe
 
+Wichtige Tipps um neue Funktionalität zu lernen und Fehler schnell zu finden. BEsonders beim Einstig in die Programmierung treten oft Fehler auf. Mit der richtigen Heransgehensweise lassen sich diese aber systematisch lösen!
+
+
 ## Aufruf der Hilfefunktion in R
 
-* **?\<Befehl\>** oder **help(\<Befehl\>)** zeigt Hilfe für ein bekanntes Kommando an, z.B. ?var zeigt die Hilfe für die Funktion zur Varianzberechnung an
+Neue Funktionalituaten finden und die Benutzung neuer Funktionen erlernen.
+
+* **?\<Befehl\>** oder **help(\<Befehl\>)** zeigt Hilfe für ein bekanntes Kommando an, z.B. ?data.frame zeigt die Hilfe für die Funktion zur Erstellung eines data.frame an. 
+
+**Hinweis**: Besonders hilfreich bei neuen Befehlen ist der letzte Abschnitt der Hilfe-Seiten mit den Beispielanwendungen!
+
 * **??\<Schlagwort\>** oder **help.search()** zeigt Befehle und Bibliotheken an, in deren Hilfeseite das Schlagwort vorkommt.
 * Beispiele für eine bestimmte Funktion können mit example("Funktion") aufgerufen werden
 
-**Hinweis**: um bei google nach R-spezifischen Problemen zu suchen, hilft es R in eckige Klammern zu setzen: "[R] was-ich-wissen-will"
-
--------------------------------------
-**Aufgabe**
-
-Welche Optionen gibt es für den Aufruf der Funktion var?
--------------------------------------
+**Hinweis**: Um bei google nach R-spezifischen Problemen zu suchen, hilft es R in eckige Klammern zu setzen: "[R] was-ich-wissen-will"
 
 
 ## Informationen über Variablen
+
 Bei Fehlern oder unerwarteten Ergebnissen sollten Sie sich zunächst einen Überblick verschaffen. Um den Ablauf ihres Skripts zu verfolgen hilft es oft den Zustand von Variablen mit **print()** oder **message()** auszugeben.   
 
 Ob eine Variable überhaupt existiert prüfen Sie mit dem Befehl **exists(\<Variablenname\>)** (mit **ls()** können Sie sich alle im Speicher existierenden Variablen anzeigen lassen). Um den Inhalt von Variablen zu überprüfen nutzen Sie den Befehl **str()**. Wenn Sie eine deskriptive Statistik der enthaltenen Werte benötigen können Sie diese mit **summary()** ausgeben (bei einigen Klassen erhalten Sie mit diesem Befehl eine spezielle Zusammenfassung dieses Objekttypes). Bei data.frames kann es auch nützlich sein sich nur eine Untermenge der Zeilen ausgeben zu lassen. Mit **head()** geben Sie die ersten 6 Zeilen eines data.frame aus; mit **tail()** die letzten 6.   
 
 Um die Dimensionen von Variablen zu überprüfen nutzen Sie **length()** (z.B. Anzahl der Elemente in einem Vektor, Anzahl der Spalten in einem data.frame, Anzahl der Elemente in einem Array). Bei zwei-dimensionalen Variablen können Sie die Anzahl der Spalten mit **ncol()** und die Anzahl der Zeilen mit **nrow()** abfragen. Ausserdem können Sie die Dimensionen eines Objekts mit **dim()** erfahren.
+
+
+
+
+
+
+-------------------------------------
+**Hausaufgabe**
+
+Erstellen Sie einen Funktion die ein Argument als Eingabe erwartet und folgende Funktionalität besitzt. Für Werte kleiner als 0 soll "ungültig", für Werte von 1-4 soll "sehr wenig", für Werte von 5-10 "wenig", für Werte von 10-100 "viel" und für alle Werte größer als 100 "sehr viel" zurückgegeben werden.
+
+```{r, eval=FALSE}
+
+meine_bewertung <- function(x){
+  # hier kommt ihr Kontrollfluss hin
+  
+  return(bewertung)
+}
+
+# test der funktion
+meine_bewertung(12)
+meine_bewertung(-23)
+# ...
+
+```
+
+-------------------------------------
+
 

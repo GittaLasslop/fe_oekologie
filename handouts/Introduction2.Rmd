@@ -22,11 +22,11 @@ Nach der Einführung in das Programmieren im Allgemeinen und die Syntax von R in
 
 3) Üben wie man den Überblick darüber behält was in einem R skript passiert und welchen Daten in den einzelnen Variablen abgespeichert sind.
 
-4) Abbildungen mit Hilfe der *plot()* Funktion erstellen.
+4) Abbildungen mit Hilfe der `plot()` Funktion erstellen.
 
 ## Ordnerstruktur
 
-Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei befindet. Das passiert mit der Angabe des Pfades. Der Pfad kann absolut (z.b. /home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/data/ErsteDaten.txt) oder relativ angegeben werden (data/ersteDaten.txt). Für Schwierigkeiten sorgen hierbei oft Pfade mit Umlauten oder Leerzeichen. 
+Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei befindet. Das passiert mit der Angabe des Pfades. Der Pfad kann absolut (z.b. `/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/data/ErsteDaten.txt`) oder relativ angegeben werden (`data/ersteDaten.txt`). Für Schwierigkeiten sorgen hierbei oft Pfade mit Umlauten oder Leerzeichen. 
 
 -------------------------------------
 **Sehr wichtiger Hinweis**
@@ -35,7 +35,7 @@ Vermeiden Sie Pfadangaben mit Leerzeichen oder Umlauten!
 -------------------------------------
 
 Erstellen Sie nun auf einem Laufwerk, das nicht gelöscht wird ein Arbeitsverzeichnis für den Kurs. Im Kurs werden wir von nun an immer das Arbeitsverzeichnis auf diesen Ordner setzen und können dann mit relativen Pfadangaben arbeiten. In diesem Verzeichnis legen Sie einen Ordner "data" und einen Ordner "plots" an. Alle Daten die wir benutzen werden wir im ordner "data" abspeichern, alle Abbildungen die wir erstellen im Ordner "plots". Um am Ende nicht die Übersicht zu verlieren werden wir noch Unterverzeichnisse für die einzelnen Stunden erstellen. Für heute also noch einen ordner "intro2" innerhalb der Ordner "data" und "plots". 
-Wir setzen nun das Arbeitsverzeichnis mit der Funktion *setwd()* (set working directory). Der Pfad muss in Anführungszeichen übergeben werden (einfach '  oder doppelt "). Dadurch bekommt der Pfad den Datentyp *character*. 
+Wir setzen nun das Arbeitsverzeichnis mit der Funktion `setwd()` (set working directory). Der Pfad muss in Anführungszeichen übergeben werden (einfach '  oder doppelt "). Dadurch bekommt der Pfad den Datentyp "character". 
 
 -------------------------------------
 **Achtung**
@@ -44,7 +44,8 @@ Den Pfad müssen Sie entsprechend anpassen.
 -------------------------------------
 
 ```{r}
-setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/')
+#setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/')
+setwd('/Users/cwerner/iCloud/2019/teaching/gu_fe_oek/fe_oekologie/handouts')
 ```
 Ordner können über den Dateimanager (Windows-Explorer) oder auch mit R erzeugt werden:
 
@@ -59,7 +60,7 @@ Bestehen die Ordner bereits, wird eine Warnung ausgegeben.
 ## Einlesen von Daten und einfache Abbildungen
 
 ### Textdateien
-Bei kleinen Datenmengen können Daten in Textdateien abgespeichert werden. Diese sind dann häufig angeordnet wie eine Tabelle. Diese Tabelle kann Zeilennamen und Spaltennamen besitzen, oder es können auch nur die Werte abgespeichert sein. Die Abgrenzung zwischen den Zeilen wird automatisch erkannt da der Zeilenumbruch in Dateien klar definiert ist. Die Abgrenzung zwischen Spalten ist nicht klar definiert, hierfür kommen verschiedene Zeichen in Frage. Z.B. können die Spalten durch ein Komma (csv Dateien: comma separated values), ein Leerzeichen, ein Semikolon oder ein Tab getrennt sein. Dieses Trennzeichen muss evtl. beim Einlesen der Daten mitangegeben werden. Zum Einlesen von Textdateien bietet die Funktion *read.table()* Möglichkeiten solche Parameter anzugeben. Wir lesen nun die erste Datei ein (Wetterdaten vom Flughafen Frankfurt). Laden Sie hierfür die Daten für heute herunter und speichern sie in dem Ordner "data/intro2".
+Bei kleinen Datenmengen können Daten in Textdateien abgespeichert werden. Diese sind dann häufig angeordnet wie eine Tabelle. Diese Tabelle kann Zeilennamen und Spaltennamen besitzen, oder es können auch nur die Werte abgespeichert sein. Die Abgrenzung zwischen den Zeilen wird automatisch erkannt da der Zeilenumbruch in Dateien klar definiert ist. Die Abgrenzung zwischen Spalten ist nicht klar definiert, hierfür kommen verschiedene Zeichen in Frage. Z.B. können die Spalten durch ein Komma (csv Dateien: comma separated values), ein Leerzeichen, ein Semikolon oder ein Tab getrennt sein. Dieses Trennzeichen muss evtl. beim Einlesen der Daten mitangegeben werden. Zum Einlesen von Textdateien bietet die Funktion `read.table()` Möglichkeiten solche Parameter anzugeben. Wir lesen nun die erste Datei ein (Wetterdaten vom Flughafen Frankfurt). Laden Sie hierfür die Daten für heute herunter und speichern sie in dem Ordner "data/intro2".
 Wir versuchen die Datei zu lesen und in die Variable Daten abzuspeichern.
 ```{r}
 Daten=read.table('data/intro2/ErsteDaten.txt')
@@ -82,7 +83,7 @@ summary(Daten)
 class(Daten$Tmin)
 ```
 R benennt nun die Spalten entsprechend der Information in der Datei und erkennt die die numerischen Daten richtig.
-Wir haben nun noch zwei weitere Dateien mit den gleichen Daten aber etwas anderem Format. Diese wollen wir nun auch richtig einlesen und müssen dafür den Aufruf der Funktion *read.table()* etwas anpassen. Die erste Datei enthält als Trennzeichen ein Semikolon. Bei der zweiten Datei ist noch eine zusätzliche Zeile mit Beschreibung der Daten vorangestellt. Versuchen Sie zunächste die Dateien ohne gesetzte Parameter einzulesen und überprüfen Sie das Ergebnis. Dann mit den folgenden Anpassungen.
+Wir haben nun noch zwei weitere Dateien mit den gleichen Daten aber etwas anderem Format. Diese wollen wir nun auch richtig einlesen und müssen dafür den Aufruf der Funktion `read.table()` etwas anpassen. Die erste Datei enthält als Trennzeichen ein Semikolon. Bei der zweiten Datei ist noch eine zusätzliche Zeile mit Beschreibung der Daten vorangestellt. Versuchen Sie zunächste die Dateien ohne gesetzte Parameter einzulesen und überprüfen Sie das Ergebnis. Dann mit den folgenden Anpassungen.
 ```{r,eval=FALSE}
 Daten=read.table('data/intro2/ErsteDatenc.txt')
 summary(Daten)
@@ -96,7 +97,7 @@ summary(Daten)
 
 ### Einfache Abbildungen
 
-Wir können nun mit Hilfe einfacher Punktabbildungen prüfen ob die Werte plausibel sind. Dafür verwenden wir die Funktion *plot()* und übergeben das Datum als x Wert und eine der anderen Spalten als y Wert. Wir wandeln dafür das Datum, welches momentan als einfache Zeichenfolge gespeichert ist, mit dem Befehl "as.POSIXct.Date" noch in einen Datums/ Zeit-Datentyp um. Dieser Datentyp ermöglicht es mit Datumsangaben zu rechnen bzw. diese in Abbildungen sinnvoll zu skalieren (Tage, Wochen, Monate, ...).
+Wir können nun mit Hilfe einfacher Punktabbildungen prüfen ob die Werte plausibel sind. Dafür verwenden wir die Funktion `plot()` und übergeben das Datum als x Wert und eine der anderen Spalten als y Wert. Wir wandeln dafür das Datum, welches momentan als einfache Zeichenfolge gespeichert ist, mit dem Befehl `as.POSIXct.Date()` noch in einen Datums/ Zeit-Datentyp um. Dieser Datentyp ermöglicht es mit Datumsangaben zu rechnen bzw. diese in Abbildungen sinnvoll zu skalieren (Tage, Wochen, Monate, ...).
 
 ```{r}
 Daten$Datum=as.POSIXct.Date(Daten$Datum)
@@ -116,7 +117,7 @@ Sie könne auch den Zusammenhang zwischen zwei Variablen, z.B. maximumale und mi
 plot(Daten$Tmax, Daten$Tmin)
 ```
 
-Die Funktion *plot()* ist für verschiedene Datentypen definiert. Sobald kompliziertere Abbildungen erstellt werden sollen stößt man mit dieser Funktion aber auch an Grenzen oder es wird sehr aufwändig. Wir werden deswegen später das Paket [*ggplot2*](https://ggplot2.tidyverse.org) benutzen.
+Die Funktion `plot()` ist für verschiedene Datentypen definiert. Sobald kompliziertere Abbildungen erstellt werden sollen stößt man mit dieser Funktion aber auch an Grenzen oder es wird sehr aufwändig. Wir werden deswegen später das Paket [*ggplot2*](https://ggplot2.tidyverse.org) benutzen.
 
 ### Einlesen räumlicher Daten aus .tif Dateien
 Die räumlichen Daten sind als .tif Datei abgespeichert. Um diese einfach einzulesen benutzen wir das Paket raster. Dieses muss erst installiert und dann geladen werden. Durch die Installation wird es auf dem Rechner verfügbar, allerdings muss das Paket nach jedem Neustart neu geladen werden. Eventuell werden beim Installieren noch andere Pakete mitinstalliert, die auch benötigt werden.
@@ -135,14 +136,14 @@ Das Laden eines Paketes und die Installation wird von Ausgaben in der Konsole in
 -------------------------------------
 
 
-Die Daten sollten im Ordner data/intro2/Alaska liegen. Dann können wir die Funktion *raster()* benutzen um die erste Datei zu lesen.
+Die Daten sollten im Ordner `data/intro2/Alaska` liegen. Dann können wir die Funktion `raster()` benutzen um die erste Datei zu lesen.
 
 ```{r}
 LandCover=raster('data/intro2/Alaska/MCD12Q1_2001-01-01.Land_Cover_Type_1.tif')
 LandCover
 ```
 Die Daten sind nun in der Variablen LandCover abgelegt und diese Variable gehört zur Datenklasse RasterLayer. 
-Das Eingeben des Variablennames in der Konsole gibt hier einige Informationen über den Datensatz aus. Die Funktion summary hilft bei raster Datenobjekten nicht viel weiter. In einem RasterLayer sind bereits einige sehr nützliche Informationen gespeichert und werden direkt in der Konsole ausgegeben. Wir können wieder die plot() Funktion benutzen um die Daten zu visualisieren.
+Das Eingeben des Variablennames in der Konsole gibt hier einige Informationen über den Datensatz aus. Die Funktion summary hilft bei raster Datenobjekten nicht viel weiter. In einem RasterLayer sind bereits einige sehr nützliche Informationen gespeichert und werden direkt in der Konsole ausgegeben. Wir können wieder die `plot()` Funktion benutzen um die Daten zu visualisieren.
 ```{r}
 plot(LandCover)
 hist(LandCover)
@@ -151,7 +152,13 @@ Die Karte und die Verteilung sehen etwas seltsam aus. Der Wert 255 ist in diesem
 ```{r}
 is.na(LandCover)=LandCover==255
 ```
-Hierdurch werden alle Gridzellen auf NA gesetzt in denen die LandCover Variable den Wert 255 gespeichert hat.
+Der Befehl ist etwas schwer verständlich, wir gehen ihn von rechts nach links durch. `Landcover==255` erzeugt ein bool raster (TRUE/ FALS raster) - alle Raster-Zellen mit Wert 255 werden TRUE, alle anderen werden FALSE. Mit der Funktion `is.na()` werden nun alle TRUE Positionen im Raster auf NA gesetzt.
+
+```{r}
+# Gitta, was haelst Du von der Alternative? Ist fuer mich verstaendlicher, is.na ist fuer mich eine Abfrage und bei einer Zuweisung verwirrend. Ich glaube der Sybtax kommt auch spaeter im LU/LUC Teil so vor...
+LandCover[LandCover == 255] <- NA
+```
+
 Wir überprüfen wieder das Ergebnis:
 ```{r}
 plot(LandCover)
@@ -191,8 +198,8 @@ dev.off()
 ## Zusammenfassung
 
 Beim Lesen von Textdateien können verschiedene Parameter übergeben werden die die Struktur der Datei (Header, Trennzeichen) definieren.
-Nach dem Einlesen sollten die Daten z.B. mit *summary()*, *dim()*, *class()*, überprüft werden. Einfache Abbildungen helfen schnell zu überprüfen ob beim Lesen der Daten alles geklappt hat und die Daten keine groben Fehler enthalten. Dafür gibt es die Funktion *plot()*. 
+Nach dem Einlesen sollten die Daten z.B. mit `summary()`, `dim()`, `class()`, überprüft werden. Einfache Abbildungen helfen schnell zu überprüfen ob beim Lesen der Daten alles geklappt hat und die Daten keine groben Fehler enthalten. Dafür gibt es die Funktion `plot()`. 
 
-Zum Lesen von räumlichen Daten aus .tif Dateien verwenden wir das Paket raster. Einzelne Dateien können mit der Funktion *raster()* gelesen werden, mehrere Dateien mit der Funktion *stack()*. Die Daten der einzelnen Dateien sind dann in den Layern des RasterStack (Stapel) zu finden. Die Funktion *plot()* kann auch auf diese raster Objekte angewendet werden. Die Informationen über das Raster Objekt werden in der Konsole ausgegeben wenn man den Variablennamen gefolgt von Enter dort eingibt.
+Zum Lesen von räumlichen Daten aus .tif Dateien verwenden wir das Paket raster. Einzelne Dateien können mit der Funktion `raster()` gelesen werden, mehrere Dateien mit der Funktion `stack()`. Die Daten der einzelnen Dateien sind dann in den Layern des RasterStack (Stapel) zu finden. Die Funktion `plot()` kann auch auf diese raster Objekte angewendet werden. Die Informationen über das Raster Objekt werden in der Konsole ausgegeben wenn man den Variablennamen gefolgt von Enter dort eingibt.
 
-Mit der Funktion png() können Abbildungen in .png Dateien abgespeichert werden. 
+Mit der Funktion `png()` können Abbildungen in png-Dateien abgespeichert werden. 

@@ -34,7 +34,7 @@ Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei b
 Vermeiden Sie Pfadangaben mit Leerzeichen oder Umlauten!
 -------------------------------------
 
-Erstellen Sie nun auf einem Laufwerk, das nicht gelöscht wird ein Arbeitsverzeichnis für den Kurs. Im Kurs werden wir von nun an immer das Arbeitsverzeichnis auf diesen Ordner setzen und können dann mit relativen Pfadangaben arbeiten. In diesem Verzeichnis legen Sie einen Ordner data und einen Ordner plots an. Alle Daten die wir benutzen werden wir im ordner data abspeichern, alle Abbildungen die wir erstellen im Ordner plots. Um am Ende nicht die Übersicht zu verlieren werden wir noch Unterverzeichnisse für die einzelnen Stunden erstellen. Für heute also noch einen ordner intro2 innerhalb der Ordner data und plots. 
+Erstellen Sie nun auf einem Laufwerk, das nicht gelöscht wird ein Arbeitsverzeichnis für den Kurs. Im Kurs werden wir von nun an immer das Arbeitsverzeichnis auf diesen Ordner setzen und können dann mit relativen Pfadangaben arbeiten. In diesem Verzeichnis legen Sie einen Ordner "data" und einen Ordner "plots" an. Alle Daten die wir benutzen werden wir im ordner "data" abspeichern, alle Abbildungen die wir erstellen im Ordner "plots". Um am Ende nicht die Übersicht zu verlieren werden wir noch Unterverzeichnisse für die einzelnen Stunden erstellen. Für heute also noch einen ordner "intro2" innerhalb der Ordner "data" und "plots". 
 Wir setzen nun das Arbeitsverzeichnis mit der Funktion *setwd()* (set working directory). Der Pfad muss in Anführungszeichen übergeben werden (einfach '  oder doppelt "). Dadurch bekommt der Pfad den Datentyp *character*. 
 
 -------------------------------------
@@ -46,7 +46,7 @@ Den Pfad müssen Sie entsprechend anpassen.
 ```{r}
 setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/')
 ```
-Ornder können über den Dateimanager (Windows-Explorer) oder auch mit R erzeugt werden:
+Ordner können über den Dateimanager (Windows-Explorer) oder auch mit R erzeugt werden:
 
 ```{r}
 dir.create('data')
@@ -59,7 +59,7 @@ Bestehen die Ordner bereits, wird eine Warnung ausgegeben.
 ## Einlesen von Daten und einfache Abbildungen
 
 ### Textdateien
-Bei kleinen Datenmengen können Daten in Textdateien abgespeichert werden. Diese sind dann häufig angeordnet wie eine Tabelle. Diese Tabelle kann Zeilennamen und Spaltennamen besitzen, oder es können auch nur die Werte abgespeichert sein. Die Abgrenzung zwischen den Zeilen wird automatisch erkannt da der Zeilenumbruch in Dateien klar definiert ist. Die Abgrenzung zwischen Spalten ist nicht klar definiert, hierfür kommen verschiedene Zeichen in Frage. Z.B. können die Spalten durch ein Komma (csv Dateien: comma separated values), ein Leerzeichen, ein Semikolon oder ein Tab getrennt sein. Dieses Trennzeichen muss evtl. beim Einlesen der Daten mitangegeben werden. Zum Einlesen von Textdateien bietet die Funktion *read.table()* Möglichkeiten solche Parameter anzugeben. Wir lesen nun die erste Datei ein (Wetterdaten vom Flughafen Frankfurt). Laden Sie hierfür die Daten für heute runter und speichern sie in dem Ordner data/intro2.
+Bei kleinen Datenmengen können Daten in Textdateien abgespeichert werden. Diese sind dann häufig angeordnet wie eine Tabelle. Diese Tabelle kann Zeilennamen und Spaltennamen besitzen, oder es können auch nur die Werte abgespeichert sein. Die Abgrenzung zwischen den Zeilen wird automatisch erkannt da der Zeilenumbruch in Dateien klar definiert ist. Die Abgrenzung zwischen Spalten ist nicht klar definiert, hierfür kommen verschiedene Zeichen in Frage. Z.B. können die Spalten durch ein Komma (csv Dateien: comma separated values), ein Leerzeichen, ein Semikolon oder ein Tab getrennt sein. Dieses Trennzeichen muss evtl. beim Einlesen der Daten mitangegeben werden. Zum Einlesen von Textdateien bietet die Funktion *read.table()* Möglichkeiten solche Parameter anzugeben. Wir lesen nun die erste Datei ein (Wetterdaten vom Flughafen Frankfurt). Laden Sie hierfür die Daten für heute herunter und speichern sie in dem Ordner "data/intro2".
 Wir versuchen die Datei zu lesen und in die Variable Daten abzuspeichern.
 ```{r}
 Daten=read.table('data/intro2/ErsteDaten.txt')
@@ -70,12 +70,12 @@ class(Daten)
 summary(Daten)
 class(Daten$V2)
 ```
-Die Daten wurden in einem data.frame names Daten abgespeichert.
+Die Daten wurden in einem data.frame namens "Daten" abgespeichert.
 Die einzelnen Spalten in der Tabelle sind erkannt worden, jedoch hat R nicht erkannt dass die erste Zeile die Namen der Spalten beinhaltet. Alle Variablen werden als Faktoren interpretiert und die Spalten bekommen noch zusätzliche Namen (z.B. V2) Über die Hilfe der Funktion können wir herausfinden wie wir R mitteilen können dass die Spaltennamen bereits in der Datei enthalten sind.
 ```{r}
 ?read.table
 ```
-Der Default Wert (Standardwert) für den Parameter header ist FALSE, diesen setzen wir jetzt beim Funktionsaufruf auf TRUE.
+Der Default Wert (Standardwert) für den Parameter "header" ist FALSE, diesen setzen wir jetzt beim Funktionsaufruf auf TRUE.
 ```{r}
 Daten=read.table('data/intro2/ErsteDaten.txt',header=TRUE)
 summary(Daten)
@@ -96,7 +96,8 @@ summary(Daten)
 
 ### Einfache Abbildungen
 
-Wir können nun mit Hilfe einfacher Punktabbildungen prüfen ob die Werte plausibel sind. Dafür verwenden wir die Funktion *plot()* und übergeben das Datum als x Wert und eine der anderen Spalten als y Wert. Wir wandeln dafür das Datum noch in einen speziellen Datentyp um:
+Wir können nun mit Hilfe einfacher Punktabbildungen prüfen ob die Werte plausibel sind. Dafür verwenden wir die Funktion *plot()* und übergeben das Datum als x Wert und eine der anderen Spalten als y Wert. Wir wandeln dafür das Datum, welches momentan als einfache Zeichenfolge gespeichert ist, mit dem Befehl "as.POSIXct.Date" noch in einen Datums/ Zeit-Datentyp um. Dieser Datentyp ermöglicht es mit Datumsangaben zu rechnen bzw. diese in Abbildungen sinnvoll zu skalieren (Tage, Wochen, Monate, ...).
+
 ```{r}
 Daten$Datum=as.POSIXct.Date(Daten$Datum)
 plot(Daten$Datum, Daten$Tmin)
@@ -110,12 +111,12 @@ plot(Daten$Datum, Daten$Sun)
 plot(Daten$Datum, Daten$windmax)
 plot(Daten$Datum, Daten$snow)
 ```
-Sie könne auch den Zusammenhang zwischen zwei Variablen, z.B. maximumale und minimale Temperatur überprüfen indem Sie die eine als x, die andere als y Wert übergeben.
+Sie könne auch den Zusammenhang zwischen zwei Variablen, z.B. maximumale und minimale Temperatur überprüfen indem Sie die eine als x, die andere als y Wert übergeben (ein sogennanter "scatter plot").
 ```{r}
 plot(Daten$Tmax, Daten$Tmin)
 ```
 
-Die Funktion *plot()* ist für verschiedene Datentypen definiert. Sobald kompliziertere Abbildungen erstellt werden sollen stößt man mit dieser Funktion aber auch an Grenzen oder es wird sehr aufwändig. Wir werden deswegen später das Paket *ggplot2* benutzen.
+Die Funktion *plot()* ist für verschiedene Datentypen definiert. Sobald kompliziertere Abbildungen erstellt werden sollen stößt man mit dieser Funktion aber auch an Grenzen oder es wird sehr aufwändig. Wir werden deswegen später das Paket [*ggplot2*](https://ggplot2.tidyverse.org) benutzen.
 
 ### Einlesen räumlicher Daten aus .tif Dateien
 Die räumlichen Daten sind als .tif Datei abgespeichert. Um diese einfach einzulesen benutzen wir das Paket raster. Dieses muss erst installiert und dann geladen werden. Durch die Installation wird es auf dem Rechner verfügbar, allerdings muss das Paket nach jedem Neustart neu geladen werden. Eventuell werden beim Installieren noch andere Pakete mitinstalliert, die auch benötigt werden.

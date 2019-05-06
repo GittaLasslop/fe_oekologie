@@ -10,7 +10,7 @@ output:
   #  latex_engine: pdflatex
   #  fig_caption: yes
   #  includes:
-  #    in_header: styles.tex
+  #   in_header: styles.tex
 ##    toc: true
 
 ---
@@ -20,6 +20,7 @@ output:
 Das Seminar Material finden Sie im OLAT SOSE 2019.
 
 Die Daten für die heutige Stunde finden sie unter:
+
 https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/map_de.zip?temp_url_sig=f019a4981eedd082dbbe461e9f8798cdcbcaf103&temp_url_expires=2019-07-05T15:47:22Z
 
 
@@ -44,7 +45,8 @@ Ausserdem benötigen wir:
 Wir können nun die Pakete einzeln mit *install.packages* installieren und mit *library* laden. Da wir hier eine ganze Liste an Paketen haben benutzen wir eine Schleife:
 
 ```{r, eval=FALSE, message=FALSE}
-for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal", "devtools")) {
+for (p in c("raster", "rgeos", "ggplot2", "rworldmap", 
+            "maps", "mapproj", "rgdal", "devtools")) {
   if (!require(p, character.only=TRUE)) {
     install.packages(p)
   }
@@ -76,18 +78,6 @@ source(file.path( "R", "functions.R"), encoding=getOption("encoding"))
 Da wir nicht die ersten sind die R benutzen um Karten
 zu erstellen nutzen wir eine vorgefertigte Karte aus dem Paket "maps"
 die für die Darstellung mit dem Befehl 'map_data' aus dem Paket 'ggplot2' aufbereitet wird.
--------------------------------------
-**Aufgabe**
-Die Zeile $p = p + coord \_ fixed()$ kann z.B. mit
-$p = p + coord \_ map("ortho", orientation=c(45, 8, 0))$
- ersetzt werden.
-Finden Sie mit Hilfe der Hilfeseiten heraus, ob es noch andere Projektionen
-gibt und probieren diese aus.
--------------------------------------
--------------------------------------
-**Aufgabe**
-Schauen Sie sich sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, was Sie gerade gemacht haben.
--------------------------------------
 
 Hier sind die Befehle aus dem Paket ggplot2 Paket, mit denen eine erste Weltkarte in Form der Ländergrenzen erstellt wird. Führen sie nach jeder Zeile nach 'p = p + geom_path()' den Befehl print(p) aus, um zu sehen, welche Auswirkungen die jeweiligen Änderungen haben.
 
@@ -104,15 +94,17 @@ print(p)
 ```
 -------------------------------------
 **Aufgabe**
-Die Zeile $p = p + coord \_ fixed()$ kann z.B. mit
+Die Zeile 
+$p = p + coord \_ fixed()$ 
+kann z.B. mit
 $p = p + coord \_ map("ortho", orientation=c(45, 8, 0))$
- ersetzt werden.
-Finden Sie mit Hilfe der Hilfeseiten heraus, ob es noch andere Projektionen
-gibt und probieren diese aus.
+ersetzt werden.
+Finden Sie mit Hilfe der Hilfeseiten heraus, ob es noch andere Projektionen gibt und probieren diese aus.
 -------------------------------------
 -------------------------------------
 **Aufgabe**
-Schauen Sie sich sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, was Sie gerade gemacht haben.
+Schauen Sie sich sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, 
+was gerade gemacht wurde.
 -------------------------------------
 
 ## Regionale Karte mit Landbedeckung
@@ -125,7 +117,9 @@ werden in einen "data.frame" umgewandelt und die Spalten umbenannt. Zunächst se
 ```{r}
 year <- 2001
 lct <- 3
-file <- file.path(data.dir, paste0("MCD12Q1_GEO_lres_", year, "-01-01.Land_Cover_Type_", lct, ".tif"))
+file <- file.path(data.dir, 
+                  paste0("MCD12Q1_GEO_lres_", year, 
+                         "-01-01.Land_Cover_Type_", lct, ".tif"))
 ```
 
 Der nun folgende Teil wird in fast allen folgenden Skripten wieder kommen. Deshalb werden wir ihn gemeinsam in eine Funktion packen, die in einer Datei 'functions.R' gespeichert werden soll. Dabei wird der Pfad zu dem GeoTiff dieser Funktion als Argument übergeben. Die Funktion liefert dann die Datentabelle (data.frame) zurück, welche einer Variablen zugewiesen werden kann.
@@ -139,7 +133,8 @@ colnames(dfLCT) <- c("x", "y", "id")
 -------------------------------------
 **Aufgabe**
  Entfernen Sie den Wert für 'FillValue/Unclassified' in der Spalte 'id' des data.frames 'dfLCT',
- so dass er nicht in der Legende auftaucht. Den Zahlenwert für 'FillValue/Unclassified' finden Sie auf der MODIS-Webseite: \href{https://www.google.de/search?q=MCD12Q1}{Google-Suche nach 'MCD12Q1'}.
+ so dass er nicht in der Legende auftaucht. Den Zahlenwert für 'FillValue/Unclassified' 
+ finden Sie auf der MODIS-Webseite: \href{https://www.google.de/search?q=MCD12Q1}{Google-Suche nach 'MCD12Q1'}.
 -------------------------------------
 
 
@@ -151,7 +146,10 @@ Allen gültigen numerischen IDs werden ihre Namen zugewiesen. Dafür muss eine l
 
 -------------------------------------
 **Aufgabe**
-Suchen Sie auf der \href{https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1}{\textcolor{blue}{MODIS-Webseite}} nach der entsprechenden Tabelle (Land Cover Types Description, Type 3) und erzeugen Sie die lookup-Tabelle. Kopieren Sie hierfür die Tabelle in eine Textdatei und lesen Sie diese mit der read.table() Funktion und selektieren Sie dann die Klassifikation Type 3.
+Suchen Sie auf der \href{https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1}{\textcolor{blue}{MODIS-Webseite}} nach der entsprechenden Tabelle 
+(Land Cover Types Description, Type 3) und erzeugen Sie die lookup-Tabelle. 
+Kopieren Sie hierfür die Tabelle in eine Textdatei und lesen Sie diese mit 
+der read.table() Funktion und selektieren Sie dann die Klassifikation Type 3.
 -------------------------------------
 
 ```{r}
@@ -180,17 +178,22 @@ p = p + guides(fill = guide_legend(title = NULL, ncol = 3))
 p = p + labs(title = "MODIS MCD12Q1 Landcover")
 p = p + xlab("Longitude")
 p = p + ylab("Latitude")
+p
 ```
+
 -------------------------------------
 **Aufgabe**
-Ändern Sie in den abgebildeten Kartenausschnitt so dass nur der Bereich zwischen Longitude -160 und -140 gezeigt wird. Setzen Sie die Legende statt unter die Abbildung über die Abbildung. Was setzt der Parameter ncol in der Funktion guide\_legend? Setzen Sie als Ueberschrift über die Legende den Text 'Land cover types'. Ändern Sie die Dicke der Ländergrenzen.
+Ändern Sie in den abgebildeten Kartenausschnitt so dass nur der Bereich zwischen 
+Longitude -160 und -140 gezeigt wird. Setzen Sie die Legende statt unter die Abbildung 
+über die Abbildung.  
+Setzen Sie als Ueberschrift über die Legende den Text 'Land cover types'. 
+Ändern Sie die Dicke der Ländergrenzen.
+Sie müssen dafür lediglich den oben stehenden code abändern. Probieren Sie einfach Parameteränderungen aus
+oder rufen Sie die Hilfeseiten für die einzelnen Befehle auf, oder googlen Sie.
 -------------------------------------
 
 Anschließend wird eine Karte mit der entsprechenden Region erzeugt und in einer PDF Datei gespeichert.
 
-```{r, echo=FALSE, fig.width=5, fig.height=6, out.width="80%", fig.align="center"}
-print(p)
-```
 
 ```{r, eval=FALSE}
 file <- paste0("ALASKA_LCT", lct, "_", year, ".pdf")
@@ -207,13 +210,12 @@ table(dfLCT$name)
 ```
 
 # Hausaufgaben
+1. Was setzt der Parameter ncol in der Funktion guide\_legend? **(1 Punkt)**
 
-1. Wiederholen Sie die Aufgabe mit Land Cover Type 1. Das sollte idealerweise in Form einer for-Schleife mit der Variablen lct gemacht werden. **(2 Punkte)**
+2. Wiederholen Sie die Aufgabe mit Land Cover Type 1. Das sollte idealerweise in Form einer for-Schleife mit der Variablen lct gemacht werden. **(2 Punkte)**
 
-2. Es sind Daten für die Jahre 2001 und 2010 vorhanden. Schreiben Sie erneut eine Schleife für diese 2 Jahre, so dass Sie am Ende vier Karten haben: 2001 + LCT1, 2001 + LCT3, 2010 + LCT1, 2010 + LCT3. **(2 Punkte)**
+3. Es sind Daten für die Jahre 2001 und 2010 vorhanden. Schreiben Sie erneut eine Schleife für diese 2 Jahre, so dass Sie am Ende vier Karten haben: 2001 + LCT1, 2001 + LCT3, 2010 + LCT1, 2010 + LCT3. **(2 Punkte)**
 
-3. Schreiben Sie eine Funktion, die eine Spalte 'name' mit der Landbedeckung als Character anhängt (basierend auf der numerischen Spalte 'id' der Landbedeckungsklasse). **(1 Punkt)**
+4. Schreiben Sie eine Funktion, die eine Spalte 'name' mit der Landbedeckung als Character an den data.frame dfLCT anhängt (basierend auf der numerischen Spalte 'id' der Landbedeckungsklasse). **(1 Punkt)**
 
-4. Benutzten Sie den Befehl 'scale_fill_manual' um den Biomen sinnvolle Farben zuzuweisen. (Mit der geladenen ggplot2 library können Sie mit ?scale_fill_manual die Hilfe aufrufen. Beachten Sie auch das cheat-sheet im OLAT.) **(1 Punkt)**
-
-5. Wieviel Fläche bedecken die einzelnen Landbedeckungslassen? Hinweis: das Paket "raster" hat eine Funktion "area" mit deren Hilfe die Größe jedes Pixels in km^2^ berechnent werden kann. **(1 Punkt)**
+5. Benutzten Sie den Befehl 'scale_fill_manual' um den Biomen sinnvolle Farben zuzuweisen. (Mit der geladenen ggplot2 library können Sie mit ?scale_fill_manual die Hilfe aufrufen. Beachten Sie auch das cheat-sheet im OLAT.) **(1 Punkt)**

@@ -1,44 +1,31 @@
 ---
 title: "Fernerkundung globale Ökologie"
 subtitle: "Paket Einführung"
-author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@kit.edu)"
 classoption: a4paper
 #lang: de-DE
 output:
-  tufte::tufte_handout:
-    latex_engine: pdflatex
-    fig_caption: yes
-    includes:
-      in_header: styles.tex
+  pdf_document:
+ # tufte::tufte_handout:
+  #  latex_engine: pdflatex
+  #  fig_caption: yes
+  #  includes:
+  #    in_header: styles.tex
 ##    toc: true
-    highlight: default
+
 ---
 
 # Einführung
 
-Das Seminar Material finden Sie im OLAT SOSE 2018.
+Das Seminar Material finden Sie im OLAT SOSE 2019.
 
-Die Daten die im Kurs benutzt werden finden Sie unter:
-https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
+Die Daten für die heutige Stunde finden sie unter:
+https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/map_de.zip?temp_url_sig=f019a4981eedd082dbbe461e9f8798cdcbcaf103&temp_url_expires=2019-07-05T15:47:22Z
 
 
 ## Rstudio
 
 [RStudio](https://www.rstudio.com/) ist eine sogenannte Entwicklungsumgebung für [R](https://cran.r-project.org/). Hier können Programme geschrieben und getestet werden. Die wichtigsten Teile hierbei sind der Editor und die Konsole. Im Editor werden Programme geschrieben und als Textdateien gespeichert. In der Konsole werden die Programme ausgeführt und die Rückmeldung der einzelnen Befehle erfolgt hier.
-
-Nach dem Start von R-Studio erstellen Sie ein leeres Projekt in einem neuen Verzeichnis unter 'S:\\FE_Oekologie' mit Ihrem Namen. Das erfolgt über das Dropdown-Menü *File* --> *neues Projekt ...*. Folgen Sie den Screenshots rechts am Rand. Unter dem Punkt 'Verzeichnisname' des letzten Screenshots tragen Sie bitte Ihren Namen **ohne Umlaute**, **ohne Sonderzeichen** und **ohne Leerzeichen** ein.
-
-```{r echo=FALSE, out.width="33%", fig.cap="Menues zur Erstellung eines neuen Projektes in einem neuen Verzeichnis.", fig.subcap=c("Neues Verzeichnis", "Leeres Projekt", "Projekt Name")}
-knitr::include_graphics(paste0("RStudio_Screenshot_0", 2:4, "_menu.png"))
-```
-
-Nachdem das Projekt erstellt wurde sieht RStudio wie im folgenden Screenshot aus. Dabei ist noch kein Editor offen, die Konsole füllt die gesamte linke Seite.
-
-```{r echo=FALSE, out.width="75%", fig.align="right", fig.cap="RStudio nach dem Erstellen des neuen Projektes. In rot markiert sind die Stellen, an denen das aktuelle Arbeitsverzeichnis steht. Blau umrandet ist der Projektname."}
-knitr::include_graphics("RStudio_Screenshot_05_full_marked.png")
-```
-
-Dieses erstellte Projekt wird das ganze Seminar durch benutzt. Um den Editor zu öffnen, können Sie entweder über das Menü *Datei* --> *neue Datei* --> *R Script* ein Editorfenster öffnen, oder über das Symbol ganz links oben. Jedes Thema soll in einer Datei gespeichert werden. **Aufgaben** sollen direkt in dieses Skript eingefügt werden. **Hausaufgaben** müssen in einer extra Datei gespeichert werden. Dazu kann zur Vereinfachung das jeweilige Skript kopiert werden (Entweder mit Copy/Paste oder im Explorer). 
 
 ## Pakete laden und installieren
 
@@ -52,47 +39,34 @@ Zunächst müssen alle benötigten Pakete installiert werden. Dies sind in unser
 
 Ausserdem benötigen wir:
 
-4. Basiskarten (rworldmap, maps, mapproj),
+4. Basiskarten (rworldmap, maps, mapproj)
 
-5. und das Seminarpaket (FEglobaleOekologie).
+Wir können nun die Pakete einzeln mit *install.packages* installieren und mit *library* laden. Da wir hier eine ganze Liste an Paketen haben benutzen wir eine Schleife:
 
 ```{r, eval=FALSE, message=FALSE}
 for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal", "devtools")) {
   if (!require(p, character.only=TRUE)) {
     install.packages(p)
-    library(p, character.only=TRUE)
   }
-}
-if (!require(FEglobaleOekologie)) {
-  library("devtools")
-  install_github("joergsteinkamp/FEglobaleOekologie")
+  library(p, character.only=TRUE)
 }
 ```
+*!require()* gibt hierbei FALSE zurück wenn das Paket bereits installiert ist, mit dem keyword character.only wird übermittelt dass der Paketname als *character* Datentyp übergeben wird. (So wie auch beim Aufruf von library.) 
 
-## Regionen
-```{r echo=FALSE, fig.margin=TRUE,out.width="95%", fig.cap="\\label{fig:fig3}MODIS Kacheln in sinusoidaler Projection."}
-knitr::include_graphics("modis_sinusoidal.jpg")
-```
-```{r echo=FALSE, fig.margin=TRUE,out.width="95%", fig.cap="\\label{fig:fig4}MODIS Kacheln in geographischer Projection."}
-knitr::include_graphics("modis_geographic.jpg")
-```
-Die Originaldaten liegen in der sogenannten sinusoidalen Projektion (Fig. \ref{fig:fig3}) im Datei-Format [HDF](http://hdfeos.org/) (hierarchical data format) vor. In der "normalen" geographischen Projektion (Fig. \ref{fig:fig4}) sehen die einzelnem Kacheln gegen die Ränder hin immer verzerrter aus. In der zweiten Karte sind die vorhandenen Daten zu sehen. Nur die 4-kacheligen (NWBRAZIL und SEEUROPE) sind nicht verfügbar, da sie zu groß sind. Jede Gruppe muss eine Region bearbeiten. In einzelnen Sitzungen kann es jedoch je nach Aufgabenstellung vorkommen, dass zu einer anderen Region gewechselt werden muss.
+## Verzeichnisse
+Wir wechseln nun in unser Arbeitsverzeichnis und setzen die Verzeichnisse in denen wir die Daten und Abbildungen speichern wollen.
 
-Es folgt die Initialisierung der beabeiteten Region und der Pfade zu den Daten und Bildern. Ersetzen Sie die Pfadangabe der Variable baseDir mit dem Pfad Ihres Arbeitsverzeichnisses (sie haben dies sehr wahrscheinlich auf dem Laufwerk S: angelegt; mit dem Kommando getwd() in der Konsole zeigt Ihnen R Ihr aktuelles Verzeinis an). Bestätigen sie Nachfrage von fegloekInit() bei der Erstellung von Verzeichnissen mit y für yes. `fegloekOptions()` zeigt Ihnen die initialisierten Variablen für Ihre Region an.
+Das Kommando getwd() in der Konsole zeigt Ihnen R Ihr aktuelles Verzeinis an. 
+
 ```{r message=FALSE, warning=FALSE, results='hide'}
-library(raster)
-library(ggplot2)
-library(FEglobaleOekologie)
-# fegloekOptions(baseDir = getwd())
-fegloekOptions(baseDir = "/home/gitta/R/Lehre")
-fegloekOptions(region = "ALASKA")
-fegloekInit()
-fegloekOptions()
+setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/')
+data.dir='data/map_de/ALASKA/'
+plot.dir='plots/map_de/'
 ```
 
 ```{r, echo=FALSE}
-source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
-source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
+source(file.path("R", "variables.R"), encoding=getOption("encoding"))
+source(file.path( "R", "functions.R"), encoding=getOption("encoding"))
 ```
 
 # Erste Karten
@@ -102,18 +76,23 @@ source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getO
 Da wir nicht die ersten sind die R benutzen um Karten
 zu erstellen nutzen wir eine vorgefertigte Karte aus dem Paket "maps"
 die für die Darstellung mit dem Befehl 'map_data' aus dem Paket 'ggplot2' aufbereitet wird.
-\marginnote{
-\textbf{Aufgabe}\\
+-------------------------------------
+**Aufgabe**
 Die Zeile $p = p + coord \_ fixed()$ kann z.B. mit
 $p = p + coord \_ map("ortho", orientation=c(45, 8, 0))$
  ersetzt werden.
 Finden Sie mit Hilfe der Hilfeseiten heraus, ob es noch andere Projektionen
-gibt und probieren diese aus.}
-\marginnote{
-\textbf{Daueraufgabe}\\
-Schauen Sie sich sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, was Sie gerade gemacht haben.}
+gibt und probieren diese aus.
+-------------------------------------
+-------------------------------------
+**Aufgabe**
+Schauen Sie sich sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, was Sie gerade gemacht haben.
+-------------------------------------
+
 Hier sind die Befehle aus dem Paket ggplot2 Paket, mit denen eine erste Weltkarte in Form der Ländergrenzen erstellt wird. Führen sie nach jeder Zeile nach 'p = p + geom_path()' den Befehl print(p) aus, um zu sehen, welche Auswirkungen die jeweiligen Änderungen haben.
+
 ```{r, message=FALSE, warning=FALSE, out.width="75%", fig.align='center'}
+library(ggplot2)
 worldmap <- map_data("world")
 p <- ggplot(worldmap, aes(y=lat, x=long, group=group))
 p = p + geom_path()
@@ -123,51 +102,57 @@ p = p + xlab("Laenge")
 p = p + ylab("Breite")
 print(p)
 ```
+-------------------------------------
+**Aufgabe**
+Die Zeile $p = p + coord \_ fixed()$ kann z.B. mit
+$p = p + coord \_ map("ortho", orientation=c(45, 8, 0))$
+ ersetzt werden.
+Finden Sie mit Hilfe der Hilfeseiten heraus, ob es noch andere Projektionen
+gibt und probieren diese aus.
+-------------------------------------
+-------------------------------------
+**Aufgabe**
+Schauen Sie sich sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, was Sie gerade gemacht haben.
+-------------------------------------
 
 ## Regionale Karte mit Landbedeckung
 
-Die von uns vorprozessierten Daten (LUC_ALASKA.zip) werden geladen. Sie können die Daten entweder mit der Funktion download.file() oder von Hand herunterladen. Achten Sie darauf die Datei im Data Verzeichnis abzuspeichern (getOption("fegloekDataDir")).
-```{r}
-fileName <- paste0("LUC_", getOption("fegloekRegion"), 
-                   ".zip")
-#file='https://www.dropbox.com/sh/1rcz0fjmgz2hnuh/
-#AABBwtgJHlcD21y5t43NFLpma/Daten/LUC_ALASKA.zip?dl=0'
-#oder
-file=
-  'https://powerfolder.gwdg.de/dl/fiXNVFhCv7bwzo33Hj8Rys5L/LUC_ALASKA.zip'
-download.file(file,file.path(getOption("fegloekDataDir"),fileName))
-unzip(file.path(getOption("fegloekDataDir"), fileName), 
-            exdir = getOption("fegloekDataDir"))
-```
+Die von uns vorprozessierten Daten (LUC_ALASKA.zip) werden geladen. Sie können die Daten entweder mit der Funktion download.file() oder von Hand herunterladen. Achten Sie darauf die Datei im Data Verzeichnis abzuspeichern.
+
 Lesen Sie nun die Landbedeckungsdaten Klasse 3 für das Jahr 2001 ein. Die Rasterdaten
-werden in einen "data.frame" umgewandelt und die Spalten umbenannt.
+werden in einen "data.frame" umgewandelt und die Spalten umbenannt. Zunächst setzen wir den Dateinamen zusammen. Wir haben unterschiedliche Dateien für unterschiedliche Jahre und land cover typ Klassifizierungen, daher wollen wir den Dateinamen flexibel zusammenbauen:
 
 ```{r}
 year <- 2001
 lct <- 3
-data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 file <- file.path(data.dir, paste0("MCD12Q1_GEO_lres_", year, "-01-01.Land_Cover_Type_", lct, ".tif"))
 ```
 
 Der nun folgende Teil wird in fast allen folgenden Skripten wieder kommen. Deshalb werden wir ihn gemeinsam in eine Funktion packen, die in einer Datei 'functions.R' gespeichert werden soll. Dabei wird der Pfad zu dem GeoTiff dieser Funktion als Argument übergeben. Die Funktion liefert dann die Datentabelle (data.frame) zurück, welche einer Variablen zugewiesen werden kann.
 ```{r}
+library(raster)
 rLCT  <- raster(file)
 dfLCT <- as.data.frame(rasterToPoints(rLCT))
 colnames(dfLCT) <- c("x", "y", "id")
 ```
-\marginnote{
-\textbf{Aufgabe}\\
+
+-------------------------------------
+**Aufgabe**
  Entfernen Sie den Wert für 'FillValue/Unclassified' in der Spalte 'id' des data.frames 'dfLCT',
  so dass er nicht in der Legende auftaucht. Den Zahlenwert für 'FillValue/Unclassified' finden Sie auf der MODIS-Webseite: \href{https://www.google.de/search?q=MCD12Q1}{Google-Suche nach 'MCD12Q1'}.
-}
+-------------------------------------
+
 
 ```{r, echo=FALSE}
 dfLCT = subset(dfLCT, id < 254)
 ```
 
 Allen gültigen numerischen IDs werden ihre Namen zugewiesen. Dafür muss eine lookup-Tabelle LCT3lookuptable erzeugt werden, die die Spalten 'id' und 'name' hat. Die lookup-Tabelle und der Landnutzungsdatendatz werden anhand der gemeinsamen Spalte 'id' verbunden, 'all.X=TRUE' stellt hierbei sicher, dass alle Zeilen aus dfLCT erhalten bleiben. Ist ein 'id'-Wert aus dfLCT nicht in LCTlookuptable bekommt 'name' den Wert 'NA' für 'not available'.
-\marginnote{\textbf{Aufgabe}\\
-Suchen Sie auf der \href{https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1}{MODIS-Webseite} nach der entsprechenden Tabelle (Land Cover Types Description, Type 3) und erzeugen Sie die lookup-Tabelle. Kopieren Sie hierfür die Tabelle in eine Textdatei und lesen Sie diese mit der read.table() Funktion und selektieren Sie dann die Klassifikation Type 3.}
+
+-------------------------------------
+**Aufgabe**
+Suchen Sie auf der \href{https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1}{\textcolor{blue}{MODIS-Webseite}} nach der entsprechenden Tabelle (Land Cover Types Description, Type 3) und erzeugen Sie die lookup-Tabelle. Kopieren Sie hierfür die Tabelle in eine Textdatei und lesen Sie diese mit der read.table() Funktion und selektieren Sie dann die Klassifikation Type 3.
+-------------------------------------
 
 ```{r}
 dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
@@ -176,7 +161,8 @@ dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
 Nun können wir mit den Funktionen aus dem Paket ggplot2 wieder eine Karte erzeugen. Hierbei stehen die Landcover Klassifikationen im Vordergrund. Zusätzlich werden noch vier von uns vordefinierte Punkte (Variable 'points', V1-4) auf der Karte verzeichnet. An diesen werden in den folgenden Skripten Vegetationsindizes untersucht.
 
 ```{r, message=FALSE, warning=FALSE}
-points <- getOption("fegloekPoints")
+points <- data.frame(long = c(-143.54, -152.6, -147.12, -155), lat = c(61.43, 
+64.85, 65.13, 67))
 
 p <- ggplot(dfLCT, aes(x = x, y = y))
 p = p + geom_raster(aes(fill = name))
@@ -195,8 +181,10 @@ p = p + labs(title = "MODIS MCD12Q1 Landcover")
 p = p + xlab("Longitude")
 p = p + ylab("Latitude")
 ```
-\marginnote{\textbf{Aufgabe}\\
-Ändern Sie in den abgebildeten Kartenausschnitt so dass nur der Bereich zwischen Longitude -160 und -140 gezeigt wird. Setzen Sie die Legende statt unter die Abbildung über die Abbildung. Was setzt der Parameter ncol in der Funktion guide\_legend? Setzen Sie als Ueberschrift über die Legende den Text 'Land cover types'. Ändern Sie die Dicke der Ländergrenzen.}
+-------------------------------------
+**Aufgabe**
+Ändern Sie in den abgebildeten Kartenausschnitt so dass nur der Bereich zwischen Longitude -160 und -140 gezeigt wird. Setzen Sie die Legende statt unter die Abbildung über die Abbildung. Was setzt der Parameter ncol in der Funktion guide\_legend? Setzen Sie als Ueberschrift über die Legende den Text 'Land cover types'. Ändern Sie die Dicke der Ländergrenzen.
+-------------------------------------
 
 Anschließend wird eine Karte mit der entsprechenden Region erzeugt und in einer PDF Datei gespeichert.
 
@@ -205,8 +193,8 @@ print(p)
 ```
 
 ```{r, eval=FALSE}
-file <- paste0(getOption("fegloekRegion"), "_LCT", lct, "_", year, ".pdf")
-pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=10, height=10)
+file <- paste0("ALASKA_LCT", lct, "_", year, ".pdf")
+pdf(file.path(plot.dir, file), paper="special", width=10, height=10)
 print(p)
 dev.off()
 ```
@@ -216,9 +204,6 @@ dev.off()
 Der Befehl 'table()' zählt gleiche Werte in einem Vektor (eine Spalte eines data.frames ist ein Vektor). Es kann auch der Befehl ddply aus dem Paket plyr verwendet werden, der einen data.frame zurück liefert, aber etwas komplizierter ist.
 ```{r, eval=FALSE}
 table(dfLCT$name)
-```
-```{r, echo=FALSE}
-knitr::kable(plyr::ddply(dfLCT, c("id", "name"), plyr::summarize, count=length(name)))
 ```
 
 # Hausaufgaben

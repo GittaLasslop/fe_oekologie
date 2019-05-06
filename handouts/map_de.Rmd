@@ -129,6 +129,7 @@ rLCT  <- raster(file)
 dfLCT <- as.data.frame(rasterToPoints(rLCT))
 colnames(dfLCT) <- c("x", "y", "id")
 ```
+Das r im Variablennamen rLCT soll uns hier an den Datentyp erinnern.
 
 -------------------------------------
 **Aufgabe**

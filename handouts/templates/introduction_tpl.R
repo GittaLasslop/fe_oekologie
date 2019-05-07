@@ -14,6 +14,21 @@
 # - testen Sie ihr Skript indem Sie es in RStuio aufrufen und laufen lassen
 # ======================================================================================
 
+# Aufgabe 0: ---------------------------------------------------------------------------
+# a) Erstellen Sie einen data.frame "Tabelle1" mit den Spalten “Latitude”, “Longitude”, 
+# “Landcover”. Die Spalte “Landcover” soll den Typ Faktor haben.
+# lat = c(50.11, 23.9, 50.2) lon = c(8.68, 32.9, 8.2) lu = c(“urban”, “water”, “forest”)
+# Geben Sie den erstellten data.frame aus und führen Sie außerdem den Befehl 
+# summary() aus: "summary(Tabelle1)"
+
+
+# b) Erstellen Sie einen data.frame “Tabelle2” mit den Spalten “Latitude”, “Longitude”, 
+# “Landcover”. Die Spalte “Landcover” soll den Typ Faktor haben.
+# lat = c(50.11, 23.9, 50.2, 0.0) lon = c(8.68, 32.9, 8.2, -10.5) lu = c(“urban”, “water”)
+# Geben Sie den erstellten data.frame aus und führen Sie außerdem den Befehl summary aus: 
+# summary(Tabelle2). Was fällt Ihnen auf?
+
+
 # Aufgabe 1: --------------------------------------------------------------------------- 
 # Erstellen Sie einen data.frame KohlenstoffSpeicher mit den Spalten Ökosystem, 
 # Vegetation und Boden. Tragen sie in der Ökosystemspalte drei verschiedene Namen

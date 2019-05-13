@@ -112,7 +112,7 @@ class(1.1)
 class('a')
 ```
 anzeigen lassen.
-Datentypen könnten in R auch umgewandelt werden (oft mit Befehlen der Form **as.\<datentyp\>**):
+Datentypen können in R auch umgewandelt werden (oft mit Befehlen der Form **as.\<datentyp\>**):
 ```{r}
 number=1
 character=as.character(number)
@@ -309,9 +309,9 @@ Funktionen werden mit dem keyword **function** definiert und einem Funktionsname
 
 ```{r}
 quadratFunktion <- function(x) {
-  y <- x^2
-  return(y)
-}
+                    y <- x^2
+                    return(y)
+                   }
 
 quadratFunktion(-3)
 mein_quadrat = quadratFunktion(11)
@@ -323,9 +323,9 @@ Parametern können auch Standardwerte übergeben werden (z.B. a=1; wenn a nicht 
 
 ```{r}
 parabelFunktion <- function(x, a=1, b=0, c=0) {
-  y <- a * x^2 + b * x + c
-  return(y)
-}
+                    y <- a * x^2 + b * x + c
+                    return(y)
+                   }
 
 parabelFunktion(-3:3)
 parabelFunktion(-3:3, c=-5)
@@ -333,28 +333,48 @@ parabelFunktion(-3:3, c=-5)
 
 Die Variablen x,a,b und c existieren dabei nur innerhalb der Funktion, außerhalb können die Variablen mit gleichem Namen definiert sein, durch den Aufruf der Funktion werden diese nicht benutzt oder verändert! 
 
+\newpage
 
-# Reservierte Wörter und Variablennamen
+-------------------------------------------------------------------------
+**Aufgabe**
 
-Die folgenden Wörter dürfen nicht als Variablennamen verwendet werden da sie
-Teil der Sprache sind.
+Schreiben Sie eine Funktion, die einen Geldbetrag in Euro in Schweizer Franken umrechnet. 
+Als Standardwechselkurs können Sie den Wechselkurs 1 Euro = 1.13 Schweizer Franken benutzen, 
+es soll aber auch möglich sein einen Wert für den Wechselkurs an die Funktion zu übergeben. 
+-------------------------------------
 
-* **if**, **else**, **repeat**, **while**, **function**, **for**, **in**, **next**, **break**
-* **TRUE**, **FALSE**, **NULL**, **Inf**, **NaN**, **NA** 
-* und noch ein paar exotische mehr
+```{r, eval=FALSE}
+EuroInSchweizerFranken <- function(Euro, Wechselkurs=1.13) {
+                    # Fügen Sie hier die Berechnung ein:
+  
+                    return(SchweizerFranken)
+                   }
 
-Es ist ebenfalls nicht sinnvoll **T** und **F** als Namen für Variablen zu verwenden,
-da dies Kurzformen für **TRUE** und **FALSE** sind und oft zu schwer auffindbaren Fehlern führen.
+EuroInSchweizerFranken(1)
+EuroInSchweizerFranken(1,Wechselkurs=1.5)
+EuroInSchweizerFranken(1,1.5)
 
-
+```
 
 # Kontrollstrukturen
 Der Ablauf eines Programms oder Skriptes wird durch Kontrollstrukturen definiert. Diese werden benutzt um Programmteile nur unter bestimmten Bedingungen oder mehrfach auszuführen.
 
 ## Bedingungen
+Zur Überprüfung von Bedingungen werden logische Operatoren eingesetzt, dabei können die folgenden Bedingungen getestet werden:
+
+* Gleichheit: x==y
+* Ungleichheit: x!=y
+* Kleiner als: y<x
+* Größer als: y>x
+* Kleiner gleich: y<=x
+* Größer gleich: y>=x
+
+Diese Bedingunge können mit und (&&) oder mit oder (||) verknüpft werden.
+
 Das englische **if** (falls) wird zur Überprüfung von Bedingungen benutzt, um Befehle nur
-unter diesen Umständen auszuführen. Wenn die Bedingung nicht erfüllt ist, können weitere
-abgefragt werden (**else if**, ansonsten wenn). Sollte keine Bedingung zutreffen wird das Programmteil im **else**-Block (ansonsten) ausgeführt:
+unter diesen Umständen auszuführen.
+Wenn die Bedingung nicht erfüllt ist, können weitere
+abgefragt werden (**else if**, ansonsten wenn). Sollte keine Bedingung zutreffen wird der Programmteil im **else**-Block (ansonsten) ausgeführt:
 
 ```{r, eval=FALSE}
 a <- 1
@@ -372,26 +392,36 @@ if (a > b) {
 if (a < b && b == c) print("ok")
 ```
 
--------------------------------------
+\newpage
+
+---------------------------------------------------------------------------------
 **Aufgabe**
 
-Wenn die Variable "LC" den Wert "forest" hat soll die Variable "Farbe" den Wert "gruen" erhalten. Falls "LC" den Wert "urban" hat, die Farbe "rot". Für alle anderen Werte in "LC" setzen Sie die Variable "Farbe" auf "grau". 
+Wenn die Variable "LC" den Wert "forest" hat soll die Variable "Farbe" den Wert "gruen" erhalten. 
+Falls "LC" den Wert "urban" hat, die Farbe "rot". Für alle anderen Werte in "LC" setzen Sie die Variable "Farbe" auf "grau". 
+
+-------------------------------------
 
 ```{r, eval=FALSE}
-# testen Sie den Kontrollfluss mit weiteren LC Varianten (forest, urban, arable, water, ...)
+# testen Sie den Kontrollfluss mit weiteren LC Varianten 
+# (forest, urban, arable, water, ...)
 
 LC="forest"
 if (){
   # ...  
+  
 } else if () {
   # ...
+  
 } else {
   # ...
+  
 }
 LC
 Farbe
 ```
--------------------------------------
+
+
 
 
 ## Schleifen
@@ -497,6 +527,17 @@ if (1 + 1 == 3) {
 }
 ```
 
+# Reservierte Wörter und Variablennamen
+
+Die folgenden Wörter dürfen nicht als Variablennamen verwendet werden da sie
+Teil der Sprache sind.
+
+* **if**, **else**, **repeat**, **while**, **function**, **for**, **in**, **next**, **break**
+* **TRUE**, **FALSE**, **NULL**, **Inf**, **NaN**, **NA** 
+* und noch ein paar exotische mehr
+
+Es ist ebenfalls nicht sinnvoll **T** und **F** als Namen für Variablen zu verwenden,
+da dies Kurzformen für **TRUE** und **FALSE** sind und oft zu schwer auffindbaren Fehlern führen.
 
 
 # Zusätzliche Pakete/ Befehle laden
@@ -550,11 +591,11 @@ Geburtstag=data.frame(Person=c('Albert Einstein','Alexander von Humboldt','Charl
 ```
 Berechnen Sie wieviele Tage Albert Einstein nach Charles Darwin geboren wurde, indem Sie auf die einzelnen Einträge im data.frame zugreifen.
 
-3. Berechnen Sie die Quadratwurzel der Zahlen 1 bis 10 mit einer **for-Schleife**.
+3. Berechnen Sie die Quadratwurzel der Zahlen 1 bis 10 mit einer **for-Schleife** und lassen Sie das Ergebnis mit print() ausgeben.
 
-4. Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises. Eingabeparameter soll der Radius sein. Rückgabewert soll die Fläche sein.
+4. Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises. Eingabeparameter soll der Radius sein. Rückgabewert soll die Fläche sein. Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Radius 1 und geben Sie das Ergebnis mit print() aus.
 
-5. Schreiben Sie einen R Code mit einer Variablen Uhrzeit, der für den Wert '9 Uhr' der Variablen den Text 'Guten Morgen' zurückgibt, für den Wert '18 Uhr' den Text 'Guten Abend'.
+5. Schreiben Sie einen R Code mit einer Variablen Uhrzeit, der für den Wert '9 Uhr' der Variablen den Text 'Guten Morgen' ausgibt, für den Wert '18 Uhr' den Text 'Guten Abend'. (auch mit print())
 
 6. Erstellen Sie einen Funktion die ein Argument als Eingabe erwartet und folgende Funktionalität besitzt. Für Werte kleiner als 0 soll "ungültig", für Werte von 1-4 soll "sehr wenig", für Werte von 5-10 "wenig", für Werte von 10-100 "viel" und für alle Werte größer als 100 "sehr viel" zurückgegeben werden.
 
@@ -567,8 +608,8 @@ meine_bewertung <- function(x){
 }
 
 # test der funktion
-meine_bewertung(12)
-meine_bewertung(-23)
+print(meine_bewertung(12))
+print(meine_bewertung(-23))
 # ...
 
 ```

@@ -274,7 +274,8 @@ Variablen vom Typ list können im Gegensatz zu *data.frame* Variablen auch Eintr
 ```{r}
 site=list(Vegetation='Wald', 
           Koordinaten =c(8.2,50.2), 
-          Messdaten=data.frame(Datum=c(2010,2011,2014,2015), Temperatur=c(10,15,13,14)))
+          Messdaten=data.frame(Datum=c(2010,2011,2014,2015), 
+                               Temperatur=c(10,15,13,14)))
 ```
 Auf die einzelnen dort gespeicherten Variablen wird mit einfachen eckigen Klammern zugegriffen [], auf die Elemente in diesen Variablen mit doppelten eckigen Klammern [[]], der Name der Variablen kann auch benutzt werden.
 

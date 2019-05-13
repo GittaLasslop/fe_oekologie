@@ -45,7 +45,6 @@ Den Pfad müssen Sie entsprechend anpassen.
 
 ```{r}
 setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/')
-#setwd('/Users/cwerner/iCloud/2019/teaching/gu_fe_oek/fe_oekologie/handouts')
 ```
 Wir wollen die folgende Struktur im Kurs verwenden:
 ```
@@ -70,33 +69,34 @@ Bestehen die Ordner bereits, wird eine Warnung ausgegeben. Die erstellten Ordner
 # Einlesen von Daten und einfache Abbildungen
 
 ## Textdateien
-Bei kleinen Datenmengen können Daten in Textdateien abgespeichert werden. Diese sind dann häufig angeordnet wie eine Tabelle. Diese Tabelle kann Zeilennamen und Spaltennamen besitzen, oder es können auch nur die Werte abgespeichert sein. Die Abgrenzung zwischen den Zeilen wird automatisch erkannt, da der Zeilenumbruch in Dateien klar definiert ist. Die Abgrenzung zwischen Spalten ist nicht klar definiert, hierfür kommen verschiedene Zeichen in Frage. Z.B. können die Spalten durch ein Komma (csv Dateien: comma separated values), ein Leerzeichen, ein Semikolon oder ein Tab getrennt sein. Dieses Trennzeichen muss evtl. beim Einlesen der Daten mitangegeben werden. Zum Einlesen von Textdateien bietet die Funktion `read.table()` Möglichkeiten solche Parameter anzugeben. Wir lesen nun die erste Datei ein (Wetterdaten vom Flughafen Frankfurt). Laden Sie hierfür die [\underline{\textcolor{blue}{Daten}}](https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip?temp_url_sig=9834f040d82b57bbb16af185bc8f3afab8e7d20d&temp_url_expires=2019-07-02T11:37:17Z) für heute herunter und speichern sie in dem Ordner "data/intro2".
+Bei kleinen Datenmengen können Daten in Textdateien abgespeichert werden. Diese sind dann häufig angeordnet wie eine Tabelle. Diese Tabelle kann Zeilennamen und Spaltennamen besitzen, oder es können auch nur die Werte abgespeichert sein. Die Abgrenzung zwischen den Zeilen wird automatisch erkannt, da der Zeilenumbruch in Dateien klar definiert ist. Die Abgrenzung zwischen Spalten ist nicht klar definiert, hierfür kommen verschiedene Zeichen in Frage. Z.B. können die Spalten durch ein Komma (csv Dateien: comma separated values), ein Leerzeichen, ein Semikolon oder ein Tab getrennt sein. Dieses Trennzeichen muss evtl. beim Einlesen der Daten mitangegeben werden. Zum Einlesen von Textdateien bietet die Funktion `read.table()` Möglichkeiten solche Parameter anzugeben. Wir lesen nun die erste Datei ein (Wetterdaten vom Flughafen Frankfurt). Laden Sie hierfür die [\underline{\textcolor{blue}{Daten}}](https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip?temp_url_sig=9834f040d82b57bbb16af185bc8f3afab8e7d20d&temp_url_expires=2019-07-02T11:37:17Z) für heute herunter und speichern sie in dem Ordner "data/intro2". Oder kopieren Sie die Daten vom T-Laufwerk.
 
 https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip?temp_url_sig=9834f040d82b57bbb16af185bc8f3afab8e7d20d&temp_url_expires=2019-07-02T11:37:17Z
 
-Wir versuchen die Datei zu lesen und in die Variable Daten abzuspeichern.
+Wir versuchen die erste Datei zu lesen und in die Variable Daten abzuspeichern.
 ```{r}
 Daten=read.table('data/intro2/ErsteDaten.txt')
 ```
-Wir schauen nun was R gelesen und abgespeichert hat. Wir benutzen die Funktion `class()` um den Datentyp abzufragen und erhalten detailliertere Informationen zu den eingelesenen Werten mit der Funktion `summary()`. Dieser Befehl liefert eine deskriptive Statistik für die einzelnen Spalten.
+Wir schauen nun was R gelesen und abgespeichert hat. Wir benutzen die Funktion `class()` um den Datentyp abzufragen und erhalten detailliertere Informationen zu den eingelesenen Werten mit der Funktion `summary()`. Dieser Befehl liefert eine deskriptive Statistik für die einzelnen Spalten. Die Funktion `head()` gibt die ersten Zeilen des Datensatzes in der Konsole aus.
 ```{r}
 class(Daten)
 summary(Daten)
+head(Daten)
 class(Daten$V2)
 ```
 Die Daten wurden in einem data.frame namens "Daten" abgespeichert.
-Die einzelnen Spalten in der Tabelle sind erkannt worden, jedoch hat R nicht erkannt dass die erste Zeile die Namen der Spalten beinhaltet. Alle Variablen werden als Faktoren interpretiert und die Spalten bekommen noch zusätzliche Namen (z.B. V2) Über die Hilfe der Funktion können wir herausfinden wie wir R mitteilen können dass die Spaltennamen bereits in der Datei enthalten sind.
+Die einzelnen Spalten in der Tabelle sind erkannt worden, jedoch hat R nicht erkannt dass die erste Zeile die Namen der Spalten beinhaltet. Alle Variablen werden als Faktoren interpretiert und die Spalten bekommen noch zusätzliche Namen (z.B. V2) Über die Hilfe der Funktion können wir herausfinden wie wir R mitteilen können, dass die Spaltennamen bereits in der Datei enthalten sind.
 ```{r}
 ?read.table
 ```
 Der Default Wert (Standardwert) für den Parameter "header" ist FALSE, diesen setzen wir jetzt beim Funktionsaufruf auf TRUE.
 ```{r}
-Daten=read.table('data/intro2/ErsteDaten.txt',header=TRUE)
+Daten=read.table('data/intro2/ErsteDaten.txt', header=TRUE)
 summary(Daten)
 class(Daten$Tmin)
 ```
-R benennt nun die Spalten entsprechend der Information in der Datei und erkennt die die numerischen Daten richtig.
-Wir haben nun noch zwei weitere Dateien mit den gleichen Daten aber etwas anderem Format. Diese wollen wir nun auch richtig einlesen und müssen dafür den Aufruf der Funktion `read.table()` etwas anpassen. Die erste Datei enthält als Trennzeichen ein Semikolon. Bei der zweiten Datei ist noch eine zusätzliche Zeile mit Beschreibung der Daten vorangestellt. Versuchen Sie zunächste die Dateien ohne gesetzte Parameter einzulesen und überprüfen Sie das Ergebnis. Dann mit den folgenden Anpassungen.
+R benennt nun die Spalten entsprechend der Information in der Datei und erkennt die numerischen Daten richtig.
+Wir haben nun noch zwei weitere Dateien mit den gleichen Daten aber etwas anderem Format. Diese wollen wir nun auch richtig einlesen und müssen dafür den Aufruf der Funktion `read.table()` etwas anpassen. Die erste Datei enthält als Trennzeichen ein Semikolon. Bei der zweiten Datei ist noch eine zusätzliche Zeile mit Beschreibung der Daten vorangestellt. Versuchen Sie zunächst die Dateien ohne gesetzte Parameter einzulesen und überprüfen Sie das Ergebnis. Dann mit den folgenden Anpassungen.
 ```{r,eval=FALSE}
 Daten=read.table('data/intro2/ErsteDatenc.txt')
 summary(Daten)
@@ -128,7 +128,7 @@ plot(Daten$Datum, Daten$windmax)
 plot(Daten$Datum, Daten$snow)
 ```
 
-Sie könne auch den Zusammenhang zwischen zwei Variablen, z.B. maximumale und minimale Temperatur überprüfen indem Sie die eine als x, die andere als y Wert übergeben (ein sogennanter "scatter plot").
+Sie könne auch den Zusammenhang zwischen zwei Variablen, z.B. maximale und minimale Temperatur überprüfen indem Sie die eine als x, die andere als y Wert übergeben (ein sogenannter "scatter plot").
 ```{r}
 plot(Daten$Tmax, Daten$Tmin)
 ```
@@ -218,3 +218,17 @@ for (i in 1:n){
 * Zum **Lesen von räumlichen Daten** aus .tif Dateien verwenden wir das Paket "raster". Einzelne Dateien können mit der Funktion `raster()` gelesen werden, mehrere Dateien mit der Funktion `stack()`. Die Daten der einzelnen Dateien sind dann in den Layern des RasterStack (Stapel) zu finden. Die Funktion `plot()` kann auch auf diese raster Objekte angewendet werden. Die Informationen über das Raster Objekt werden in der Konsole ausgegeben wenn man den Variablennamen gefolgt von Enter dort eingibt.
 
 * Mit der Funktion `png()` können Abbildungen in **png-Dateien abgespeichert** werden. Die Datei muss mit dem Befehl `dev.off()` wieder geschlossen werden.
+
+# Hausaufgaben
+
+1) Lesen Sie die Daten aus der Datei ErsteDatencR.txt ein und fertigen Sie eine Abbildung der Zeitreihe der mittleren Temperatur an. Wandeln Sie hierfür das Datum mit Daten$Datum=as.POSIXct.Date(Daten$Datum) in den speziellen Datentyp für Zeit- und Datumvariablen um.
+Rufen Sie die Hilfe für die plot-Funktion auf (?plot). Schauen Sie sich die Argumente an, die an die Funktion übergeben werden können.
+Ändern Sie nun die folgenden Dinge in der Abbildung:
+
+* verwenden Sie statt Punkten eine Linie
+* fügen Sie eine Überschrift (main) 'Mittlere Temperatur' hinzu
+* beschriften Sie x- und y-Achse mit xlab und ylab
+
+Speichern Sie die Abbildungen als png-Dateien ab.
+
+2) Benutzen Sie google um herauszufinden wie Sie die Farbe der Punkte oder Linie ändern können. Welche Suchanfrage bringt Ihnen die Lösung? Fertigen Sie die Abbildung aus Aufgabe 1 mit roten Punkten an und speichern Sie sie als png-Datei.

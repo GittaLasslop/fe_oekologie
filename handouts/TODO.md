@@ -2,24 +2,12 @@
 
 ## Items
 
+- Fix path (use actual GIS lab drives and folders) in lesson2 handout
 - Update command cheatsheets (in lyx): create incremental versions for each day
-- Extend R-introduction docs (2-day setup): writing and reading files, some plotting, aggregation etc., ...
 - Create one file structure for everyone and select regions (should fit 1GB max and will stay on everyones machine)
 - choose best regions for topics (see below)
-- homework (easy to parse and check, Lückentext, questions that check understanding of topic, create dedicated skeleton homework R-files that will also receive the text answers as comments)
-- add 10min each session to discuss homework in detail
 - end of day 2 we do a test reporting (us) from what we saw during the first two days
-- **day2: demonstrate how to pull data from MODIS servers (example only?)**
-
-## New file structure:
-
-```
-coursedir
-   +- data/topic/region
-   +- plots/ (names: hw_ for homework)
-   +- script<1, …>.R (all scripts etc.) 
-   +- fe_functions.R (helper script)
-```
+- day2: **demonstrate how to pull data from MODIS servers (example only? maybe we should shift this to a later date?**
 
 ## Selected regions per topic
 
@@ -31,7 +19,7 @@ coursedir
 
 ## Next steps
 
-1. improve intro section (2 days of R)
+1. improve intro section (2 days of R) DONE
 2. decide on regions and create new file structure
 3. improve each session in order
 	- update command cheatsheets

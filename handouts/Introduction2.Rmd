@@ -139,7 +139,8 @@ Die Funktion `plot()` ist für verschiedene Datentypen definiert. Sobald kompliz
 Die räumlichen Daten sind als .tif Datei abgespeichert. Um diese einfach einzulesen benutzen wir das Paket raster. Dieses muss erst installiert und dann geladen werden. Durch die Installation wird es auf dem Rechner verfügbar, allerdings muss das Paket nach jedem Neustart neu geladen werden. Eventuell werden beim Installieren noch andere Pakete mitinstalliert, die auch benötigt werden.
 
 ```{r, eval=FALSE}
-install.packages(raster)
+install.packages('raster')
+install.packages('rgdal')
 ```
 ```{r}
 library(raster)
@@ -184,7 +185,7 @@ is.na(LandCover)=LandCover==255
 LandCover
 plot(LandCover)
 ```
-Jetzt haben wir eine Variable mit 5 Schichten (layers), jedes layer beinhaltet die Landbedeckung eines bestimmten Jahres.
+Jetzt haben wir eine Variable mit 5 Schichten (layers), jedes layer beinhaltet die Landbedeckung eines bestimmten Jahres. Die Funktion `paste0()` wird benutzt um mehrere strings zusammenzusetzen. 
 Auf die einzelnen Layer kann mit der Funktion `subset()` zugeriffen werden. Wir wollen nun jedes Layer einzeln plotten und in einer .png Datei abspeichern. Hier ist das Beispiel wie es für das erste Jahr funktioniert.
 
 ```{r}

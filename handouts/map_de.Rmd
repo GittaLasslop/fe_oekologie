@@ -79,7 +79,7 @@ Da wir nicht die ersten sind die R benutzen um Karten
 zu erstellen nutzen wir eine vorgefertigte Karte aus dem Paket "maps"
 die für die Darstellung mit dem Befehl 'map_data' aus dem Paket 'ggplot2' aufbereitet wird.
 
-Hier sind die Befehle aus dem Paket ggplot2 Paket, mit denen eine erste Weltkarte in Form der Ländergrenzen erstellt wird. Führen sie nach jeder Zeile nach 'p = p + geom_path()' den Befehl print(p) aus, um zu sehen, welche Auswirkungen die jeweiligen Änderungen haben.
+Hier sind die Befehle aus dem Paket ggplot2 Paket, mit denen eine erste Weltkarte in Form der Ländergrenzen erstellt wird. Führen sie nach jeder Zeile den Befehl print(p) aus, um zu sehen, welche Auswirkungen die jeweiligen Änderungen haben.
 
 ```{r, message=FALSE, warning=FALSE, out.width="75%", fig.align='center'}
 library(ggplot2)
@@ -103,7 +103,7 @@ Finden Sie mit Hilfe der Hilfeseiten heraus, ob es noch andere Projektionen gibt
 -------------------------------------
 -------------------------------------
 **Aufgabe**
-Schauen Sie sich sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, 
+Schauen Sie sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, 
 was gerade gemacht wurde.
 -------------------------------------
 
@@ -187,7 +187,7 @@ p
 Ändern Sie in den abgebildeten Kartenausschnitt so dass nur der Bereich zwischen 
 Longitude -160 und -140 gezeigt wird. Setzen Sie die Legende statt unter die Abbildung 
 über die Abbildung.  
-Setzen Sie als Ueberschrift über die Legende den Text 'Land cover types'. 
+Setzen Sie als Überschrift über die Legende den Text 'Land cover types'. 
 Ändern Sie die Dicke der Ländergrenzen.
 Sie müssen dafür lediglich den oben stehenden code abändern. Probieren Sie einfach Parameteränderungen aus
 oder rufen Sie die Hilfeseiten für die einzelnen Befehle auf, oder googlen Sie.

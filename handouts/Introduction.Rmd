@@ -52,7 +52,9 @@ Führen Sie die Berechnungen in der Konsole aus. Schreiben Sie dann ein Skript m
 
 
 Variablen speichern Werte, die wir ihnen zuweisen. In R funktioniert das
-durch die Zeichen "=" und "<-". Über den Variablennamen können wir die Werte wieder abrufen bzw. auf sie zugreifen.
+durch die Zeichen "=" und "<-". Zwischen diesen beiden Zeichen gibt es keinen Unterschied. 
+Da beide verwendet werden, werden wir auch bei immer mal wieder in den Skripten benutzen.
+Über den Variablennamen können wir die Werte wieder abrufen bzw. auf sie zugreifen.
 Mit diesen Variablen kann man dann weiter rechnen oder sie verändern.
 
 Es sollten möglichst selbsterklärende Namen für Variablen gewählt werden bzw.

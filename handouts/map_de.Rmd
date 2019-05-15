@@ -122,7 +122,18 @@ file <- file.path(data.dir,
                          "-01-01.Land_Cover_Type_", lct, ".tif"))
 ```
 
-Der nun folgende Teil wird in fast allen folgenden Skripten wieder kommen. Deshalb werden wir ihn gemeinsam in eine Funktion packen, die in einer Datei 'functions.R' gespeichert werden soll. Dabei wird der Pfad zu dem GeoTiff dieser Funktion als Argument übergeben. Die Funktion liefert dann die Datentabelle (data.frame) zurück, welche einer Variablen zugewiesen werden kann.
+-------------------------------
+** Aufgabe **
+Der nun folgende Teil wird in fast allen folgenden Skripten wieder kommen.
+Deshalb werden wir ihn gemeinsam in eine Funktion packen, die in einer 
+Datei 'functions.R' gespeichert werden soll. 
+Dabei wird der Pfad zu dem GeoTiff dieser Funktion als Argument übergeben. 
+Die Funktion liefert dann die Datentabelle (data.frame) zurück, 
+welche einer Variablen zugewiesen werden kann. Der Funktionsname 
+soll `geotiff2df` sein. Wir werden die Funktion in den folgenden 
+Stunden immer wieder erweitern.
+-------------------------------
+
 ```{r}
 library(raster)
 rLCT  <- raster(file)
@@ -130,6 +141,15 @@ dfLCT <- as.data.frame(rasterToPoints(rLCT))
 colnames(dfLCT) <- c("x", "y", "id")
 ```
 Das r im Variablennamen rLCT soll uns hier an den Datentyp erinnern.
+Zu Erinnerung:
+Funktionen in R haben die allgemeine Form:
+```{r,eval=FALSE}
+Funktionsname <- function(InputPar1,InputPar2,...){
+  R code
+  return(value)
+}
+```
+
 
 -------------------------------------
 **Aufgabe**

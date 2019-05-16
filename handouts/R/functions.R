@@ -36,3 +36,21 @@ extractDate <- function(fnames) {
   }
   return(dates)
 }
+
+borderSubset <- function (rTarget) 
+{
+  worldmap <- getMap(resolution = "low")
+  cp.target <- as(extent(rTarget), "SpatialPolygons")
+  proj4string(cp.target) <- CRS(proj4string(rTarget))
+  new.cp.target <- as.vector(extent(cp.target))
+  dx <- 0.1 * (new.cp.target[2] - new.cp.target[1])
+  dy <- 0.1 * (new.cp.target[4] - new.cp.target[2])
+  cp.target <- as(extent(c(new.cp.target[1] - dx, new.cp.target[2] + 
+                             dx, new.cp.target[3] - dy, new.cp.target[4] + dy)), "SpatialPolygons")
+  proj4string(cp.target) <- CRS(proj4string(rTarget))
+  cp.geo <- spTransform(cp.target, crs(worldmap))
+  regionmap <- gIntersection(worldmap, cp.geo, byid = TRUE)
+  regionmap.target <- spTransform(regionmap, crs(rTarget))
+  regionmap.target <- fortify(regionmap.target)
+  return(regionmap.target)
+}

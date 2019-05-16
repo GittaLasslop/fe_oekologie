@@ -5,11 +5,12 @@ classoption: a4paper
 #lang: de-DE
 bibliography: literatur.bib
 output:
-  tufte::tufte_handout:
+#  tufte::tufte_handout:
+   pdf_document:
 ##    latex_engine: xelatex
-    fig_caption: yes
-    includes:
-      in_header: styles.tex
+ #   fig_caption: yes
+#    includes:
+#      in_header: styles.tex
 ##    toc: true
     highlight: default
 ---
@@ -34,32 +35,26 @@ Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
 library(raster)
 library(ggplot2)
 library(reshape2)
+library(rworldmap)
 
-library(FEglobaleOekologie)
-fegloekOptions(baseDir = "/home/gitta/R/Lehre") 
-fegloekOptions(region="BORNEO")
-fegloekInit()
+setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts')
 ```
 ```{r, message=FALSE, warning=FALSE,eval=FALSE}
 library(raster)
 library(ggplot2)
 library(reshape2)
+library(rworldmap)
 
-library(FEglobaleOekologie)
-fegloekOptions(baseDir = "yourBaseDir") 
-fegloekOptions(region="BORNEO")
-fegloekInit()
 ```
-Die benötigten Fernerkundungsdaten finden Sie online: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
-Laden Sie dort die Datei "LUC_{REGION}.zip" und verschieben Sie die entzippten Dateien in den folgenden Ordner:
+Die benötigten Fernerkundungsdaten finden Sie auf dem T Laufwerk. Kopieren Sie die Dateien auf ihr S Laufwerk in den folgenden Ordner:
 ```{r, message=FALSE, warning=FALSE, eval=FALSE}
-file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+'S:/FGOE/data/LUC/BORNEO'
 ```
 
 Ausserdem benötigen wir die Funktion *geotiff2df()* aus den letzten Sitzungen. Kopieren Sie den Quelltext der Funktion in dieses Script oder laden Sie die Funktion aus einer externen Datei *functions.R* (in ihrem OLAT_Skript haben wir die Funktion der letzten Sitzung schon eingefügt - generell ist es aber ratsam bei größeren Projekten häufig verwendete Funktionen in externe Dateien auszulagern und mit source in the Laufzeitumgebung zu laden).
 
 ```{r, messsage=FALSE}
-source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
+source(file.path("R", "functions.R"), encoding=getOption("encoding"))
 ```
 
 
@@ -80,17 +75,17 @@ end_year <- 2010
 
 
 ```{r, echo=FALSE, results="hide", message=FALSE, warning=FALSE, fig.width=5, fig.height=4, fig.margin=TRUE}
-forestExtent <- getOption("fegloekLUCExtent")
-data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+forestExtent <- c(-280000   ,    0   ,    0  ,250000)
+data.dir <- 'data/LUC/BORNEO'
 for (year in start_year:end_year) {
   file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
-  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop=forestExtent, valid_range = c(0, 253))
+  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop_extent =forestExtent, valid_range = c(0, 253))
 
   # reproject border lines, if not yet done
   if (!exists("regionmap")) {
     rLCT <- raster(file.path(data.dir, file))
     rLCT = crop(rLCT, forestExtent)
-    regionmap = borderSubset(rLCT)
+  #  regionmap = borderSubset(rLCT)
   }
 
   dfLCT$name=""
@@ -110,7 +105,6 @@ for (year in start_year:end_year) {
   if (year == start_year || year == end_year) {
     p <- ggplot(dfLCT, aes(x=x, y=y))
     p <- p + geom_raster(aes(fill=name))
-    p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
     p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
                          ylim=c(min(dfLCT$y), max(dfLCT$y)))
     p <- p + theme(legend.position = "bottom")
@@ -126,28 +120,31 @@ for (year in start_year:end_year) {
     p <- p + labs(title=year)
     p <- p + xlab("easting")
     p <- p + ylab("northing")
-    file <- paste0(getOption("fegloekRegion"), "_LUC_", year, ".pdf")
+    file <- paste0("plots/BORNEO_LUC_", year, ".pdf")
     print(p)
   }
 }
 ```
 
-Der *crop* Befehl schneidet eine von uns vordefinierte Region (mittels einer Hilfsfunktion des Pakets FEglobaleOekologie (getOption("fegloekLUCExtent")) aus den Daten aus. Diese Region muss als zusätzliches/ optionales Funktionsargument der Funktion 'geotiff2df()' übergeben werden. Die Begrenzungsdaten liegen in der UTM-Projektion vor. Um Ländergrenzen dazustellen zu können müssen wir zunächst die vorhandene Karte auf die jeweilige Projektion der Region umprojiziert. Das wird in der von uns geschriebenen Funktion 'borderSubset()' gemacht.
+Der *crop* Befehl schneidet eine von uns vordefinierte Region aus den Daten aus. Diese Region muss als zusätzliches/ optionales Funktionsargument der Funktion 'geotiff2df()' übergeben werden. 
 
 Anschliessend wird für jedes Jahr eine neue Spalte erzeugt, die Wald und nicht bewaldete Gebiete unterscheidet. Die Klassifikation in Wald / Nicht-Wald erfolgt mittels der zuletzt definierten Variable in LCT3lookuptable. Anschließend wird die Anzahl der bewaldeten und unbewaldeten Pixel pro Jahr gezählt und in dem data.frame tsForest gespeichert.
 
-
-\marginnote{
-\textbf{Aufgabe}\\
-Aktivieren Sie innerhalb der Schleife die Zeilen mit 'annotate' und wählen sie die X- und Y-Koordinaten so, das die Informationen innerhalb der Karte erscheinen (Hinweis: der Befehl 'extent(rLCT)' gibt Ihnen die Limits der Karte aus).
-}
+--------------------------
+**Aufgabe**
+Aktivieren Sie innerhalb der Schleife die Zeilen mit 'annotate' und 
+wählen sie die X- und Y-Koordinaten so, das die Informationen innerhalb 
+der Karte erscheinen (Hinweis: der Befehl 'extent(rLCT)' gibt Ihnen 
+die Limits der Karte aus).
+---------------------------
 
 ```{r, eval=FALSE}
-forestExtent <- getOption("fegloekLUCExtent")
-data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+forestExtent = c(-280000, 0, 0, 250000)
+data.dir = 'Pfad zu ihrem Datenordner'
 for (year in start_year:end_year) {
   file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
-  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop=forestExtent, valid_range = c(0, 253))
+  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", 
+                      crop_extent =forestExtent, valid_range = c(0, 253))
   
   # reproject border lines, if not yet done
   if (!exists("regionmap")) {
@@ -173,7 +170,6 @@ for (year in start_year:end_year) {
   if (year == start_year || year == end_year) {
     p <- ggplot(dfLCT, aes(x=x, y=y))
     p <- p + geom_raster(aes(fill=name))
-    p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
     p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
                          ylim=c(min(dfLCT$y), max(dfLCT$y)))
     p <- p + theme(legend.position = "bottom")
@@ -191,8 +187,8 @@ for (year in start_year:end_year) {
     p <- p + labs(title=year)
     p <- p + xlab("easting")
     p <- p + ylab("northing")
-    file <- paste0(getOption("fegloekRegion"), "_LUC_", year, ".pdf")
-    pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=10, height=6)
+    file <- paste0("Borneo_LUC_", year, ".pdf")
+    pdf("Pfad zu ihrem Plot Ordner", file), paper="special", width=10, height=6)
     print(p)
     dev.off()
   }
@@ -211,8 +207,8 @@ p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen"
 ## p <- p + facet_wrap(~variable, ncol=1, scales="free_y")
 ```
 ```{r, eval=FALSE}
-file <- paste0(getOption("fegloekRegion"), "_LUC_TS.pdf")
-pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=10, height=6)
+file <- paste0("BORNEO_LUC_TS.pdf")
+pdf(file.path('plots/LUC/', file), paper="special", width=10, height=6)
 print(p)
 dev.off()
 ```
@@ -236,15 +232,16 @@ Nun modifizieren wir das Plotskript so, dass für jedes Jahr eine neuer Layer de
 
 ```{r, eval=FALSE}
 
-forestExtent <- getOption("fegloekLUCExtent")
-data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+forestExtent <- c(-280000, 0, 0, 250000)
+data.dir <- 'data/LUC/BORNEO'
 
 list_of_dfLCTs = list()
 cnt = 1
 
 for (year in start_year:end_year) {
   file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
-  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop_extent=forestExtent, valid_range = c(0, 253))
+  dfLCT <- geotiff2df(file.path(data.dir, file), name = "id", 
+                      crop_extent = forestExtent, valid_range = c(0, 253))
 
   # reproject border lines, if not yet done
   if (!exists("regionmap")) {
@@ -271,7 +268,6 @@ dfLCT_total <- do.call("rbind", list_of_dfLCTs)
 
 p <- ggplot(dfLCT_total, aes(x=x, y=y, frame=year))
 p <- p + geom_raster(aes(fill=name))
-p <- p + geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group))
 p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
                          ylim=c(min(dfLCT$y), max(dfLCT$y)))
 p <- p + theme(legend.position = "bottom")

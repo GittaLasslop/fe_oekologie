@@ -5,11 +5,11 @@ bibliography: /home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2018/handouts/litera
 classoption: a4paper
 ## lang: de-DE
 output:
-  tufte::tufte_handout:
+  pdf_document:
 ##    latex_engine: xelatex
     fig_caption: yes
     includes:
-      in_header: styles.tex
+#      in_header: styles.tex
 ##    toc: true
     highlight: default
 ---
@@ -25,15 +25,13 @@ Das MODIS Kürzel ist [MOD17A3](https://lpdaac.usgs.gov/dataset_discovery/modis/
 ## Initialisieren
 Sollten Sie eine Fehlermeldung beim Laden der Pakete bekommen installieren Sie diese bitte als erstes nochmal neu mit dem code aus der 1. Stunde:
 ```{r, message=FALSE, warning=FALSE,eval=FALSE}
-for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal", "devtools")) {
+for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", 
+            "mapproj", "rgdal", "devtools")) {
   if (!require(p, character.only=TRUE)) {
     install.packages(p)
     library(p, character.only=TRUE)
   }
 }
-
-library("devtools")
-install_github("joergsteinkamp/FEglobaleOekologie")
 
 ```
 
@@ -42,58 +40,60 @@ Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
 library(raster)
 library(ggplot2)
 library(plyr)
-library(FEglobaleOekologie)
-fegloekOptions(baseDir = "/home/gitta/R/Lehre")
-fegloekOptions(region="BORNEO")
-fegloekInit()
+setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts')
 ```
 
 
 ```{r, echo=FALSE}
-source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
-source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
+source(file.path("R", "variables.R"), encoding=getOption("encoding"))
+source(file.path("R", "functions.R"), encoding=getOption("encoding"))
 ```
-Download der Daten von https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2 (NPP_region.zip), die entpackten Dateien sollen in folgendem Verzeichnis liegen.
+Wechseln Sie in ihr Arbeitsverzeichnis und kopieren Sie sich die Daten für die heutige Stunde in das Verzeichnis
 ```{r, message=FALSE, warning=FALSE,eval=FALSE}
-file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+'data/NPP/BORNEO'
 ```
 
 
 ## Einlesen der Daten
 
+
+Eine Datei, in der die NPP-Werte sind, wird geladen, dafür erweitern wir die Funktion 'geotiff2df()' basierend auf dem code der letzen Stunde. Die Funktion 'geotiff2df()' soll die input Parameter "file" (Dateiname), "name" (den Namen für die Datenvariable, hier NPP), valid\_range und scale\_factor haben. Als Rückgabe brauchen wir einen dataframe mit drei Spalten: x und y (lat und lon) Werte und die Werte der Datenvariablen.
+
+
+Die Datei soll mit raster() gelesen werden und dann in einen dataframe mit as.data.frame(rasterToPoints(raster)) umgewandelt werden. Zusätzlich müssen noch die Spaltennamen in "x","y" und den input parameter "name" (hier NPP) geändert werden. Werte außerhalb der Limits (valid\_range) sollen auf NA gesetzt werden (z.B. data[data <= valid_range[1]] = NA) und die Variable mit dem scale\_factor multipliziert werden.
+
+Funktionen in R haben die allgemeine Form:
+```{r,eval=FALSE}
+Funktionsname <- function(InputPar1,InputPar2,...){
+  Rcode
+  return(value)
+}
+```
+
+----------------------
+***Aufgabe***
+Finden Sie wieder "scale factor" und "valid range" auf der dem 
+heutigen Thema entsprechenden MODIS Web-Seite (MOD17A3, siehe oben) und 
+speichern Sie scale factor in die Variable "nppScaleFactor" und 
+die Limits in die Variable "nppValidRange". Wenn Sie die gesuchten 
+Variablen nicht finden können, nehmen Sie nppScaleFactor = 1 und
+nppValidRange = c(0, 1.e30). 
+------------------------------------
+
+Dann verwenden wir die Funktion um die Daten zu lesen:
 ```{r, echo=FALSE}
 nppScaleFactor <- 0.0001
 nppValidRange  <- c(0, 65500)
 ```
 
-Eine Datei, in der die NPP-Werte sind, wird geladen, dafür schreiben wir eine Funktion basierend auf dem code der letzen Stunde. Die Funktion 'geotiff2df()' soll die input Parameter "file" (Dateiname), "name" (den Namen für die Datenvariable, hier NPP), valid\_range und scale\_factor haben. Als Rückgabe brauchen wir einen dataframe mit drei Spalten: x und y (lat und lon) Werte und die Werte der Datenvariablen.
-
-\marginnote{
-\textbf{Aufgabe}\\
-Finden Sie wieder "scale factor" und "valid range" auf der dem heutigen Thema entsprechenden MODIS
-Web-Seite (MOD17A3, siehe oben) und definieren Sie scale factor als "nppScaleFactor" und die Limits als
-"nppValidRange". Wenn Sie die gesuchten Variablen nicht finden können, nehmen Sie nppScaleFactor = 1 und
-nppValidRange = c(0, 1.e30). 
-}
-
-Die Datei soll mit raster() gelesen werden und dann in einen dataframe mit as.data.frame(rasterToPoints(raster)) umgewandelt werden. Zusätzlich müssen noch die Spaltennamen in "x","y" und den input parameter "name" (hier NPP) geändert werden. Werte außerhalb der Limits (valid\_range) sollen auf NA gesetzt werden (z.B. data[data <= valid_range[1]] = NA) und die Variable mit dem scale\_factor multipliziert werden.
-Funktionen in R haben die allgemeine Form:
-```{r,eval=FALSE}
-Funktionsname <- function(InputPar1,InputPar2,...){
-  R code
-  return(value)
-}
-```
-
-Dann verwenden wir die Funktion um die Daten zu lesen:
-
 ```{r}
-data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+data.dir <- 'data/NPP/BORNEO'
 file <- file.path(data.dir, "MOD17A3_2010-01-01.Npp_1km.tif")
-dfNPP <- geotiff2df(file, "NPP", valid_range = nppValidRange, scale_factor = nppScaleFactor)
+dfNPP <- geotiff2df(file, "NPP", valid_range = nppValidRange, 
+                    scale_factor = nppScaleFactor)
 ```
 
-Laden der Landnutzungsklassen, anhand welcher die NPP-Werte klassifiziert werden. (Die Daten müssen Sie eventuell noch runterladen wenn Sie das letzte Mal eine andere Region benutzt haben.) Die LCT3lookuptable müssen Sie wie in der letzten Stunde einlesen.
+Dann laden wir die Landnutzungsklassen, anhand welcher die NPP-Werte klassifiziert werden. Die LCT3lookuptable müssen Sie wie schon vorher mit `read.table()` einlesen.
 
 ```{r}
 file <-file.path(data.dir, "MCD12Q1_2010-01-01.Land_Cover_Type_3.tif")
@@ -103,37 +103,24 @@ dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
 
 ## Datenprozessierung
 
-In den Regionen Alaska, Südafrika und Australiens stimmen die Koordinaten der zwei Dateien leider nicht exakt überein, daher muss ein Datensatz an den anderen angepasst werden. Die Rundung führt leider zu einer geringen Ungenauigkeit, die im Rahmen unseres Kurses jedoch vernachlässigt werden kann. Um die beiden Datensätze zusammenzufügen müssen die Werte jedoch exakt übereinstimmen, sie werden daher mit den folgenden code-Zeilen korrigiert. Finden Sie was die Funktion round macht!
-
-```{r}
-if (getOption("fegloekRegion") == "ALASKA" ||
-    getOption("fegloekRegion") == "SAFRICA" ||
-    getOption("fegloekRegion") == "SWAUSTRALIA" ||
-    getOption("fegloekRegion") == "SEAUSTRALIA") {
-    dfNPP$x = round(dfNPP$x, -3)
-    dfNPP$y = round(dfNPP$y, -3)
-    dfLCT$x = round(dfLCT$x, -3)
-    dfLCT$y = round(dfLCT$y, -3)
-}
-```
-
 Verschmelzen der zwei data.frames.
 
 ```{r}
 dfData <- merge(dfNPP, dfLCT, by=c("x", "y"))
 ```
 
-\marginnote{
-\textbf{Aufgabe}\\
+--------------------------
+***Aufgabe***
 Machen alle Ökosysteme in Ihrer Region Sinn? Sie können den Befehl
 'table' nutzen oder den mächtigeren (aber auch komplizierteren) Befehl 
 'ddply' aus dem Paket 'plyr'. Überlegen Sie anhand des Resultats,
 welche Ökosysteme Sie von der Analyse ausnehmen können und wie Sie
 das machen.
-}
+--------------------------------------------------------
 
-```{r, echo=FALSE}
-knitr::kable(ddply(dfData, c("id", "name"), summarize, count=length(id)))
+```{r}
+ddply(dfData, c("id", "name"), summarize, count=length(id))
+table(dfData$name)
 ```
 
 ## Grafikausgabe
@@ -149,8 +136,8 @@ p <- p + ylab("NPP [kg(C)/m^2]")
 p <- p + coord_flip()
 ```
 ```{r, eval=FALSE}
-file <- paste0(getOption("fegloekRegion"), "_NPP.pdf")
-pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=8, height=8)
+file <- paste0("plots/NPP/Borneo_NPP.pdf")
+pdf( file, paper="special", width=8, height=8)
 print(p)
 dev.off()
 ```

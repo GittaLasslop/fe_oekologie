@@ -23,20 +23,6 @@ p = p + xlab("Laenge")
 p = p + ylab("Breite")
 print(p)
 
-# projizieren in andere Koordinatensysteme
-PointsDF = data.frame(long=c(8,16.4,13.55,7),lat=c(50.15,53.85,56,59.20))
-sPoints    <- SpatialPoints(PointsDF,
-                            proj4string=CRS("+proj=longlat +ellps=WGS84"))
-sPointsUTM <- spTransform(sPoints, CRS(projection(rNDVI)))
-points <- data.frame(sPointsUTM)
-Germany=map_data('world',region='Germany')
-GermanyLonLat <- SpatialPoints(Germany[1:2],
-                               proj4string=CRS("+proj=longlat +ellps=WGS84"))
-GermanyUTM <- spTransform(GermanyLonLat, CRS(projection(rNDVI)))
-Germany=cbind(Germany,coordinates(GermanyUTM))
-names(Germany)=c("long"     , "lat"    ,   "group" ,    "order" ,    "region" ,   "subregion" ,"x"   ,   "y")
-
-
 # Lesen der NDVI Daten
 NDVIDatum='2007-01-09'
 file <- file.path(data.dir, 
@@ -51,8 +37,21 @@ ndviLowerLimit  <- ?
 dfNDVI$NDVI[dfNDVI$NDVI <= ndviLowerLimit] = NA
 dfNDVI$NDVI = dfNDVI$NDVI * ndviScaleFactor
 
-# NDVI Karte mit Ländergrenzen von Deutschland und Punkten
+# projizieren in andere Koordinatensysteme
+PointsDF = data.frame(long=c(8,16.4,13.55,7),lat=c(50.15,53.85,56,59.20))
+sPoints    <- SpatialPoints(PointsDF,
+                            proj4string=CRS("+proj=longlat +ellps=WGS84"))
+sPointsUTM <- spTransform(sPoints, CRS(projection(rNDVI)))
+points <- data.frame(sPointsUTM)
+Germany=map_data('world',region='Germany')
+GermanyLonLat <- SpatialPoints(Germany[1:2],
+                               proj4string=CRS("+proj=longlat +ellps=WGS84"))
+GermanyUTM <- spTransform(GermanyLonLat, CRS(projection(rNDVI)))
+Germany=cbind(Germany,coordinates(GermanyUTM))
+names(Germany)=c("long"     , "lat"    ,   "group" ,    "order" ,    "region" ,   "subregion" ,"x"   ,   "y")
 
+
+# NDVI Karte mit Ländergrenzen von Deutschland und Punkten
 p <- ggplot(dfNDVI, aes(x = x, y = y))
 p = p + geom_raster(aes(fill = NDVI))
 p = p + geom_path(data = Germany, size = 0.2, colour = "red",
@@ -78,6 +77,7 @@ dev.off()
 # Lesen des NDVI für mehrere Beobachtungszeitpunkte
 files <- list.files(data.dir, pattern="NDVI.tif$", full.names=TRUE)
 stackNDVI <- stack(files)
+
 # Extrahieren der Zeitreihen
 dfNDVI <- extract(stackNDVI, sPointsUTM, df=TRUE)
 dfNDVI$ID = NULL

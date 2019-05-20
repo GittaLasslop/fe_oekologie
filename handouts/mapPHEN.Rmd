@@ -1,5 +1,5 @@
 ---
-title: "Fernerkundung globale Ökologie: 2. Phänologie"
+title: "Fernerkundung globale Ökologie: Phänologie"
 author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
 output:
@@ -18,7 +18,7 @@ Wir werden in dieser Sitzung
 
 - räumliche Daten von einem Koordinatensystem in ein anderes projizieren
 
-- Berechnungen mit der Funktion `apply()` durchführen
+- die Funktionen `apply()` und `melt()` anwenden
 
 ## Pakete laden und installieren
 
@@ -67,12 +67,10 @@ dir.create(data.dir)
 
 
 ```{r, echo=FALSE}
-source(file.path( "R", "functions.R"), encoding=getOption("encoding"))
+#source(file.path( "R", "functions.R"), encoding=getOption("encoding"))
 ```
 
-# Erste Karten
-
-## Weltkarte
+# Weltkarte
 
 Wir benutzen zunächst eine vorgefertigte Karte aus dem Paket "maps",
 die für die Darstellung mit dem Befehl 'map_data' aus dem Paket 'ggplot2' aufbereitet wird.
@@ -101,12 +99,12 @@ kann z.B. mit
 ersetzt werden um die Projektion der Darstellung zu ändern.
 -------------------------------------
 
-## Regionale Karte des NDVI
+# Regionale Karte des NDVI
 
 Die Daten für heute finden Sie auf dem T-Laufwerk `'T:/FGOE/PHEN/'`. Achten Sie darauf die Dateien im Verzeichnis `plot.dir` `data/PHEN/NEUROPE` relativ zu Ihrem Arbeitsverzeichnis abzuspeichern.
 
 Lesen Sie nun eine Datei des NDVI ein. Die Rasterdaten
-werden in einen `data.frame` umgewandelt und die Spalten umbenannt. Zunächst setzen wir den Dateinamen zusammen. Wir haben unterschiedliche Dateien für unterschiedliche Zeitpunkte, daher wollen wir den Dateinamen flexibel zusammenbauen:
+werden mit `rasterToPoints()` in eine matrix und dann mit `as.data.frame()` in einen `data.frame` umgewandelt. Die Spaltennamen werden mit `names()` umbenannt. Zunächst setzen wir den Dateinamen zusammen. Wir haben unterschiedliche Dateien für unterschiedliche Zeitpunkte, daher wollen wir den Dateinamen flexibel zusammenbauen und benutzen für den Zeitpunkt die Variable `NDVIDatum`:
 
 ```{r}
 library(raster)
@@ -141,10 +139,9 @@ ndviLowerLimit  <- ?
 dfNDVI$NDVI[dfNDVI$NDVI <= ndviLowerLimit] = NA
 dfNDVI$NDVI = dfNDVI$NDVI * ndviScaleFactor
 ```
-
-Nun können wir mit den Funktionen aus dem Paket ggplot2 wieder eine Karte erzeugen. Hierbei soll der NDVI durch Farben abgebildet werden. Zusätzlich werden noch vier von uns vordefinierte Punkte (Variable 'points', P1-4) auf der Karte verzeichnet. An diesen werden wir später die Zeitreihe extrahieren.
-Wir definieren nun Punkte in Breiten-/Lägengrad, und werden sie dann in
-UTM Koordinaten transformieren. Auch die Breiten-/Längengradangaben unserer Weltkarte müssen transformiert werden.
+Zusätzlich definieren wir noch vier Punkte (Variable 'points', P1-4). Diese wollen wir auf der Karte einzeichnen und später die Zeitreihe an diesen Punkten extrahieren.
+Wir definieren die Punkte in Breiten-/Lägengrad, und werden sie dann in
+UTM Koordinaten transformieren. 
 
 ```{r}
 PointsDF = data.frame(long=c(8,16.4,13.55,7),lat=c(50.15,53.85,56,59.20))
@@ -152,6 +149,10 @@ PointsDF = data.frame(long=c(8,16.4,13.55,7),lat=c(50.15,53.85,56,59.20))
 sPoints    <- SpatialPoints(PointsDF,
                             proj4string=CRS("+proj=longlat +ellps=WGS84"))
 sPointsUTM <- spTransform(sPoints, CRS(projection(rNDVI)))
+points <- data.frame(sPointsUTM)
+```
+Auch die Breiten-/Längengradangaben der Ländergrenzen müssen transformiert werden. Wir benutzen hier nicht mehr die gesamte Weltkarte sondern nur die Grenzen von Deutschland als Beispiel.
+```{r}
 Germany=map_data('world',region='Germany')
 GermanyLonLat <- SpatialPoints(Germany[1:2],
                             proj4string=CRS("+proj=longlat +ellps=WGS84"))
@@ -160,9 +161,9 @@ Germany=cbind(Germany,coordinates(GermanyUTM))
 names(Germany)=c("long"     , "lat"    ,   "group" ,    "order" ,    "region" ,   "subregion" ,"x"   ,   "y")
 ```
 
-```{r, message=FALSE, warning=FALSE}
-points <- data.frame(sPointsUTM)
+Nun können wir mit den Funktionen aus dem Paket ggplot2 wieder eine Karte erzeugen. Hierbei soll der NDVI durch Farben abgebildet werden. 
 
+```{r, message=FALSE, warning=FALSE}
 p <- ggplot(dfNDVI, aes(x = x, y = y))
 p = p + geom_raster(aes(fill = NDVI))
 p = p + geom_path(data = Germany, size = 0.2, colour = "red",
@@ -202,14 +203,10 @@ pdf(file.path(plot.dir, file), paper="special", width=10, height=10)
 print(p)
 dev.off()
 ```
-## Einlesen und Verarbeiten der MODIS Daten
+# NDVI Zeitreihen
 Wir lesen nun auch die NDVI Daten der anderen Monate und Jahre ein.
 Dafür erzeugen wir einen Vektor `files` der alle Dateinamen dieses Verzeichnisses enthält in denen die Zeichenkette "NDVI.tif" vorkommt (mit `list.files()`). Diese Dateien werden mit der Funktion stack() gelesen und der Variablen stackNDVI zugewiesen. Es wird eine Serie (oder ein Stapel) aus den herunter geladenen georeferenzierten Dateien erzeugt.
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
-files <- list.files(data.dir, pattern="NDVI.tif$", full.names=TRUE)
-stackNDVI <- stack(files)
-```
-```{r, message=FALSE, warning=FALSE,eval = FALSE}
+```{r, message=FALSE, warning=FALSE}
 files <- list.files(data.dir, pattern="NDVI.tif$", full.names=TRUE)
 stackNDVI <- stack(files)
 ```
@@ -301,12 +298,6 @@ Die Funktion `facet_wrap()` sorgt dafür dass die Abbildung für alle 4 Punkte a
 
 # Hausaufgabe
 
-1. Ändern sie die Farbskala der Kartenabbildung des NDVI  mit der Funktion `scale_fill_continuous()`. Lesen Sie hierfür die Hilfe oder finden Sie Beispiele im Netz. **(1 Punkt)**
+1. Beschreiben Sie für jede einzelne Zeile dieses Skriptes was passiert. Fügen Sie die Beschreibung als Kommentar ein (`#`). Lassen Sie sich dazu Variablen in der Konsole ausgeben, benutzen Sie Funktionen wie `head`, `summary`, `class`, rufen Sie die Hilfeseiten mit `?Funktion` auf oder suchen Sie im Internet. **(6 Punkte)**
 
-2. Wiederholen Sie das Erstellen der Karte für den NDVI als for - Schleife für Beobachtungsdaten von zwei weiteren Zeitpunkte. Definieren Sie hierfür die Variable `NDVIDatum` als Vektor mit weiteren Zeitpunkten. **(2 Punkte)**
-
-3. Berechnen Sie Minimum und Maximum der Zeitreihen mit `apply()` (analog zur Berechnung des Medians) **(2 Punkte)**.
-
-4. Was setzt der Parameter `ncol` in der Funktion `guide_legend`? **(1 Punkt)**
-
-5. Lesen Sie den Essay "How to Report Bugs Effectively" von Simon Tatham https://www.chiark.greenend.org.uk/~sgtatham/bugs.html. Nennen Sie vier Punkte, die Ihnen wichtig erscheinen um Fehler effizient zu kommunizieren. **(2 Punkte)**
+2. Lesen Sie den Essay "How to Report Bugs Effectively" von Simon Tatham https://www.chiark.greenend.org.uk/~sgtatham/bugs.html. Nennen Sie vier Punkte, die Ihnen wichtig erscheinen um Fehler effizient zu kommunizieren. **(2 Punkte)**

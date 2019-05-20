@@ -1,0 +1,56 @@
+---
+title: "Problem Bericht 1"
+author: "Gitta Lasslop"
+date: "May 20, 2019"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Wie beschreibt man einen Fehler/ein Problem in R
+
+- https://www.r-project.org/posting-guide.html: "It is a skill to ask good questions"
+- https://www.chiark.greenend.org.uk/~sgtatham/bugs.html: How to report bugs efficiently
+
+## Wie beschreibt man einen Fehler/ein Problem in R
+
+- Einfaches Beispiel um den Fehler zu reproduzieren
+- Falls nicht möglich: Genaue Beschreibung der Situation in der der Fehler auftritt
+
+## Problem bei der Installation von Paketen
+
+**Fehlerbeschreibung:**
+
+Fehler tritt auf beim Ausführen des Befehls: install.package(raster)
+Fehlermeldung: Error in install.packages : object 'raster' not found
+
+**Mögliche Lösung:** 
+
+- google-Suche nach "Error in install.packages : object 'raster' not found"
+
+No results found for "Error in install.packages : object 'raster' not found".
+
+- Autovervollständigung der google-Suche schlägt vor: "Error in install.packages : object 'dplyr' not found"
+
+--> Forumseintrag "Try putting the package names in quotation mark."
+
+## Falsches Datum mit `as.POSIXct.Date()`
+
+**Fehlerbeschreibung:**
+Falsches Datum bei Konvertierung mit as.POSIXct.Date(as.factor('17.01.2019'))
+
+Ergibt: "1970-01-02 01:00:00 CET"
+
+**Mögliche Lösung**
+
+```?as.POSIXct.Date ```:
+They can also convert character strings of the formats "2001-02-03" and "2001/02/03" [...]
+(Formats such as "01/02/03" are ambiguous but can be converted via a format specification by strptime.)
+
+as.POSIXct(strptime('17.01.2019',"%d.%m.%Y"))
+
+oder:
+as.Date(Daten$Datum,"%d.%m.%Y")
+

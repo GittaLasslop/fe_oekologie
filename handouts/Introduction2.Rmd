@@ -75,6 +75,7 @@ https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip
 
 Wir versuchen die erste Datei zu lesen und in die Variable Daten abzuspeichern.
 ```{r}
+setwd('S:/FGOE')
 Daten=read.table('data/intro2/ErsteDaten.txt')
 ```
 Wir schauen nun was R gelesen und abgespeichert hat. Wir benutzen die Funktion `class()` um den Datentyp abzufragen und erhalten detailliertere Informationen zu den eingelesenen Werten mit der Funktion `summary()`. Dieser Befehl liefert eine deskriptive Statistik für die einzelnen Spalten. Die Funktion `head()` gibt die ersten Zeilen des Datensatzes in der Konsole aus.
@@ -113,7 +114,7 @@ summary(Daten)
 Wir können nun mit Hilfe einfacher Punktabbildungen prüfen ob die Werte plausibel sind. Dafür verwenden wir die Funktion `plot()` und übergeben das Datum als x Wert und eine der anderen Spalten als y Wert. Wir wandeln dafür das Datum, welches momentan als einfache Zeichenfolge gespeichert ist, mit dem Befehl `as.POSIXct.Date()` noch in einen Datums/ Zeit-Datentyp um. Dieser Datentyp ermöglicht es mit Datumsangaben zu rechnen bzw. diese in Abbildungen sinnvoll zu skalieren (Tage, Wochen, Monate, ...).
 
 ```{r}
-Daten$Datum=as.POSIXct.Date(Daten$Datum)
+Daten$Datum=as.Date(Daten$Datum,"%d.%m.%Y")
 plot(Daten$Datum, Daten$Tmin)
 hist(Daten$Tmin)
 ```
@@ -222,7 +223,7 @@ for (i in 1:n){
 
 # Hausaufgaben
 
-1) Lesen Sie die Daten aus der Datei ErsteDatencR.txt ein und fertigen Sie eine Abbildung der Zeitreihe der mittleren Temperatur an. Wandeln Sie hierfür das Datum mit Daten$Datum=as.POSIXct.Date(Daten$Datum) in den speziellen Datentyp für Zeit- und Datumvariablen um.
+1) Lesen Sie die Daten aus der Datei ErsteDatencR.txt ein und fertigen Sie eine Abbildung der Zeitreihe der mittleren Temperatur an. Wandeln Sie hierfür das Datum mit Daten$Datum=as.Date(Daten$Datum,"%d.%m.%Y") in den speziellen Datentyp für Zeit- und Datumvariablen um.
 Rufen Sie die Hilfe für die plot-Funktion auf (?plot). Schauen Sie sich die Argumente an, die an die Funktion übergeben werden können.
 Ändern Sie nun die folgenden Dinge in der Abbildung:
 

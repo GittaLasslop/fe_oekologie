@@ -62,6 +62,7 @@ setwd('S:/FGOE/')
 data.dir='data/PHEN/NEUROPE/'
 plot.dir='plots/PHEN/'
 dir.create(plot.dir)
+dir.create('data/PHEN')
 dir.create(data.dir)
 ```
 
@@ -84,8 +85,8 @@ p <- ggplot(worldmap, aes(y=lat, x=long, group=group))
 p = p + geom_path()
 p = p + coord_fixed()
 p = p + labs(title="Laendergrenzen")
-p = p + xlab("Laenge")
-p = p + ylab("Breite")
+p = p + xlab("Laengengrad")
+p = p + ylab("Breitengrad")
 print(p)
 ```
 -------------------------------------
@@ -134,8 +135,8 @@ dfNDVI$NDVI = dfNDVI$NDVI * ndviScaleFactor
 ```
 
 ```{r, eval=FALSE}
-ndviScaleFactor <- ?
-ndviLowerLimit  <- ?
+ndviScaleFactor <- 0.0001
+ndviLowerLimit  <- -2000
 dfNDVI$NDVI[dfNDVI$NDVI <= ndviLowerLimit] = NA
 dfNDVI$NDVI = dfNDVI$NDVI * ndviScaleFactor
 ```

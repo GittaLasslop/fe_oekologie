@@ -63,7 +63,7 @@ p = p + geom_text(data = points, aes(x = long, y = lat, label =
                   hjust = c(-0.4, -0.4, 1.4, 1.4),col='red')
 p = p + coord_fixed(xlim = c(min(dfNDVI$x), max(dfNDVI$x)),
                     ylim = c(min(dfNDVI$y), max(dfNDVI$y)), expand = FALSE)
-p = p + theme(legend.position = "bottom")
+p = p + theme(legend.position = "left")
 p = p + guides(fill = guide_legend(title = NULL, ncol = 4))
 p = p + labs(title = "MODIS NDVI")
 p = p + xlab("Longitude")

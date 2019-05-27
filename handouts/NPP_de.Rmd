@@ -20,6 +20,8 @@ Wir werden heute:
 
 - eine Funktion schreiben, die  MODIS .tif Dateien lesen, Fehlwerte auf NA setzen, die Daten mit dem Skalierungsfaktor multiplizieren und in einen data.frame umwandeln kann
 
+- den NPP Gradienten entlang der Breitengrade in Mexiko berechnen
+
 - Datensätze mit der Funktion merge verbinden
 
 - untersuchen wie sich NPP für unterschiedliche Vegetationstypen in Mexiko ändert  
@@ -30,8 +32,7 @@ Das MODIS Kürzel ist [MOD17A3](https://lpdaac.usgs.gov/products/mod17a3v055/).
 
 ## Literatur
  
- @zhao_drought-induced_2010; @zhao_improvements_2005; @nemani_climate-driven_2003 und zum vertiefen: @de_kauwe_satellite_2016 und Kommentare, sowie Antworten zu  @zhao_drought-induced_2010
-
+ @zhao_drought-induced_2010; @zhao_improvements_2005; @nemani_climate-driven_2003 
 ## Laden der Bibliotheken
 Eigentlich sollten mittlerweile alle Bibliotheken bereits installiert sein. Zur Sicherheit führen Sie den folgenden code nochmal aus:
 ```{r, message=FALSE, warning=FALSE,eval=FALSE}
@@ -63,7 +64,7 @@ Wechseln Sie in ihr Arbeitsverzeichnis und kopieren Sie sich die Daten für die 
 ```
 
 
-## Einlesen der Daten
+## NPP Daten
 
 Eine Datei, in der die NPP-Werte sind, wird geladen, hierfür schreiben wir die Funktion 'geotiff2df()' basierend auf dem code der letzen Stunde. Die Funktion 'geotiff2df()' soll die input Parameter "file" (Dateiname), "name" (den Namen für die Datenvariable, hier NPP), valid\_range und scale\_factor haben. Als Rückgabe brauchen wir einen dataframe mit drei Spalten: x und y (lat und lon) Werte und die Werte der Datenvariablen.
 
@@ -100,14 +101,28 @@ p = p + scale_fill_gradient(low = "yellow", high = "green")
 p = p + coord_fixed()
 print(p)
 ```
+Häufig findet man entlang der Breitengrade auch starke klimatische Gradienten.
+Daher berechnen wir nun den Gradienten von NPP entlang der Breitengrade:
+```{r}
+LatNPP=aggregate(dfNPP[3],by=list(lat=dfNPP$y),FUN='mean')
+```
+Mit der Funktion `aggregate` werden alle Werte von dfNPP[3] die den gleichen Breitengrad haben (dfNPP$y) gemittelt (FUN='mean').
+
+```{r}
+plot(LatNPP$lat,LatNPP$NPP,xlab='Latitude', ylab='NPP [kg C/m²/Jahr]',type='l',lwd=3)
+```
+
+## Landcover Daten
 
 Dann laden wir die Landoberflächenbedeckungsklassen, anhand welcher die NPP-Werte klassifiziert werden. Die tif-Dateien enthalten nur numerische Werte für die Klassen. Die Namen der Klassen und die Zuordnung zu den numerischen Werten stehen in der Datei LCT3Loouptable.txt. Diese soll mit read.table() einglesen werden. Wir ordnen dann die Namen der Klassen den im data.frame dfLCT gespeicherten numerischen Werten der Satellitendaten zu (mit der Funktion merge()).
+
 ```{r,echo=FALSE}
 LCT3lookuptable=read.table('LCT3Lookuptable.txt',header=T)
 file <-file.path(data.dir, "MCD12Q1_2010-01-01.Land_Cover_Type_3.tif")
 dfLCT <- geotiff2df(file, 'id', valid_range = c(0, 253))
 dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
 ```
+
 
 ```{r,eval=FALSE}
 LCTlookuptable=read.table(?)
@@ -134,10 +149,10 @@ dfData <- merge(dfNPP, dfLCT, by=c("x", "y"))
 
 --------------------------
 ***Aufgabe***
-Machen alle Ökosysteme in Ihrer Region Sinn? Sie können den Befehl
+Bei welchen Vegetationstypen vermuten Sie eine Fehlklassifizierung? Sie können den Befehl
 'table' nutzen um zu sehen wie viele Gridzellen den verschiedenen 
 Vegetationsklassen zugeordnet werden. Überlegen Sie anhand des Resultats,
-welche Ökosysteme Sie von der Analyse ausnehmen können und wie Sie
+welche Ökosysteme Sie von einer Analyse für NPP ausnehmen können und wie Sie
 das machen.
 --------------------------------------------------------
 
@@ -172,13 +187,11 @@ print(p)
 
 1. Sie wollen eine Datei mit dem absoluten Pfad 'S:/FGOE/data/LandCover/LCT3.txt' einlesen. Ihr working directory (oder Arbeitsverzeichnis) ist auf 'S:/FGOE/data' gesetzt. Wie lautet der Pfad zu der Datei relativ zu Ihrem working directory. **(0.5 Punkte)**
 
-2. zu melt **(1 Punkt)**
+2. Berechnen Sie analog zur Berechnung des NPP-Gradienten entlang der Breitengrade den Gradienten entlang der Längengrade **(1 Punkt)**
 
-3. Der array data=array(1:100,c(4,5,5)) hat drei Dimensionen, wobei die erste Dimension der Längengrad ist, die zweite Dimension der Breitengrad und die dritte Dimension die zeit. Berechnen Sie mit der Funktion apply():
+3. Der array data=array(1:100,c(4,5,5)) hat drei Dimensionen, wobei die erste Dimension der Längengrad ist, die zweite Dimension der Breitengrad und die dritte Dimension die zeit. Berechnen Sie mit der Funktion apply() **(1 Punkt)**:
 - das Mittel über die Zeit für jeden Punkt 
 - einen Mittelwert für jede Latitude
-
-**(1 Punkt)**
 
 4. Es gibt auch eine entsprechende GPP Datei (Brutto-Primärproduktion). Passen Sie das Skript an um die Analyse für GPP zu wiederholen. **(1 Punkt)**
 
@@ -187,7 +200,6 @@ print(p)
 data1=data.frame(soil=c(1,2,3),soilname=c('Podsol','Schwarzerde','Gley'))
 data2=data.frame(site=c('S1','S2','S3','S4','S5'),soil=c(2,1,3,3,2))
 ```
-
 
 6. Setzen Sie NPP ins Verhältnis zu GPP. Erzeugen Sie einen Boxplot des Verhältnisses NPP:GPP für alle Landbedeckungsklassen **(2 Punkte)**.
     

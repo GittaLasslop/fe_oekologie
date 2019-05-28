@@ -15,9 +15,9 @@ output:
     highlight: default
 ---
 
-# Landnutzungswandel/Land-Use Change (LUC)
+# Landbedeckung
 
-Über den jährlich ermittelten Landnutzungstypen (Land cover type, LCT) lässt sich die Veränderung der Landnutzung über den Zeitraum der vorhandenen Satellitenmessungen ermitteln.
+Über den jährlich ermittelten Landbedeckungstypen (Land cover type, LCT) lässt sich die Veränderung der Landnutzung über den Zeitraum der vorhandenen Satellitenmessungen ermitteln.
 
 ## Daten
 Das MODIS Kürzel für die heutige Sitzung ist [MCD12Q1](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1).
@@ -62,16 +62,19 @@ Erweitern Sie die Funktion *geotiff2df()* so, dass Sie mit der Übergabe eines o
 (1) ein zusaetzliches Funktionsargument ('crop_extent') mit dem Standardwert NA (für 'nicht definiert') und  
 (2) den Befehl crop (?crop) um die Ausdehnung unserer Karte auf die Grenzen 'crop_extent' zu beschneiden.   
 In unserem heutigen Skript haben wir die Position für die Funktionserweiterung mit einem Kommentar markiert. **Hinweis:** Für den Aufbau der if-Bedingung können Sie sich bei der folgenden Abfrage von 'valid_range' in der Funktion inspirieren lassen.
-}
+
 
 ## Verarbeiten der Daten
 
-In unseren MODIS Beispiel-Daten sind LUC Informationen für die Jahre 2001 -- 2010 vorhanden. Die Jahre werden in einer for-Schleife zwischen start_year und end_year durchlaufen und mit jedem Durchlauf wird berechnet, wieviel Pixel als bewaldet und unbewaldet klassifiziert sind. Im ersten Jahr (year == start_year) wird der data.frame tsForest erzeugt und in den folgenden Jahren wird diesem data.frame je eine Zeile hinzugefügt (rbind, "row bind"). Für das erste und letze Jahr wird eine Karte erzeugt (Hinweis: die Daten der Region BORNEO für das Jahr 2001 enthalten ungewöhnlich viele nicht-klassifizierte Pixel - starten hier deshalb mit dem Jahr 2002; generell sollten Sie bei LUC Analysen immer prüfen ob Unregelmässigkeiten in einer Zeitscheibe zu beobachten sind - sie könnten sich auch die Quality Control Daten des Produkts ansehen; diese finden Sie auf der MODIS-Homepage als seperaten Datensatz).
+In unseren MODIS Beispiel-Daten sind LUC Informationen für die Jahre 2001 -- 2010 vorhanden. Wir vergleichen erstmal die Landoberflächenbedeckung für das erste Jahr im Vergleich zum letzen Jahr.
 
 ```{r}
-start_year <- 2001
+start_year <- 2002
 end_year <- 2010
 ```
+
+
+Die Jahre werden in einer for-Schleife zwischen start_year und end_year durchlaufen und mit jedem Durchlauf wird berechnet, wieviel Pixel als bewaldet und unbewaldet klassifiziert sind. Im ersten Jahr (year == start_year) wird der data.frame tsForest erzeugt und in den folgenden Jahren wird diesem data.frame je eine Zeile hinzugefügt (rbind, "row bind"). Für das erste und letze Jahr wird eine Karte erzeugt (Hinweis: die Daten der Region BORNEO für das Jahr 2001 enthalten ungewöhnlich viele nicht-klassifizierte Pixel - starten hier deshalb mit dem Jahr 2002; generell sollten Sie bei LUC Analysen immer prüfen ob Unregelmässigkeiten in einer Zeitscheibe zu beobachten sind - sie könnten sich auch die Quality Control Daten des Produkts ansehen; diese finden Sie auf der MODIS-Homepage als separaten Datensatz).
 
 
 ```{r, echo=FALSE, results="hide", message=FALSE, warning=FALSE, fig.width=5, fig.height=4, fig.margin=TRUE}
@@ -81,12 +84,6 @@ for (year in start_year:end_year) {
   file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
   dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop_extent =forestExtent, valid_range = c(0, 253))
 
-  # reproject border lines, if not yet done
-  if (!exists("regionmap")) {
-    rLCT <- raster(file.path(data.dir, file))
-    rLCT = crop(rLCT, forestExtent)
-  #  regionmap = borderSubset(rLCT)
-  }
 
   dfLCT$name=""
   dfLCT$name[dfLCT$id < 5 | dfLCT$id > 8] = "unforested"
@@ -146,13 +143,6 @@ for (year in start_year:end_year) {
   dfLCT <- geotiff2df(file.path(data.dir, file), name="id", 
                       crop_extent =forestExtent, valid_range = c(0, 253))
   
-  # reproject border lines, if not yet done
-  if (!exists("regionmap")) {
-    rLCT <- raster(file.path(data.dir, file))
-    rLCT = crop(rLCT, forestExtent)
-    regionmap = borderSubset(rLCT)
-  }
-
   dfLCT$name = ""
   dfLCT$name[dfLCT$id < 5 | dfLCT$id > 8] = "unforested"
   dfLCT$name[dfLCT$id > 4 & dfLCT$id < 9] = "forested"
@@ -176,14 +166,6 @@ for (year in start_year:end_year) {
     p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
                                         "water"="lightblue"), drop=FALSE)
     p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
-    
-    ## label = paste0(nFor, " * km^2")
-    ## p <- p + annotate("text", label=label, x=3e5, y=9.05e6,
-    ##                  color="white", parse=TRUE, size=12)
-    ## label = paste0(nUnf, " * km^2")
-    ## p <- p + annotate("text", label=label, x=3e5, y=8.95e6,
-    ##                  color="white", parse=TRUE, size=12)
-    
     p <- p + labs(title=year)
     p <- p + xlab("easting")
     p <- p + ylab("northing")
@@ -217,79 +199,20 @@ dev.off()
 print(p)
 ```
 
-Die Karte mit der räumlichen Verteilung kann auch für jedes Jahr geplottet werden. Diese Bilder können Sie zu einer Animation zusammenfügen. Hierzu benötigen Sie die Erweiterung 'gganimate' der Bibliothek 'ggplot2'. Diese muss zunächst mit den folgenden Befehlen nachinstalliert werden:
-
-```{r, eval=FALSE}
-## Installation des Zusatzpakets
-library(devtools)
-devtools::install_github("dgrtwo/gganimate")
-
-## laden des neuen Pakets
-library(gganimate)
-```
-
-Nun modifizieren wir das Plotskript so, dass für jedes Jahr eine neuer Layer der Animation ausgegeben wird (sehen Sie sich hierzu auch die Beispiele auf [GitHub](https://github.com/dgrtwo/gganimate) an). Damit dies funtioniert müssen wir zunächst einen data.frame aller Daten (über alle Jahre) erzeugen. Hierbei wird im Gegensatz zu unserem bisherigen Skript noch dfLCT noch eine Spalte 'year' angefügt. Wir speichern die dfLCT data.frames der einzelnen Jahre dann in einer Liste (list_of_dfLCTs) um sie anschliessend mit der Befehlskombination *do.call*, *rbind* zu einem grossen data.frame zu vereinen. Diesen benutzen wir schliesslich um eine Animation mit ggplot zu erzeugen.
-
-```{r, eval=FALSE}
-
-forestExtent <- c(-280000, 0, 0, 250000)
+```{r}
+forestExtent <- c(-280000   ,    0   ,    0  ,250000)
 data.dir <- 'data/LUC/BORNEO'
-
-list_of_dfLCTs = list()
-cnt = 1
-
-for (year in start_year:end_year) {
   file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
-  dfLCT <- geotiff2df(file.path(data.dir, file), name = "id", 
-                      crop_extent = forestExtent, valid_range = c(0, 253))
-
-  # reproject border lines, if not yet done
-  if (!exists("regionmap")) {
-    rLCT <- raster(file.path(data.dir, file))
-    rLCT = crop(rLCT, forestExtent)
-    regionmap = borderSubset(rLCT)
-  }
-
-  dfLCT$name=""
-  dfLCT$name[dfLCT$id < 5 | dfLCT$id > 8] = "unforested"
-  dfLCT$name[dfLCT$id > 4 & dfLCT$id < 9] = "forested"
-  dfLCT$name[dfLCT$id == 0] = "water"
-
-  dfLCT$year=year
-  print(head(dfLCT))
-  
-  list_of_dfLCTs[[cnt]] = dfLCT
-  cnt = cnt + 1
-}
-
-## Verknuepfung der einzelnen dfLCT data.frames zu einem grossen data.frame
-dfLCT_total <- do.call("rbind", list_of_dfLCTs)
-
-
-p <- ggplot(dfLCT_total, aes(x=x, y=y, frame=year))
-p <- p + geom_raster(aes(fill=name))
-p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
-                         ylim=c(min(dfLCT$y), max(dfLCT$y)))
-p <- p + theme(legend.position = "bottom")
-p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
-                                        "water"="lightblue"), drop=FALSE)
-p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
-    
-## label = paste0(nFor, " * km^2")
-## p <- p + annotate("text", label=label, x=3e5, y=9.05e6,
-##                  color="white", parse=TRUE, size=12)
-## label = paste0(nUnf, " * km^2")
-## p <- p + annotate("text", label=label, x=3e5, y=8.95e6,
-##                  color="white", parse=TRUE, size=12)
-    
-p <- p + xlab("easting")
-p <- p + ylab("northing")
-
-gganimate(p, "meine_animation.html")
-
+# Vergleich erstes und letztes Jahr, was passiert mit den bewaldeten pixeln die entwaldet wurden.
+# 1. plotten der Karten
+# 2. tracken der änderungen
 ```
 
-
+# Vergleich mit dem ESA Datensatz
+1) umprojizieren
+2) Ist die klassifizierung vergleichbar?
+3) welche pixel sind gleich klassifiziert
+4) für welche klassen gibt es die größten unterschiede
 
 
 # Hausaufgaben
@@ -301,8 +224,6 @@ gganimate(p, "meine_animation.html")
 3. Beschriften Sie die x-Achse des Zeitreihen-Plots mit ganzen Zahlen damit es eher einer Zeitachse mit Jahren entspricht (?scale_x_continuous). **(0.5 Punkte)**
 
 4. Modifizieren Sie den Plot indem sie die Balkendarstellung durch Linien ersetzen. **(1 Punkt)**
-
-5. Die Ausführen ihres Skriptes bricht ab und in der Konsole von Rstudio entdecken Sie die Fehlermeldung file does not exist". Beschreiben Sie kurz Ihr Vorgehen um den Fehler zu beheben/ einzugrenzen. **(1 Punkt)**
 
 6. Mit welcher Funktion können Sie in R Spalten an einen data.frame anhängen? **(1 Punkt)**
 

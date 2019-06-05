@@ -5,7 +5,8 @@ bibliography: literatur.bib
 classoption: a4paper
 lang: de-DE
 output:
-  tufte::tufte_handout:
+  pdf_document:
+  #  tufte::tufte_handout:
 ##    latex_engine: xelatex
     fig_caption: yes
     includes:
@@ -14,7 +15,7 @@ output:
     highlight: default
 ---
 
-# Vegetationsdynamik
+# Überblick
 
 Im Rahmen dieser Übung verstehen wir unter Vegetationsdynamik den Verlauf bzw. die Dauer der Vegetationsperiode. Unser heutiges MODIS Produkt ist [MCD12Q2](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q2). Weiterhin werden wir heute eine grundlegende Technik der Geodaten-Analyse behandeln: die Kombination unterschiedlicher Datenquellen zur Analyse einer Fragestellung.
 
@@ -24,52 +25,39 @@ Die relevante Literatur für heute ist: @Buitenwerf2015Threedecadesmultidimensio
 
 ## Initialisieren
 
-Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
+Laden der benötigten Pakete und setzen des working directories.
 
 ```{r, message=FALSE, warning=FALSE}
 library(raster)
 library(ggplot2)
 library(reshape2)
-library(FEglobaleOekologie)
-fegloekOptions(baseDir =
-               "/Users/cwerner/Dropbox/Documents/2018/teaching/fe_oekologie_2018/handouts")
-fegloekOptions(region="NEUROPE")
-fegloekInit()
+```
+```{r, eval=FALSE}
+setwd('S:/FGOE/')
+```
+```{r, echo=FALSE}
+setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts')
 ```
 
-Die benötigten Fernerkundungsdaten finden Sie online: https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2
-Laden Sie dort die Datei "VegDyn_{REGION}.zip" und verschieben Sie die entzippten Dateien in den folgenden Ordner:
-
-```{r, message=FALSE, warning=FALSE, eval=FALSE}
-file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+Die benötigten Fernerkundungsdaten finden Sie auf dem T: Laufwerk. Kopieren Sie diese in den folgenden Ordner
+```{r}
+data.dir='data/VegDyn/SEEUROPE/'
 ```
 
-Bitte beachten Sie, dass Sie heute mindestens zwei Regionen herunterladen müssen. Wiederholen Sie dazu den obigen Schritt. Ausserdem benötigen wir wieder den data.frame LCT3lookuptable. Diesen finden Sie in der Datei variables.R. Es ist empehlenswert, dass Sie das Skript kopieren um die zwei Regionen getrennt bearbeiten zu können und nicht durcheinander kommen.
+Wir benutzen nochmal die Funktion `extractDate()` um das Datum aus den Dateinamen zu extrahieren. Diese befindet sich auch im Datenordner und wird mit `source()` geladen.
 
-Um eine externe Datei (variables.R) in unser heutiges Skript zu importieren benutzen wir den Befehl 'source()'. Beachten Sie, dass sich die Datei variables.R im Unterverzeichnis R erwartet wird. Ein möglicher Pfad wäre also:
-
-```{r echo=FALSE, out.width="100%", fig.align="center", fig.cap="Verzeichnisstruktur"}
-knitr::include_graphics("RStudio_folders.png")
+```{r}
+source(file.path(data.dir,'extractDate.R'))
 ```
-
-```{r, message=FALSE, warning=FALSE, eval=TRUE}
-source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), 
-       encoding=getOption("encoding"))
-source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), 
-       encoding=getOption("encoding"))
-```
-
-Durch diese Befehlszeilen sollten (unter anderem) der data.frame 'LCT3lookuptable' sowie die Funktion 'extractDate()' für das Skript verfügbar sein.
 
 
 ## Einlesen der Daten
 
 Ähnlich zu unserer Sitzung "Phänologie" wird heute eine Zeitreihe aus den Dateien erzeugt.
 Dies geschieht für den Anfang und das Ende der Vegetationsperiode. Bitte beachten Sie dass die Daten schon in geografischen Koordinaten und nicht im UTM-Format vorliegen.
-Zunächst lesen wir alle Dateien welche mit dem jeweiligen angegebenen Namensmustern im Verzeichnis data.dir gefunden werden. Dann werden diese mit dem Befehl 'stack()' zu einem 3-dimensionalen Raster zusammengefügt.
+Zunächst lesen wir alle Dateien welche mit dem jeweiligen angegebenen Namensmustern im Verzeichnis data.dir gefunden werden. Dann werden diese mit dem Befehl 'stack()' zu einem 3-dimensionalen RasterStack zusammengefügt.
 
 ```{r, message=FALSE, warning=FALSE}
-data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
 files1 <- list.files(data.dir, pattern="Increase.Num_Modes_01.tif$", full.names=TRUE)
 stackVegStart <- stack(files1)
 files2 <- list.files(data.dir, pattern="Minimum.Num_Modes_01.tif$", full.names=TRUE)
@@ -78,14 +66,14 @@ stackVegEnd <- stack(files2)
 
 ## Verarbeiten der Daten
 
-Nun erzeugen wir für einige zuvor schon definierte Punkte aus diesem 3D-Raster Zeitreihen. Die Punkte sind für jede Region vorgegeben (schauen Sie sich das Ergebnis des Befehls getOption("fegloekPoints") in der Konsole an).
-
+Nun erzeugen wir für einige Punkte aus diesem 3D-Raster Zeitreihen. Die Punkte müssen wir zunächst noch definieren. 
 ```{r, message=FALSE, warning=FALSE}
-focus_points <- getOption("fegloekPoints")
+focus_points <- data.frame(long=c(31, 37.8, 15.85, 21.8),
+                           lat=c(31, 40.9, 44.35, 47.45))
 print(focus_points)
 ```
 
-Um die Daten extrahieren zu können wird mit SpatialPoints ein georeferenzierte Objekt aus dem data.frame focus_points erzeugt. Mit dem Befehl 'extract()' werden dann an diesen Punkten die Daten aus den Raster-Dateien entnommen und in den data.frames 'dfVegStart' und 'dfVegEnd' gespeichert.
+Um die Daten extrahieren zu können wird mit SpatialPoints ein georeferenzierte Objekt aus dem data.frame focus_points erzeugt. Mit dem Befehl 'extract()' werden dann an diesen Punkten die Daten aus den Raster-Dateien entnommen und in den data.frames 'dfVegStart' und 'dfVegEnd' gespeichert. Diese entahlten als erste Spalte die Spalte ID. Diese wird nicht benötigt und daher entfernt.
 
 ```{r}
 sPoints  <- SpatialPoints(focus_points,
@@ -105,13 +93,8 @@ print(vegDate)
 
 ```
 
-**Aufgabe:**
-
-Setzen Sie nun ungültige Werte der data.frames dfVegStart und dfVegEnd auf NA (also ungültig bzw. nicht-existent). Den NA Wert (auch Füllwert genannt) finden Sie auf der MODIS homepage des Produkts MCD12Q2:
-https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q2. Speichern Sie den fill_value in der Variable veg_fill_value.
-*Tipp:* Falls Sie vergessen haben wie Sie Werte eines data.frames oder vector ersetzen können schauen Sie im Handout der Sitzung Phänologie nach.
-
-```{r, echo=FALSE, results="hide", message=FALSE, warning=FALSE}
+Als nächstes setzen wir noch ungültige Werte auf `NA`.
+```{r}
 vegInvalid <- 32767
 dfVegStart[dfVegStart==vegInvalid] = NA
 dfVegEnd[dfVegEnd==vegInvalid] = NA
@@ -120,18 +103,6 @@ dfVegEnd[dfVegEnd==vegInvalid] = NA
 dfVegStart_transp = as.data.frame(t(dfVegStart))
 dfVegEnd_transp   = as.data.frame(t(dfVegEnd))
 
-```
-
-```{r, eval=FALSE}
-
-#vegInvalid <- ???
-#
-#dfVegStart ???
-#dfVegEnd   ???
-
-# data.frame transponieren
-dfVegStart_transp = as.data.frame(t(dfVegStart))
-dfVegEnd_transp   = as.data.frame(t(dfVegEnd))
 ```
 
 Um zu verstehen das der Befehl 't()' bewirkt vergleichen Sie auf der Konsole die Ausgabe für 'dfVegStart' und 'dfVegStart_transp'.
@@ -143,7 +114,7 @@ dfGSL$date = vegDate
 ```
 
 **Aufgabe:**
-Verschmelzen den data.frame mit 'melt()' um ihn für die graphische Ausgabe mit ggplot vorzubereiten. Wir wollen dass alle Spalten mit Ausnahme der Spalte 'date' verschmolzen werden (die Ausnahme wird mit dem Argument 'id.vars="date"' angegeben).
+Verschmelzen Sie den data.frame mit 'melt()' um ihn für die graphische Ausgabe mit ggplot vorzubereiten. Wir wollen dass alle Spalten mit Ausnahme der Spalte 'date' verschmolzen werden (die Ausnahme wird mit dem Argument 'id.vars="date"' angegeben).
 
 ```{r, echo=FALSE}
 melted.dfGSL <- melt(dfGSL, id.vars="date")
@@ -155,7 +126,7 @@ melted.dfGSL <- melt(dfGSL, id.vars="date")
 
 ## Grafikausgabe
 
-Nun öffnen wir eine PDF-Datei und plotten den Verlauf der Vegetationsperiode.
+Nun plotten wir den Verlauf der Vegetationsperiode.
 
 ```{r}
 p <- ggplot(melted.dfGSL, aes(x=date, y=value))
@@ -163,39 +134,21 @@ p <- p + geom_line()
 p <- p + scale_x_date()
 p <- p + xlab("Datum") + ylab("Vegetationsperiode [Tage]")
 p <- p + facet_wrap(~variable, ncol=1)
-```
-```{r, eval=FALSE}
-file_plot1 <- paste0(getOption("fegloekRegion"), "_GSL.pdf")
-pdf(file.path(getOption("fegloekFigDir"), file_plot1), paper="special", width=8, height=8)
-print(p)
-dev.off()
-```
-```{r, warning=FALSE, message=FALSE, echo=FALSE, fig.width=8, fig.height=5}
 print(p)
 ```
 
 # Abhängigkeit der Vegetationsperiode von der Höhe
 
-Die Gruppen BANGLADESH, BORNEO, MEXICO, NWBRAZIL, SAFRICA, SEBRAZIL und SWAUSTRALIA sollten
-nun zu einer anderen Region wechseln, entweder NEAMERICA, NEASIA, NEUROPA, SEAUSTRALIA oder SEEUROPE.
-Dafür muss die entsprechende Zeile aus obiger Initialisierung angepasst werden.
-
-```{r}
-fegloekOptions(region="SEEUROPE")
-if (any(getOption("fegloekRegion") == c("BANGLADESH", "BORNEO", "MEXICO", "NWBRAZIL",
-                   "SAFRICA", "SEBRAZIL", "SWAUSTRTALIA")))
-  warning("Falsche Region!")
-```
 
 ## Einlesen und Verarbeiten der Daten
 
 Im Folgenden wird eine durchschnittliche Vegetationsperiode über die Jahre 2001 bis 2010
 für einen bestimmten Auschnitt ("kElevExtent") in der Karte berechnet. rValid zählt,
-wieviele gültige Werte rVegStart und rVegEnd haben. Wenn die Vegetationsperiode
+wieviele gültige Werte rVegStart und rVegEnd haben. Für die Jahre mit gültigen Längen der Vegetationsperiode werden diese zunächst über die Jahre aufaddiert und dann durch rValid geteilt um den Mittelwert zu erhalten. Wenn die Vegetationsperiode
 null ist, setzen Sie auf NA.
 
 ```{r}
-data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
+kElevExtent=c(16, 26, 36, 44)
 years <- c(2006:2010)
 if (exists("rGSL")){
   rm(rGSL)
@@ -207,13 +160,13 @@ for (y in years) {
   file1 <- file.path(data.dir, 
           paste0("MCD12Q2_", y, "-01-01.Onset_Greenness_Increase.Num_Modes_01.tif"))
   rVegStart <- raster(file1)
-  rVegStart = crop(rVegStart, getOption("fegloekVegDynExtent"))
+  rVegStart = crop(rVegStart, kElevExtent)
   rVegStart[rVegStart==32767] = NA
   
   file2 <- file.path(data.dir, 
           paste0("MCD12Q2_", y, "-01-01.Onset_Greenness_Minimum.Num_Modes_01.tif"))
   rVegEnd <- raster(file2)
-  rVegEnd = crop(rVegEnd, getOption("fegloekVegDynExtent"))
+  rVegEnd = crop(rVegEnd, kElevExtent)
   rVegEnd[rVegEnd==32767] = NA
   
   if (exists("rGSL")) {
@@ -231,23 +184,25 @@ rGSL <- rGSL / rValid
 rGSL[rGSL==0] = NA
 ```
 
-Wir wandeln die Daten in einen data.frame um und benennen der Spalten neu.
+Wir wandeln die Daten in einen data.frame um und benennen die Spalten neu.
 
 ```{r}
 dfGSL <- as.data.frame(rasterToPoints(rGSL))
 colnames(dfGSL) <- c("long", "lat", "GSL")
 ```
 
-Nun laden wir die Landklassifikation. Damit die unterschiedlichen Datensätze verrenchent werden können muss evtl. die Auflösung angepasst werden. Dies erfolgt mit dem raster-Befehl 'resample'. Die methode 'ngb' gibt dabei an, dass wir die 'nearest neighbor' methode verwenden wollen. Im Anschluss vereinen wir die Datensätze.
+Nun laden wir die Landklassifikation. Damit die unterschiedlichen Datensätze kombiniert werden können muss evtl. die Auflösung angepasst werden. Dies erfolgt mit dem raster-Befehl 'resample'. Die methode 'ngb' gibt dabei an, dass wir die 'nearest neighbor' methode verwenden wollen. Im Anschluss vereinen wir die Datensätze.
 
 
 ```{r}
 file3 <- file.path(data.dir, "MCD12Q1_GEO_hres_2010-01-01.Land_Cover_Type_3.tif")
 rLCT <- raster(file3)
-rLCT = crop(rLCT, getOption("fegloekVegDynExtent"))
+rLCT = crop(rLCT, kElevExtent)
 rLCT = resample(rLCT, rGSL, method="ngb")
 dfLCT <- as.data.frame(rasterToPoints(rLCT))
 colnames(dfLCT) <- c("long", "lat", "id")
+file <- 'LCT3Lookuptable.txt'
+LCT3lookuptable=read.table(file.path(data.dir, file),header=T)
 dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
 ```
 
@@ -256,13 +211,13 @@ Ein digitales Höhenmodel (GTOPO30) wird geladen.
 ```{r}
 file4  <- file.path(data.dir, "GTOPO30.tif")
 rGtopo <- raster(file4)
-rGtopo = crop(rGtopo, getOption("fegloekVegDynExtent"))
+rGtopo = crop(rGtopo, kElevExtent)
 rGtopo = resample(rGtopo, rGSL, method="ngb")
 dfGtopo <- as.data.frame(rasterToPoints(rGtopo))
 colnames(dfGtopo) <- c("long", "lat", "elevation")
 ```
 
-Anschließend werden alle drei Datensätze anhand fer Koordinate-Spalten verschmolzen.
+Anschließend werden alle drei Datensätze anhand der Koordinate-Spalten verschmolzen.
 
 ```{r}
 dfData <- merge(dfGSL, dfGtopo, by=c("long", "lat"))
@@ -275,21 +230,14 @@ Unterteilt wird es nochmals nach Landbedeckung.
 
 ## Grafikausgabe
 
-```{r}
+```{r,eval=TRUE}
 transparentColor <- rgb(1, 0.5, 0, 0.01, maxColorValue=1)
 p <- ggplot(data=dfData, aes(x=elevation, y=GSL))
-p = p + geom_point(color=transparentColor)
+#p = p + geom_point(color=transparentColor)
 p = p + geom_smooth(se=TRUE, color='#2957FF')
 p = p + xlab("Höhe über NN [m]")
 p = p + ylab("Vegetationsperiode [Tage]")
 p = p + facet_wrap(~name, ncol=3, scale="free_y")
-```
-```{r, eval=FALSE}
-file_plot2 <- paste0(getOption("fegloekRegion"), "_GSL.png")
-png(file.path(getOption("fegloekFigDir"), file_plot2), width=1024, height=800)
-dev.off()
-```
-```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.ext='png', dpi=150, fig.width=8, fig.height=8}
 print(p)
 ```
 

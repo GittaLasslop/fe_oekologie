@@ -62,20 +62,20 @@ data.dir <- 'data/LAI/AUS'
 Ähnlich zu unserer Sitzung "Phänologie" wird heute zunächst eine Zeitreihe aus den Dateien erzeugt. Wir berechnen dann für jedes Jahr den maximalen LAI und mitteln dann über die Jahre. Um die einzelnen Jahre zu unterscheiden benutzen wir die Information im Dateinamen, dort findet sich immer das Muster Axxxx, wobei xxxx die vierstellige Jahreszahl ist.
 Anstatt alle Dateien in die Variable files zu speichern verwenden wir den input Parameter `pattern` um nur die Dateien eines Jahres auszuwählen.
 
--------------------------------------
+---------------------------------------------------
 
 ***Frage***
 
 Wie können Sie überprüfen ob die Dateien richtig ausgewählt werden?
 
--------------------------------------
+-------------------------------------------------
 
 ```{r, message=FALSE, warning=FALSE}
-years <- 2010:2010
+years <- 2010:2011
 MaxLAI <- list()
 validRange <- c(0,100)
 scaleFactor <- 0.1
-crop_extent <- extent(c(145,155,-30,-20))
+crop_extent <- extent(c(147,153.7,-30,-24.5))
 for (i in 1:length(years)){
 files <- list.files(data.dir, pattern=paste0("MCD15A2H_h31v11_",years[i]), full.names=TRUE)
 stackLAI <- crop(stack(files),crop_extent)
@@ -103,13 +103,13 @@ rm(MaxLAIstack)
 
 Nun laden wir die Landklassifikation. Damit die unterschiedlichen Datensätze kombiniert werden können muss evtl. die Auflösung angepasst werden. 
 
--------------------------------------------------
+-------------------------------------------------------------
 
 ***Aufgabe***
 
 Wie finden Sie heraus ob die Auflösung der Datensätze übereinstimmt?
 
--------------------------------------------------
+-------------------------------------------------------------
 
 ```{r}
 
@@ -137,13 +137,13 @@ names(dfLAI) = c('x','y','maxLAI')
 ```
 
 
-------------------------------------------
+------------------------------------------------------
 
 ***Aufgabe***
 
 Die Niederschlagsdaten werden gelesen. Stimmt hier die Auflösung überein? Vergleichen Sie die räumliche Auflösung und Projektion.
 
--------------------------------------------
+------------------------------------------------------
 
 ```{r}
 Precip <- raster(file.path(data.dir,'worldclimPmean.tif'))
@@ -153,8 +153,8 @@ Anschließend werden alle drei Datensätze anhand der Koordinaten-Spalten kombin
 Und wir entfernen einige Oberflächentypen, die wir nicht berücksichtigen wollen.
 
 ```{r}
-PrecipHR <- resample(Precip,LCT)
-dfPrecip <- data.frame(rasterToPoints(PrecipHR))
+Precip <- resample(Precip,LCT)
+dfPrecip <- data.frame(rasterToPoints(Precip))
 names(dfPrecip) = c('x','y','Precipitation')
 dfPLCT <- merge(dfPrecip,dfLCT,by=c('x','y'))
 dfPLCTmaxLAI <- merge(dfPLCT,dfLAI,by=c('x','y'))
@@ -182,7 +182,7 @@ Unterteilt wird es nochmals nach Landbedeckung.
 
 ```{r,eval=TRUE}
 p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation, y=maxLAI))
-p = p + facet_wrap(~name, ncol=3, scale="free_y")
+p = p + facet_wrap(~name, ncol=3)
 p = p + xlab("Niederschlag [Einheit]")
 p = p + ylab("Maximaler LAI [m2/m2]")
 p = p + geom_hex(bins=c(50))
@@ -202,7 +202,7 @@ print(p)
 
 5. Erzeugen Sie einen weitere Abbildung in der Sie eine andere sinnvolle Variable mit GSL in Beziehung setzen (Hinweis: die Daten existieren schon in unserem data.frame). **(2 Punkte)**
 
-6. Erstellen Sie eine Karte mit den Namen der Landbedeckungsklassen unseres Datenausschnitts und den Umrissen von Australien.**(2 Punkte)**  (siehe skript mapPhen das Beispiel für Deutschland)
+6. Erstellen Sie eine Karte mit den Namen der Landbedeckungsklassen unseres Datenausschnitts und den Umrissen von Australien.**(2 Punkte)**  (siehe im skript mapPhen das Beispiel für Deutschland)
 
 worldmap <- map_data("world",region='Australia')
 

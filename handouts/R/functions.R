@@ -9,8 +9,8 @@ geotiff2df <- function(file, name="value", crop_extent=NA, valid_range=NA, scale
 
  ## Setze valid range und scale factor (falls gegeben)
  if (!any(is.na(valid_range))) {
-   rast[rast <= valid_range[1]] = NA
-   rast[rast >= valid_range[2]] = NA
+   rast[rast < valid_range[1]] = NA
+   rast[rast > valid_range[2]] = NA
  }
  if (!is.na(scale_factor))
    rast = rast * scale_factor

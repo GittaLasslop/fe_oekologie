@@ -1,6 +1,6 @@
 ---
 title: "Fernerkundung globale Ökologie: 4. Landnutzungsänderung"
-author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Thurner](mailto:martin.thurner@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
 #lang: de-DE
 bibliography: literatur.bib
@@ -15,19 +15,23 @@ output:
     highlight: default
 ---
 
-# Landbedeckung
+## Überblick
+Wir werden in dieser Sitzung die Daten zur Landbedeckung von MODIS nutzen. Diese sind in jährlicher Auflösung verfügbar. Wir werden heute:
 
-Über den jährlich ermittelten Landbedeckungstypen (Land cover type, LCT) lässt sich die Veränderung der Landnutzung über den Zeitraum der vorhandenen Satellitenmessungen ermitteln.
+- die geotiff2df Funktion erweitern: durch Übergabe von Koordinaten soll ein Teil des rasters ausgeschnitten werden,
 
-## Daten
-Das MODIS Kürzel für die heutige Sitzung ist [MCD12Q1](https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1).
+- aus den Daten eine Zeitreihe der bewaldeten Flächen und unbewaldeten Flächen in Nord-West-Brasilien berechnen,
+
+- das Jahr 2001 mit 2010 vergleichen und analysieren in welchen Typen bewaldete Flächen umgewandelt wurden,
+
+- den MODIS Datensatz mit dem ESA Datensatz vergleichen.
 
 ## Literatur
 Generelle Literatur zu den relevanten MODIS Produkten:  
 @Mertes2015Detectingchangeurban @Yin2014MappingAnnualLand @Broich2011Remotelysensedforest @Friedl2010MODISCollectionglobal @Schneider2009newmapglobal
 
 Für eine Diskussion von Unsicherheiten der genutzten Produkte:  
-@Fritz2011Highlightingcontinueduncertainty @Park2014CharacteristicsMODISlandcover
+@Fritz2011Highlightingcontinueduncertainty
 
 ## Initialisieren
 Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
@@ -35,51 +39,132 @@ Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
 library(raster)
 library(ggplot2)
 library(reshape2)
-library(rworldmap)
-
+library(caret)
 setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts')
 ```
 ```{r, message=FALSE, warning=FALSE,eval=FALSE}
+install.packages("caret")
 library(raster)
 library(ggplot2)
 library(reshape2)
-library(rworldmap)
+library(caret)
 
 ```
-Die benötigten Fernerkundungsdaten finden Sie auf dem T Laufwerk. Kopieren Sie die Dateien auf ihr S Laufwerk in den folgenden Ordner:
+
+Die benötigten Fernerkundungsdaten finden Sie auf dem T Laufwerk. Kopieren Sie die Dateien auf ihr S: Laufwerk in den folgenden Ordner:
+
 ```{r, message=FALSE, warning=FALSE, eval=FALSE}
-'S:/FGOE/data/LUC/BORNEO'
+'S:/FGOE/data/LUC/NWBRAZIL'
 ```
 
-Ausserdem benötigen wir die Funktion *geotiff2df()* aus den letzten Sitzungen. Kopieren Sie den Quelltext der Funktion in dieses Script oder laden Sie die Funktion aus einer externen Datei *functions.R* (in ihrem OLAT_Skript haben wir die Funktion der letzten Sitzung schon eingefügt - generell ist es aber ratsam bei größeren Projekten häufig verwendete Funktionen in externe Dateien auszulagern und mit source in the Laufzeitumgebung zu laden).
+Ausserdem benötigen wir die Funktion *geotiff2df()* aus den letzten Sitzungen. 
+```{r,echo=FALSE}
+geotiff2df <- function(file, name="value", crop_extent=NA, valid_range=NA, scale_factor=NA) {
+ rast <- raster(file)
 
-```{r, messsage=FALSE}
-source(file.path("R", "functions.R"), encoding=getOption("encoding"))
+ ## beschneide das GeoTiff mit crop (falls crop nicht NA ist)
+ ## crop muss folgendes Format haben: c(xmin, xmax, ymin, xmax)
+ if (is.na(crop_extent))
+   rast = crop(rast, crop_extent)
+
+ ## Setze valid range und scale factor (falls gegeben)
+ if (is.na(valid_range)) {
+   rast[rast < valid_range[1]] = NA
+   rast[rast > valid_range[2]] = NA
+ }
+ if (!is.na(scale_factor))
+   rast = rast * scale_factor
+
+ ## konvertiere in einen data.frame
+ df <- as.data.frame(rasterToPoints(rast))
+ colnames(df) <- c("x", "y", name)
+ return(df)
+}
 ```
 
+```{r,eval=FALSE}
+geotiff2df <- function(file, name="value", valid_range=NA, scale_factor=NA) {
+ rast <- raster(file)
+
+ ## beschneide das GeoTiff mit crop (falls crop nicht NA ist)
+ ## crop muss folgendes Format haben: c(xmin, xmax, ymin, xmax)
+  ## Setze valid range und scale factor (falls gegeben)
+ if (!any(is.na(valid_range))) {
+   rast[rast < valid_range[1]] = NA
+   rast[rast > valid_range[2]] = NA
+ }
+ if (!is.na(scale_factor)){
+   rast = rast * scale_factor
+ }
+ ## konvertiere in einen data.frame
+ df <- as.data.frame(rasterToPoints(rast))
+ colnames(df) <- c("x", "y", name)
+ return(df)
+}
+```
 
 Erweitern Sie die Funktion *geotiff2df()* so, dass Sie mit der Übergabe eines optionalen Arguments "crop_extent" die Ausgabe beschneiden können. Hierzu  benötigen Sie:  
 (1) ein zusaetzliches Funktionsargument ('crop_extent') mit dem Standardwert NA (für 'nicht definiert') und  
 (2) den Befehl crop (?crop) um die Ausdehnung unserer Karte auf die Grenzen 'crop_extent' zu beschneiden.   
-In unserem heutigen Skript haben wir die Position für die Funktionserweiterung mit einem Kommentar markiert. **Hinweis:** Für den Aufbau der if-Bedingung können Sie sich bei der folgenden Abfrage von 'valid_range' in der Funktion inspirieren lassen.
-
 
 ## Verarbeiten der Daten
 
-In unseren MODIS Beispiel-Daten sind LUC Informationen für die Jahre 2001 -- 2010 vorhanden. Wir vergleichen erstmal die Landoberflächenbedeckung für das erste Jahr im Vergleich zum letzen Jahr.
-
+Die Jahre werden in einer for-Schleife zwischen start_year und end_year durchlaufen und mit jedem Durchlauf wird berechnet, wieviel Pixel als bewaldet und unbewaldet klassifiziert sind. Im ersten Jahr (year == start_year) wird der data.frame tsForest erzeugt und in den folgenden Jahren wird diesem data.frame je eine Zeile hinzugefügt (rbind, "row bind"). Für das erste und letze Jahr wird eine Karte erzeugt.
 ```{r}
-start_year <- 2002
+start_year <- 2001
 end_year <- 2010
 ```
 
+Der *crop* Befehl schneidet eine von uns vordefinierte Region aus den Daten aus. Diese Region muss als zusätzliches/ optionales Funktionsargument der Funktion 'geotiff2df()' übergeben werden. 
 
-Die Jahre werden in einer for-Schleife zwischen start_year und end_year durchlaufen und mit jedem Durchlauf wird berechnet, wieviel Pixel als bewaldet und unbewaldet klassifiziert sind. Im ersten Jahr (year == start_year) wird der data.frame tsForest erzeugt und in den folgenden Jahren wird diesem data.frame je eine Zeile hinzugefügt (rbind, "row bind"). Für das erste und letze Jahr wird eine Karte erzeugt (Hinweis: die Daten der Region BORNEO für das Jahr 2001 enthalten ungewöhnlich viele nicht-klassifizierte Pixel - starten hier deshalb mit dem Jahr 2002; generell sollten Sie bei LUC Analysen immer prüfen ob Unregelmässigkeiten in einer Zeitscheibe zu beobachten sind - sie könnten sich auch die Quality Control Daten des Produkts ansehen; diese finden Sie auf der MODIS-Homepage als separaten Datensatz).
+Anschliessend wird für jedes Jahr eine neue Spalte erzeugt, die Wald und nicht bewaldete Gebiete unterscheidet. Die Klassifikation in Wald / Nicht-Wald erfolgt mittels der zuletzt definierten Variable in LCT3lookuptable. Anschließend wird die Anzahl der bewaldeten und unbewaldeten Pixel pro Jahr gezählt und in dem data.frame tsForest gespeichert.
 
+
+```{r, eval=FALSE}
+forestExtent = c(1000000, 1500000, 8500000, 9000000)
+data.dir = 'Pfad zu ihrem Datenordner'
+for (year in start_year:end_year) {
+  file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
+  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", 
+                      crop_extent =forestExtent, valid_range = c(0, 253))
+  
+  dfLCT$name = ""
+  dfLCT$name[dfLCT$id < 5 | dfLCT$id > 8] = "unforested"
+  dfLCT$name[dfLCT$id > 4 & dfLCT$id < 9] = "forested"
+  dfLCT$name[dfLCT$id == 0] = "water"
+
+  nFor = length(dfLCT$name[dfLCT$name == "forested"])
+  nUnf = length(dfLCT$name[dfLCT$name == "unforested"])
+
+  if (year == start_year) {
+    tsForest = data.frame(Year=year, forested=nFor, unforested=nUnf)
+  } else {
+    tsForest = rbind(tsForest, data.frame(Year=year, forested=nFor, unforested=nUnf))
+  }
+
+  if (year == start_year || year == end_year) {
+    p <- ggplot(dfLCT, aes(x=x, y=y))
+    p <- p + geom_raster(aes(fill=name))
+    p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
+                         ylim=c(min(dfLCT$y), max(dfLCT$y)))
+    p <- p + theme(legend.position = "bottom")
+    p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
+                                        "water"="lightblue"), drop=FALSE)
+    p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
+    p <- p + labs(title=year)
+    p <- p + xlab("easting")
+    p <- p + ylab("northing")
+    file <- paste0("NWBRAZIL_LUC_", year, ".pdf")
+    pdf("Pfad zu ihrem Plot Ordner", file))
+    print(p)
+    dev.off()
+  }
+}
+```
 
 ```{r, echo=FALSE, results="hide", message=FALSE, warning=FALSE, fig.width=5, fig.height=4, fig.margin=TRUE}
-forestExtent <- c(-280000   ,    0   ,    0  ,250000)
-data.dir <- 'data/LUC/BORNEO'
+forestExtent = c(1000000, 1500000, 8500000, 9000000)
+data.dir <- 'data/LUC/NWBRAZIL/small/'
 for (year in start_year:end_year) {
   file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
   dfLCT <- geotiff2df(file.path(data.dir, file), name="id", crop_extent =forestExtent, valid_range = c(0, 253))
@@ -117,67 +202,12 @@ for (year in start_year:end_year) {
     p <- p + labs(title=year)
     p <- p + xlab("easting")
     p <- p + ylab("northing")
-    file <- paste0("plots/BORNEO_LUC_", year, ".pdf")
     print(p)
   }
 }
 ```
 
-Der *crop* Befehl schneidet eine von uns vordefinierte Region aus den Daten aus. Diese Region muss als zusätzliches/ optionales Funktionsargument der Funktion 'geotiff2df()' übergeben werden. 
-
-Anschliessend wird für jedes Jahr eine neue Spalte erzeugt, die Wald und nicht bewaldete Gebiete unterscheidet. Die Klassifikation in Wald / Nicht-Wald erfolgt mittels der zuletzt definierten Variable in LCT3lookuptable. Anschließend wird die Anzahl der bewaldeten und unbewaldeten Pixel pro Jahr gezählt und in dem data.frame tsForest gespeichert.
-
---------------------------
-**Aufgabe**
-Aktivieren Sie innerhalb der Schleife die Zeilen mit 'annotate' und 
-wählen sie die X- und Y-Koordinaten so, das die Informationen innerhalb 
-der Karte erscheinen (Hinweis: der Befehl 'extent(rLCT)' gibt Ihnen 
-die Limits der Karte aus).
----------------------------
-
-```{r, eval=FALSE}
-forestExtent = c(-280000, 0, 0, 250000)
-data.dir = 'Pfad zu ihrem Datenordner'
-for (year in start_year:end_year) {
-  file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
-  dfLCT <- geotiff2df(file.path(data.dir, file), name="id", 
-                      crop_extent =forestExtent, valid_range = c(0, 253))
-  
-  dfLCT$name = ""
-  dfLCT$name[dfLCT$id < 5 | dfLCT$id > 8] = "unforested"
-  dfLCT$name[dfLCT$id > 4 & dfLCT$id < 9] = "forested"
-  dfLCT$name[dfLCT$id == 0] = "water"
-
-  nFor = length(dfLCT$name[dfLCT$name == "forested"])
-  nUnf = length(dfLCT$name[dfLCT$name == "unforested"])
-
-  if (year == start_year) {
-    tsForest = data.frame(Year=year, forested=nFor, unforested=nUnf)
-  } else {
-    tsForest = rbind(tsForest, data.frame(Year=year, forested=nFor, unforested=nUnf))
-  }
-
-  if (year == start_year || year == end_year) {
-    p <- ggplot(dfLCT, aes(x=x, y=y))
-    p <- p + geom_raster(aes(fill=name))
-    p <- p + coord_fixed(xlim=c(min(dfLCT$x), max(dfLCT$x)),
-                         ylim=c(min(dfLCT$y), max(dfLCT$y)))
-    p <- p + theme(legend.position = "bottom")
-    p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
-                                        "water"="lightblue"), drop=FALSE)
-    p <- p + guides(fill = guide_legend(title=NULL, ncol = 4))
-    p <- p + labs(title=year)
-    p <- p + xlab("easting")
-    p <- p + ylab("northing")
-    file <- paste0("Borneo_LUC_", year, ".pdf")
-    pdf("Pfad zu ihrem Plot Ordner", file), paper="special", width=10, height=6)
-    print(p)
-    dev.off()
-  }
-}
-```
-
-Nun plotten wir die Zeitreihe. Dafür werden die Spalten 'forested' und 'unforested' mit dem Befehl 'melt' in einer Spalte namens 'value' kombiniert und eine zusätzliche Spalte names 'variable' erzeugt, die die entsprechenden alten Spaltennamen 'forested'/'unforested' enthält. Falls sich die Größen der zwei Landnurzungklassen in ihrer Region sehr stark unterscheiden können Sie mit dem Befehl 'facet_wrap' die Balken der Klassen in interschiedlichen Panelen plotten und so Trends leichter sichtbar machen. Denken Sie daran, die Variablen entsprechend ihrer obigen Definition umzubenennen.
+Nun plotten wir die Zeitreihe. Dafür werden die Spalten 'forested' und 'unforested' mit dem Befehl 'melt' in einer Spalte namens 'value' kombiniert und eine zusätzliche Spalte names 'variable' erzeugt, die die entsprechenden alten Spaltennamen 'forested'/'unforested' enthält. 
 
 ```{r}
 tsForest = melt(tsForest, measure.vars=c("forested", "unforested"))
@@ -186,10 +216,9 @@ p <- p + geom_bar(stat="identity", position="dodge")
 p <- p + scale_fill_manual(values=c("unforested"="brown", "forested"="darkgreen",
                                         "water"="lightblue"), drop=FALSE)
 
-## p <- p + facet_wrap(~variable, ncol=1, scales="free_y")
 ```
 ```{r, eval=FALSE}
-file <- paste0("BORNEO_LUC_TS.pdf")
+file <- paste0("BRAZIL_LUC_TS.pdf")
 pdf(file.path('plots/LUC/', file), paper="special", width=10, height=6)
 print(p)
 dev.off()
@@ -199,35 +228,176 @@ dev.off()
 print(p)
 ```
 
+Wir vergleichen nun das erste und letzte Jahr der Zeitreihe und untersuchen, wie gross der Verlust an ehemals bewaldeter Fläche in diesem Zeitraum ist. Zunächst erfassen wir, welche Pixel im Jahr 2001 bewaldet waren. Danach, welche Pixel im Jahr 2010 nicht bewaldet waren. Anschliessend bestimmen wir die Schnittmenge  mit der Funktion `intersect`. 
+
 ```{r}
-forestExtent <- c(-280000   ,    0   ,    0  ,250000)
-data.dir <- 'data/LUC/BORNEO'
-  file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
-# Vergleich erstes und letztes Jahr, was passiert mit den bewaldeten pixeln die entwaldet wurden.
-# 1. plotten der Karten
-# 2. tracken der änderungen
+forestExtent = c(1000000, 1500000, 8500000, 9000000)
+
+year <- 2001
+file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
+dfLCT1 <- geotiff2df(file.path(data.dir, file), name="id", 
+                      crop_extent =forestExtent, valid_range = c(0, 253))
+
+idx.forest.2001 <- which(dfLCT1$id > 4 & dfLCT1$id < 9)
+
+year <- 2010
+file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
+dfLCT2 <- geotiff2df(file.path(data.dir, file), name="id", 
+                      crop_extent =forestExtent, valid_range = c(0, 253))
+idx.noforest.2010 <- which(dfLCT2$id < 5 | dfLCT2$id > 8)
+
+idx.change <- intersect(idx.forest.2001, idx.noforest.2010)
+```
+
+
+----------------------------------------
+***Aufgabe***
+
+Wie gross ist die Fläche, die von Entwaldung betroffen ist (absolut in km2 und relativ zur bewaldeten Fläche im Jahr 2001)?
+
+----------------------------------------
+
+Ausserdem stellen wir dar, welche neue Landbedeckung in den ehemals bewaldeten Flächen jetzt vorherrscht. Dafür verknüpfen wir den data frame mit der Tabelle "LCT3lookuptable" und fassen ihn anschliessend mit dem "table" Befehl zusammen, wie in der NPP-Übung. Zur Visualisierung wählen wir einen Barplot. 
+
+```{r}
+dfLCT.change <- dfLCT2[idx.change, ]
+
+file <- 'LCT3Lookuptable.txt'
+LCT3lookuptable=read.table(file.path(data.dir, file),header=T)
+dfLCT.change = merge(dfLCT.change, LCT3lookuptable, by="id", all.x=TRUE)
+
+table(dfLCT.change$name)
+
+df.change <- as.data.frame(table(dfLCT.change$name))
+colnames(df.change) <- c("Class","Freq")
+df.change <- df.change[which(df.change$Freq!=0),]
+df.change
+
+p <- ggplot(df.change, aes(x=Class, y = Freq, fill=Class))
+p <- p + geom_bar(width = 1, stat = "identity", color = "black")
+p <- p + coord_flip()
+print(p)
+
 ```
 
 # Vergleich mit dem ESA Datensatz
-1) umprojizieren
-2) Ist die klassifizierung vergleichbar?
-3) welche pixel sind gleich klassifiziert
-4) für welche klassen gibt es die größten unterschiede
+Wir vergleichen das MODIS Land Cover Produkt (Jahr 2010) mit dem ESA CCI Land Cover Datensatz (esa-landcover-cci.org). Beide Datensätze eine unterschiedliche Projektion, Auflösung und auch Klassifizierung haben, müssen diese zunächste bestmöglich vergleichbar gemacht werden. Dafür arbeiten wir diesmal direkt mit den Raster-Datensätzen anstelle von data frames, da für Raster-Datensätze Funktionen zur Umprojizierung zur Verfügung stehen.  
+Zuerst aggregieren wir den ESA Datensatz (ca. 300 m) auf eine ähnliche Auflösung wie MODIS (1 km). 
+
+--------------------------------------------------
+***Aufgabe***
+
+Was muss bei der Aggregierung beachtet werden? 
+
+-------------------------------------------------
+
+Anschliessend projizieren wir den MODIS Datensatz von UTM Koordinaten in geographische Koordinaten (geographische Länge und Breite) um. Hierbei verwenden wir den nearest neighbor Algorithmus, sodass der Wert des ursprünglichen Pixels, welches den Koordinaten des neuen Pixels am nächsten liegt, übernommen wird. 
+Schliesslich vergleichen wir die Klassifizierung der beiden Datensätze. 
+
+------------------------------------------------
+***Aufgabe***
+
+Wie können wir diese bestmöglich zusammenführen und welche Probleme treten auf?
+
+-------------------------------------------------
+
+Erst dann können wir die beiden Datensätze mithilfe einer sogenannten "confusion matrix" vergleichen. 
+
+-------------------------------------------------
+***Aufgabe***
+
+Wie gut stimmen die Datensätze für die verschiedenen Klassen überein und für welche Klassen finden wir die grössten Unterschiede?
+
+-------------------------------------------------
+
+```{r}
+forestExtent = c(1000000, 1500000, 8500000, 9000000)
+year <- 2010
+file <- paste0("MCD12Q1_", year ,"-01-01.Land_Cover_Type_3.tif")
+modis <- raster(file.path(data.dir, file))
+modis <- crop(modis, forestExtent)
+
+valid_range <- c(0, 253)
+if (!any(is.na(valid_range))) {
+   modis[modis <= valid_range[1]] = NA
+   modis[modis >= valid_range[2]] = NA
+ }
+
+projection(modis)
+#[1] "+proj=utm +zone=20 +south +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0"
+
+file <- "ESACCI-LC-L4-LCCS-Map-300m-2010-Subset.tif"
+esa <- raster(file.path(data.dir, file))
+projection(esa)
+
+Mode <- function(x, ...) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+esa.agg <- aggregate(esa, fact=4, fun=Mode, expand=TRUE, na.rm=TRUE)
+
+modis.longlat <- projectRaster(from=modis, to=esa.agg, method="ngb") #nearest neighbor
+
+esa.agg.reclass <- esa.agg
+esa.agg.reclass[esa.agg.reclass == 0] <- 255
+esa.agg.reclass[esa.agg.reclass == 10] <- 1
+esa.agg.reclass[esa.agg.reclass == 11] <- 1
+esa.agg.reclass[esa.agg.reclass == 12] <- 3
+esa.agg.reclass[esa.agg.reclass == 20] <- 1
+esa.agg.reclass[esa.agg.reclass == 30] <- 4
+esa.agg.reclass[esa.agg.reclass == 40] <- 4
+esa.agg.reclass[esa.agg.reclass == 50] <- 5
+esa.agg.reclass[esa.agg.reclass == 60] <- 6
+esa.agg.reclass[esa.agg.reclass == 61] <- 6
+esa.agg.reclass[esa.agg.reclass == 62] <- 6
+esa.agg.reclass[esa.agg.reclass == 70] <- 7
+esa.agg.reclass[esa.agg.reclass == 71] <- 7
+esa.agg.reclass[esa.agg.reclass == 72] <- 7
+esa.agg.reclass[esa.agg.reclass == 80] <- 8
+esa.agg.reclass[esa.agg.reclass == 81] <- 8
+esa.agg.reclass[esa.agg.reclass == 82] <- 8
+esa.agg.reclass[esa.agg.reclass == 90] <- 5
+esa.agg.reclass[esa.agg.reclass == 100] <- 4
+esa.agg.reclass[esa.agg.reclass == 110] <- 4
+esa.agg.reclass[esa.agg.reclass == 120] <- 2
+esa.agg.reclass[esa.agg.reclass == 121] <- 2
+esa.agg.reclass[esa.agg.reclass == 122] <- 2
+esa.agg.reclass[esa.agg.reclass == 130] <- 1
+esa.agg.reclass[esa.agg.reclass == 140] <- 1
+esa.agg.reclass[esa.agg.reclass == 150] <- 9
+esa.agg.reclass[esa.agg.reclass == 152] <- 9
+esa.agg.reclass[esa.agg.reclass == 153] <- 9
+esa.agg.reclass[esa.agg.reclass == 160] <- 5
+esa.agg.reclass[esa.agg.reclass == 170] <- 5
+esa.agg.reclass[esa.agg.reclass == 180] <- 2
+esa.agg.reclass[esa.agg.reclass == 190] <- 10
+esa.agg.reclass[esa.agg.reclass == 200] <- 9
+esa.agg.reclass[esa.agg.reclass == 201] <- 9
+esa.agg.reclass[esa.agg.reclass == 202] <- 9
+esa.agg.reclass[esa.agg.reclass == 210] <- 0
+esa.agg.reclass[esa.agg.reclass == 220] <- 255
+
+library(caret)
+
+modis.factor <- factor(values(modis.longlat), levels = c(0,1,2,3,4,5,6,7,8,9,10))
+esa.factor <- factor(values(esa.agg.reclass), levels = c(0,1,2,3,4,5,6,7,8,9,10))
+confusionMatrix(data=modis.factor, reference=esa.factor, dnn = c("MODIS", "ESA"))
+
+
+```
 
 
 # Hausaufgaben
 
-1. Beschriften Sie die Achsen korrekt (Hinweis: ?xlab, ?ylab). **(0.5 Punkte)**
+1. Ändern Sie die Achsenbeschriftung der ersten beiden Abbildungen (Karte des ersten und letzten Jahres) in deutsche Begriffe. **(0.5 Punkte)**
 
-2. In dem Skript wird das Verhältnis Wald zu nicht-Wald in einem kleinem Ausschnitt betrachtet. Überlegen Sie sich eine eigene Klassifizierung (Urbanisierung, Landwirtschaft, Verbuschung, ...) für Ihre Region und passen Sie die Variablennamen und die Klassifizierung entsprechend an. Eventuell muss auch der zu benutzende Ausschnitt verändert werden (forestExtent; schauen Sie sich den bisherigen Wert an um die Angabe zu verstehen), damit zum Beispiel eine Stadt enthalten ist. **(2 Punkte)**
+2. In dem Skript wird das Verhältnis Wald zu nicht-Wald in einem kleinem Ausschnitt betrachtet. Ändern Sie die Klassifizierung in natürliche und nicht-natürliche Vegetation (grasses/cereal crops, urban, broad-leaf crops).  **(2 Punkte)**
 
-3. Beschriften Sie die x-Achse des Zeitreihen-Plots mit ganzen Zahlen damit es eher einer Zeitachse mit Jahren entspricht (?scale_x_continuous). **(0.5 Punkte)**
+3. Überlegen Sie welche anderen Klassenzuweisungen für den ESA-Datensatz sinnvoll sein könnten und untersuchen Sie den Einfluss auf die "Confusion-Matrix". Laden Sie ein lauffähiges Skript hoch und beschreiben Sie die Änderungen in einem Kommentar. **(2 Punkte)**
 
-4. Modifizieren Sie den Plot indem sie die Balkendarstellung durch Linien ersetzen. **(1 Punkt)**
+4. Modifizieren Sie den Zeitreihen-Plot indem sie die Balkendarstellung durch Linien ersetzen. **(1 Punkt)**
 
-6. Mit welcher Funktion können Sie in R Spalten an einen data.frame anhängen? **(1 Punkt)**
-
-7. Nennen Sie mindestens eine Funktion mit der man in R die Anzahl der Zeilen in einem data.frame herausfinden kann. **(1 Punkt)**
+5. Mit welcher Funktion können Sie in R Spalten an einen data.frame anhängen? **(0.5 Punkte)**
 
 
 # Literatur

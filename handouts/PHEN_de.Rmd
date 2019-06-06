@@ -23,11 +23,8 @@ Hier werden die benötigten Pakete geladen und das Arbeitsverzeichnis gesetzt.
 library(raster)
 library(ggplot2)
 library(reshape2)
-#library(FEglobaleOekologie)
-#fegloekOptions(baseDir = "/home/gitta/R/Lehre")
-#fegloekOptions(region="NEUROPE")
-#fegloekInit()
-setwd( "/home/gitta/R/Lehre")
+
+setwd( "/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts")
 ```
 ```{r, message=FALSE, warning=FALSE, eval=FALSE}
 library(raster)
@@ -46,7 +43,7 @@ Die benötigten Fernerkundungsdaten finden Sie auf dem T: Laufwerk unter FGOE/PH
 Wir erzeugen nun eine Variable data.dir in der der Pfad zu dem Verzeichnis gespeichert ist in dem die Dateien liegen.
 Dann erzeugen wir einen Vektor files der alle Dateinamen dieses Verzeichnisses enthält in denen die Zeichenkette "NDVI.tif" vorkommt (list.files()). Diese Dateien werden mit der Funktion stack() gelesen und der Variablen stackNDVI zugewiesen. Es wird eine Serie (oder ein Stapel) aus den herunter geladenen georeferenzierten Dateien erzeugt.
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
-data.dir <- "/home/gitta/R/Lehre/data/NEUROPE"
+data.dir <- "data/PHEN/NEUROPE"
 files <- list.files(data.dir, pattern="NDVI.tif$", full.names=TRUE)
 stackNDVI <- stack(files)
 ```
@@ -86,7 +83,7 @@ dfNDVI <- extract(stackNDVI, sPointsUTM, df=TRUE)
 dfNDVI$ID = NULL
 ```
 
-Mit der bereitgestellten Funktion "extractDate" werden die 
+Mit der bereitgestellten Funktion `extractDate` werden die 
 Zeitpunkte des jeweiligen "Überflugs" aus den Dateinamen extrahiert. Um die Funktion `extractDate` zu nutzen müssen wir die Datei in der die Funktion enthalten ist zunächst sourcen. Die Dateinamen werden aus den Spaltennamen (mit `colnames`) entnommen.
 
 ```{r}

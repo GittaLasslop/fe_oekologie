@@ -1,0 +1,216 @@
+---
+title: "Fernerkundung globale Ökologie: 5. Blattflächenindex"
+author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+bibliography: literatur.bib
+classoption: a4paper
+lang: de-DE
+output:
+  pdf_document:
+  #  tufte::tufte_handout:
+##    latex_engine: xelatex
+    fig_caption: yes
+    includes:
+      in_header: styles.tex
+##    toc: true
+    highlight: default
+---
+
+# Überblick
+
+Im Rahmen dieser Übung verwenden analysieren wir die zeitliche und räumliche Variabilität des maximalen Blattflächenindexes (Leaf Area Index) in Australien. Der LAI ist Bestandteil des MODIS Produkts [MCD15A3H](https://lpdaac.usgs.gov/products/mcd15a3hv006/). Wie werden Niederschlagsdaten (http://worldclim.org/version2) und Landbedeckungsdaten hinzuziehen um zu verstehen wie sich die Abhängigkeit des LAI vom Niederschlag zwischen Vegetationstypen unterscheidet.
+Die folgenden Schritte sind dafür notwendig:
+
+- Einlesen der LAI Werte über mehrere Jahre
+
+- Berechnung des maximalen LAI einzelner Jahre und dann mitteln über die Jahre
+
+- Kombination mit den anderen Datensätzen (evtl. reprojizieren, aggregieren)
+
+- Abbildung: Niederschlagsverteilung für verschiedene Vegetationstypen
+
+- Abbildung: x-Achse mit Niederschlag, y-Achse max LAI für jeden Vegetationstyp
+
+## Literatur
+
+Die relevante Literatur für heute ist: @Fensholt2004EvaluationMODISLAI; @Myneni2002Globalproductsvegetation; @Wang2004EvaluationMODISLAI
+
+## Initialisieren
+
+Laden der benötigten Pakete und setzen der working directory.
+
+```{r, message=FALSE, warning=FALSE}
+library(raster)
+library(ggplot2)
+library(reshape2)
+```
+```{r, eval=FALSE}
+setwd('S:/FGOE/')
+```
+```{r, echo=FALSE}
+setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts')
+```
+
+Die benötigten Fernerkundungsdaten finden Sie auf dem T: Laufwerk. Kopieren Sie diese in den folgenden Ordner
+```{r}
+data.dir <- 'data/LAI/AUS'
+```
+
+# Berechnung des mittleren maximalen LAI
+
+## Einlesen der Daten
+
+Ähnlich zu unserer Sitzung "Phänologie" wird heute zunächst eine Zeitreihe aus den Dateien erzeugt. Wir berechnen dann für jedes Jahr den maximalen LAI und mitteln dann über die Jahre. Um die einzelnen Jahre zu unterscheiden benutzen wir die Information im Dateinamen, dort findet sich immer das Muster Axxxx, wobei xxxx die vierstellige Jahreszahl ist.
+Anstatt alle Dateien in die Variable files zu speichern verwenden wir den input Parameter `pattern` um nur die Dateien eines Jahres auszuwählen.
+
+-------------------------------------
+
+***Frage***
+
+Wie können Sie überprüfen ob die Dateien richtig ausgewählt werden?
+
+-------------------------------------
+
+```{r, message=FALSE, warning=FALSE}
+years <- 2010:2010
+MaxLAI <- list()
+validRange <- c(0,100)
+scaleFactor <- 0.1
+crop_extent <- extent(c(145,155,-30,-20))
+for (i in 1:length(years)){
+files <- list.files(data.dir, pattern=paste0("MCD15A2H_h31v11_",years[i]), full.names=TRUE)
+stackLAI <- crop(stack(files),crop_extent)
+stackLAI[stackLAI<validRange[1]] = NA
+stackLAI[stackLAI>validRange[2]] = NA
+stackLAI = stackLAI*scaleFactor
+MaxLAI[i] = overlay(stackLAI, fun=max)
+}
+MaxLAIstack <- stack(MaxLAI)
+plot(MaxLAIstack)
+MaxLAImean <- overlay(MaxLAIstack,fun=mean)
+```
+
+Um den Arbeitsspeicher nicht zu sehr zu belasten löschen wir die Variablen `stackLAI`, `MaxLAIstack` und `MaxLAI`, die wir nicht mehr benötigen.
+```{r}
+rm(stackLAI)
+rm(MaxLAI)
+rm(MaxLAIstack)
+```
+
+# Zuweisung des LAI zu Vegetationstypen
+
+
+## Einlesen der land cover Daten
+
+Nun laden wir die Landklassifikation. Damit die unterschiedlichen Datensätze kombiniert werden können muss evtl. die Auflösung angepasst werden. 
+
+-------------------------------------------------
+
+***Aufgabe***
+
+Wie finden Sie heraus ob die Auflösung der Datensätze übereinstimmt?
+
+-------------------------------------------------
+
+```{r}
+
+
+  file <- '/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/data/LAI/AUS/MCD12Q1_h31v11_2010-01-01.LC_Type3.tif'
+  LCT <- crop(raster(file),crop_extent)
+  valid_range <- c(0, 253)
+  LCT[LCT < valid_range[1]] = NA
+  LCT[LCT > valid_range[2]] = NA
+  plot(LCT)
+
+```
+
+Wir wandeln die Daten in einen `data.frame` um und benennen die Spalten neu.
+
+```{r}
+dfLCT <- data.frame(rasterToPoints(LCT))
+names(dfLCT) = c('x','y','id')
+file <- 'LCT3Lookuptable.txt'
+LCT3lookuptable <- read.table(file.path(data.dir, file),header=T)
+dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
+table(dfLCT$name)
+dfLAI <- data.frame(rasterToPoints(MaxLAImean))
+names(dfLAI) = c('x','y','maxLAI')
+```
+
+
+------------------------------------------
+
+***Aufgabe***
+
+Die Niederschlagsdaten werden gelesen. Stimmt hier die Auflösung überein? Vergleichen Sie die räumliche Auflösung und Projektion.
+
+-------------------------------------------
+
+```{r}
+Precip <- raster(file.path(data.dir,'worldclimPmean.tif'))
+```
+
+Anschließend werden alle drei Datensätze anhand der Koordinaten-Spalten kombiniert. 
+Und wir entfernen einige Oberflächentypen, die wir nicht berücksichtigen wollen.
+
+```{r}
+PrecipHR <- resample(Precip,LCT)
+dfPrecip <- data.frame(rasterToPoints(PrecipHR))
+names(dfPrecip) = c('x','y','Precipitation')
+dfPLCT <- merge(dfPrecip,dfLCT,by=c('x','y'))
+dfPLCTmaxLAI <- merge(dfPLCT,dfLAI,by=c('x','y'))
+```
+
+```{r,echo=FALSE}
+
+ind <- which(dfPLCTmaxLAI$name=='Water'|dfPLCTmaxLAI$name=='Non-vegetated')
+dfPLCTmaxLAI = dfPLCTmaxLAI[-ind,]
+
+```
+
+Wir schauen uns zunächst an welche vegetationstypen in welchem Niederschlagsbereich auftreten. Welche Einheit hat wohl der Niederschlag? Was bewirkt der Parameter scale='free_y'?
+```{r}
+p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation))
+p = p + geom_histogram(color='black')
+p = p + xlab("Niederschlag [Einheit?]")
+p = p + facet_wrap(~name, ncol=3, scale="free_y")
+print(p)
+```
+
+Im letzten Schritt wird einen Scatterplot erzeugt, mit dem Niederschlag
+als unabhängige Variable und dem maximalen LAI als abhängige Variable.
+Unterteilt wird es nochmals nach Landbedeckung.
+
+```{r,eval=TRUE}
+p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation, y=maxLAI))
+p = p + facet_wrap(~name, ncol=3, scale="free_y")
+p = p + xlab("Niederschlag [Einheit]")
+p = p + ylab("Maximaler LAI [m2/m2]")
+p = p + geom_hex(bins=c(50))
+p = p + geom_smooth(se=TRUE, color='red')
+print(p)
+```
+
+# Hausaufgaben
+
+1. Prüfen Sie die Position der 4 Fokuspunkte ihrer Region mit Google Maps. Interpretieren Sie mit dieser Zusatzinformation ihren Linienplot. Können Sie unterschiedliche Vegetationsperioden der 4 Punkte durch diese Zusatzinformation besser einordnen? Falls sie 'missing data' Werte in ihrer Abbildung haben: was könnte bei ihrer Region der Grund sein? **(2 Punkte)**
+
+2. Wir haben heute unter anderem eine Interpolation zweier Raster-Datensätze durchgeführt (Befehl resample). Erläutern Sie warum wir dies durchführen mussten. Überlegen Sie ausserdem was die methodischen Unterschiede zwischen 'bilinear' und 'ngb' sind. Welche Methode würden Sie verwenden wenn Temperatur, NPP, oder NDVI Werte interpoliert werden sollen - welche Methode würden Sie für die Interpolation von Landnutzungsklassen verwenden? Begründen Sie Ihre Entscheidung. **(2 Punkte)**
+
+3. Wir verwenden heute in Plot2 ein neues geom: *geom_smooth()*. Begründen Sie kurz warum Sie in PLot2 unterschiede in der 'Dicke' der Unsicherheitsbänder in den einzelnen Landnutzungs-Panelen sehen. Ausserdem: was bedeutet das Argument 'se=TRUE'? **(2 Punkte)**
+
+4. Erzeugen Sie einen neuen Plot basierend auf Plot2 indem Sie allen Landbedeckungsklassen in einem Panel darstellen. Färben Sie die Daten der einzelnen Landnutzungsklassen unterschiedlich ein (Hinweis: kopieren Sie die Plotbefehle der Übung und passen sie relevante ggplot Befehle an; Tipp: u.a. facet_wrap, scale_color_manual) **(3 Punkte)**
+
+5. Erzeugen Sie einen weitere Abbildung in der Sie eine andere sinnvolle Variable mit GSL in Beziehung setzen (Hinweis: die Daten existieren schon in unserem data.frame). **(2 Punkte)**
+
+6. Erstellen Sie eine Karte mit den Namen der Landbedeckungsklassen unseres Datenausschnitts und den Umrissen von Australien.**(2 Punkte)**  (siehe skript mapPhen das Beispiel für Deutschland)
+
+worldmap <- map_data("world",region='Australia')
+
+p=ggplot(dfLCT,aes(x=x,y=y))
+p=p+geom_raster(aes(fill=name))
+p=p+geom_path(data=worldmap,aes(x = long, y = lat, group = group))
+p
+
+7. In unserem heutigen Skript verwenden wir zwei unterschiedliche Ausgabe-Befehle (*pdf()*, *png()*). Betrachten Sie die Zeilen im Code und die jeweilige Hilfe-Seite. Beschreiben Sie die Unterschiede - wann wuerden Sie welches Kommando bevorzugen? **(2 Punkte)**
+
+# Literatur

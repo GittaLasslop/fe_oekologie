@@ -17,7 +17,7 @@ output:
 
 # Überblick
 
-Im Rahmen dieser Übung verwenden analysieren wir die zeitliche und räumliche Variabilität des maximalen Blattflächenindexes (Leaf Area Index) in Australien. Der LAI ist Bestandteil des MODIS Produkts [MCD15A3H](https://lpdaac.usgs.gov/products/mcd15a3hv006/). Wie werden Niederschlagsdaten (http://worldclim.org/version2) und Landbedeckungsdaten hinzuziehen um zu verstehen wie sich die Abhängigkeit des LAI vom Niederschlag zwischen Vegetationstypen unterscheidet.
+Im Rahmen dieser Übung verwenden analysieren wir die zeitliche und räumliche Variabilität des maximalen Blattflächenindexes (Leaf Area Index) in Australien. Der LAI ist Bestandteil des MODIS Produkts [MCD15A3H](https://lpdaac.usgs.gov/products/mcd15a3hv006/). Wie werden Niederschlagsdaten (http://worldclim.org/version2, klimatisches Mittel 1970-2000) und die schon häufiger verwendeten Landbedeckungsdaten hinzuziehen um zu verstehen wie sich die Abhängigkeit des LAI vom Niederschlag zwischen Vegetationstypen unterscheidet.
 Die folgenden Schritte sind dafür notwendig:
 
 - Einlesen der LAI Werte über mehrere Jahre
@@ -30,11 +30,11 @@ Die folgenden Schritte sind dafür notwendig:
 
 - Abbildung: x-Achse mit Niederschlag, y-Achse max LAI für jeden Vegetationstyp
 
-## Literatur
+# Literatur
 
-Die relevante Literatur für heute ist: @Fensholt2004EvaluationMODISLAI; @Myneni2002Globalproductsvegetation; @Wang2004EvaluationMODISLAI
+Die relevante Literatur für heute ist: @Fensholt2004EvaluationMODISLAI; @Myneni2002Globalproductsvegetation; @Wang2004EvaluationMODISLAI. Sowie der [MODIS user guide](https://lpdaac.usgs.gov/documents/2/mod15_user_guide.pdf).
 
-## Initialisieren
+# Initialisieren
 
 Laden der benötigten Pakete und setzen der working directory.
 
@@ -59,11 +59,10 @@ data.dir <- 'data/LAI/AUS'
 
 ## Einlesen der Daten
 
-Ähnlich zu unserer Sitzung "Phänologie" wird heute zunächst eine Zeitreihe aus den Dateien erzeugt. Wir berechnen dann für jedes Jahr den maximalen LAI und mitteln dann über die Jahre. Um die einzelnen Jahre zu unterscheiden benutzen wir die Information im Dateinamen, dort findet sich immer das Muster Axxxx, wobei xxxx die vierstellige Jahreszahl ist.
+Ähnlich zu unserer Sitzung "Phänologie" wird heute zunächst eine Zeitreihe aus den Dateien erzeugt. Wir berechnen dann für jedes Jahr den maximalen LAI und mitteln dann über die Jahre. Um die einzelnen Jahre zu unterscheiden benutzen wir die Information im Dateinamen, dort findet sich immer das Muster _xxxx, wobei xxxx die vierstellige Jahreszahl ist.
 Anstatt alle Dateien in die Variable files zu speichern verwenden wir den input Parameter `pattern` um nur die Dateien eines Jahres auszuwählen.
 
 ---------------------------------------------------
-
 ***Frage***
 
 Wie können Sie überprüfen ob die Dateien richtig ausgewählt werden?
@@ -76,19 +75,20 @@ MaxLAI <- list()
 validRange <- c(0,100)
 scaleFactor <- 0.1
 crop_extent <- extent(c(147,153.7,-30,-24.5))
+
 for (i in 1:length(years)){
-files <- list.files(data.dir, pattern=paste0("MCD15A2H_h31v11_",years[i]), full.names=TRUE)
-stackLAI <- crop(stack(files),crop_extent)
-stackLAI[stackLAI<validRange[1]] = NA
-stackLAI[stackLAI>validRange[2]] = NA
-stackLAI = stackLAI*scaleFactor
-MaxLAI[i] = overlay(stackLAI, fun=max)
+  files <- list.files(data.dir, pattern=paste0("MCD15A2H_h31v11_",years[i]), full.names=TRUE)
+  stackLAI <- crop(stack(files),crop_extent)
+  stackLAI[stackLAI<validRange[1]] = NA
+  stackLAI[stackLAI>validRange[2]] = NA
+  stackLAI = stackLAI*scaleFactor
+  MaxLAI[i] = overlay(stackLAI, fun=max)
 }
 MaxLAIstack <- stack(MaxLAI)
 plot(MaxLAIstack)
 MaxLAImean <- overlay(MaxLAIstack,fun=mean)
 ```
-
+Die schnelle Abbildung mit `plot()` zeigt uns dass die Werte und Muster sinnvoll sind, das Datenlesen und skalieren hat funktioniert.
 Um den Arbeitsspeicher nicht zu sehr zu belasten löschen wir die Variablen `stackLAI`, `MaxLAIstack` und `MaxLAI`, die wir nicht mehr benötigen.
 ```{r}
 rm(stackLAI)
@@ -101,16 +101,16 @@ rm(MaxLAIstack)
 
 ## Einlesen der land cover Daten
 
-Nun laden wir die Landklassifikation. Damit die unterschiedlichen Datensätze kombiniert werden können muss evtl. die Auflösung angepasst werden. 
+Nun laden wir die Landbedeckungsdaten. Damit die unterschiedlichen Datensätze kombiniert werden können muss evtl. die Auflösung angepasst werden. 
 
 -------------------------------------------------------------
-
 ***Aufgabe***
 
 Wie finden Sie heraus ob die Auflösung der Datensätze übereinstimmt?
 
 -------------------------------------------------------------
 
+Wir machen auch nochmal schnell eine Abbildung mit `plot()` um zu überprüfen ob beim Einlesen alles geklappt hat.
 ```{r}
 
 
@@ -128,17 +128,19 @@ Wir wandeln die Daten in einen `data.frame` um und benennen die Spalten neu.
 ```{r}
 dfLCT <- data.frame(rasterToPoints(LCT))
 names(dfLCT) = c('x','y','id')
+
 file <- 'LCT3Lookuptable.txt'
 LCT3lookuptable <- read.table(file.path(data.dir, file),header=T)
 dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
 table(dfLCT$name)
+
 dfLAI <- data.frame(rasterToPoints(MaxLAImean))
 names(dfLAI) = c('x','y','maxLAI')
 ```
 
+# Lesen der Niederschlagsdaten
 
 ------------------------------------------------------
-
 ***Aufgabe***
 
 Die Niederschlagsdaten werden gelesen. Stimmt hier die Auflösung überein? Vergleichen Sie die räumliche Auflösung und Projektion.
@@ -151,6 +153,8 @@ Precip <- raster(file.path(data.dir,'worldclimPmean.tif'))
 
 Anschließend werden alle drei Datensätze anhand der Koordinaten-Spalten kombiniert. 
 Und wir entfernen einige Oberflächentypen, die wir nicht berücksichtigen wollen.
+
+# Kombinieren der Datensätze
 
 ```{r}
 Precip <- resample(Precip,LCT)
@@ -167,11 +171,13 @@ dfPLCTmaxLAI = dfPLCTmaxLAI[-ind,]
 
 ```
 
-Wir schauen uns zunächst an welche vegetationstypen in welchem Niederschlagsbereich auftreten. Welche Einheit hat wohl der Niederschlag? Was bewirkt der Parameter scale='free_y'?
+# Erstellen der Abbildungen
+
+Wir schauen uns zunächst an welche vegetationstypen in welchem Niederschlagsbereich auftreten.  Was bewirkt der Parameter scale='free_y'?
 ```{r}
 p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation))
 p = p + geom_histogram(color='black')
-p = p + xlab("Niederschlag [Einheit?]")
+p = p + xlab("Niederschlag [mm/Jahr]")
 p = p + facet_wrap(~name, ncol=3, scale="free_y")
 print(p)
 ```
@@ -183,13 +189,19 @@ Unterteilt wird es nochmals nach Landbedeckung.
 ```{r,eval=TRUE}
 p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation, y=maxLAI))
 p = p + facet_wrap(~name, ncol=3)
-p = p + xlab("Niederschlag [Einheit]")
+p = p + xlab("Niederschlag [mm/JAHR]")
 p = p + ylab("Maximaler LAI [m2/m2]")
 p = p + geom_hex(bins=c(50))
 p = p + geom_smooth(se=TRUE, color='red')
 print(p)
 ```
 
+-----------------------------------------------------------------
+***Frage***
+
+Welche Parameter sind noch von bedeutung für den maximalen LAI und sollten in der Analyse eventuell berücksichtigt werden?
+
+-----------------------------------------------------------------
 # Hausaufgaben
 
 1. Prüfen Sie die Position der 4 Fokuspunkte ihrer Region mit Google Maps. Interpretieren Sie mit dieser Zusatzinformation ihren Linienplot. Können Sie unterschiedliche Vegetationsperioden der 4 Punkte durch diese Zusatzinformation besser einordnen? Falls sie 'missing data' Werte in ihrer Abbildung haben: was könnte bei ihrer Region der Grund sein? **(2 Punkte)**

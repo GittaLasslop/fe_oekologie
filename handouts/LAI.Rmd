@@ -176,9 +176,9 @@ dfPLCTmaxLAI = dfPLCTmaxLAI[-ind,]
 Wir schauen uns zunächst an welche vegetationstypen in welchem Niederschlagsbereich auftreten.  Was bewirkt der Parameter scale='free_y'?
 ```{r}
 p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation))
+p = p + facet_wrap(~name, ncol=3, scale="free_y")
 p = p + geom_histogram(color='black')
 p = p + xlab("Niederschlag [mm/Jahr]")
-p = p + facet_wrap(~name, ncol=3, scale="free_y")
 print(p)
 ```
 
@@ -188,41 +188,33 @@ Unterteilt wird es nochmals nach Landbedeckung.
 
 ```{r,eval=TRUE}
 p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation, y=maxLAI))
-p = p + facet_wrap(~name, ncol=3)
+p = p + facet_wrap(~name)
 p = p + xlab("Niederschlag [mm/JAHR]")
 p = p + ylab("Maximaler LAI [m2/m2]")
 p = p + geom_hex(bins=c(50))
-p = p + geom_smooth(se=TRUE, color='red')
+p = p + geom_smooth(se=TRUE)
 print(p)
 ```
 
 -----------------------------------------------------------------
 ***Frage***
-
-Welche Parameter sind noch von bedeutung für den maximalen LAI und sollten in der Analyse eventuell berücksichtigt werden?
+Welche Information erhalten Sie durch die Farbdarstellung in der obigen Abbildung?
+Welche Parameter sind noch von Bedeutung für den maximalen LAI und sollten in der Analyse eventuell berücksichtigt werden?
+Welche anderen Vegetationstypen würden sie evtl. aufgrund der Datenlage ausschließen?
 
 -----------------------------------------------------------------
 # Hausaufgaben
 
-1. Prüfen Sie die Position der 4 Fokuspunkte ihrer Region mit Google Maps. Interpretieren Sie mit dieser Zusatzinformation ihren Linienplot. Können Sie unterschiedliche Vegetationsperioden der 4 Punkte durch diese Zusatzinformation besser einordnen? Falls sie 'missing data' Werte in ihrer Abbildung haben: was könnte bei ihrer Region der Grund sein? **(2 Punkte)**
 
-2. Wir haben heute unter anderem eine Interpolation zweier Raster-Datensätze durchgeführt (Befehl resample). Erläutern Sie warum wir dies durchführen mussten. Überlegen Sie ausserdem was die methodischen Unterschiede zwischen 'bilinear' und 'ngb' sind. Welche Methode würden Sie verwenden wenn Temperatur, NPP, oder NDVI Werte interpoliert werden sollen - welche Methode würden Sie für die Interpolation von Landnutzungsklassen verwenden? Begründen Sie Ihre Entscheidung. **(2 Punkte)**
+1. Wir haben heute unter anderem eine Interpolation zweier Raster-Datensätze durchgeführt (Befehl resample). Erläutern Sie warum wir dies durchführen mussten. Überlegen Sie ausserdem was die methodischen Unterschiede zwischen 'bilinear' und 'ngb' sind. Welche Methode würden Sie verwenden wenn Temperatur, NPP, oder NDVI Werte interpoliert werden sollen - welche Methode würden Sie für die Interpolation von Landnutzungsklassen verwenden? Begründen Sie Ihre Entscheidung. **(2 Punkte)**
 
-3. Wir verwenden heute in Plot2 ein neues geom: *geom_smooth()*. Begründen Sie kurz warum Sie in PLot2 unterschiede in der 'Dicke' der Unsicherheitsbänder in den einzelnen Landnutzungs-Panelen sehen. Ausserdem: was bedeutet das Argument 'se=TRUE'? **(2 Punkte)**
+2. Wir verwenden heute in Plot2 ein neues geom: *geom_smooth()*. Begründen Sie kurz warum Sie in PLot2 unterschiede in der 'Dicke' der Unsicherheitsbänder in den einzelnen Landnutzungs-Panelen sehen. Ausserdem: was bedeutet das Argument 'se=TRUE'? **(2 Punkte)**
 
-4. Erzeugen Sie einen neuen Plot basierend auf Plot2 indem Sie allen Landbedeckungsklassen in einem Panel darstellen. Färben Sie die Daten der einzelnen Landnutzungsklassen unterschiedlich ein (Hinweis: kopieren Sie die Plotbefehle der Übung und passen sie relevante ggplot Befehle an; Tipp: u.a. facet_wrap, scale_color_manual) **(3 Punkte)**
+3. Erzeugen Sie einen neuen Plot basierend auf der letzten Abbildung in dem Sie alle Landbedeckungsklassen in einem Panel darstellen (nur die Linien, ohne geom_hex). Färben Sie die Linien der einzelnen Landnutzungsklassen unterschiedlich ein (Hinweis: kopieren Sie die Plotbefehle der Übung und passen sie relevante ggplot Befehle an; Tipp: u.a. facet_wrap, color) **(2 Punkte)**
 
-5. Erzeugen Sie einen weitere Abbildung in der Sie eine andere sinnvolle Variable mit GSL in Beziehung setzen (Hinweis: die Daten existieren schon in unserem data.frame). **(2 Punkte)**
 
-6. Erstellen Sie eine Karte mit den Namen der Landbedeckungsklassen unseres Datenausschnitts und den Umrissen von Australien.**(2 Punkte)**  (siehe im skript mapPhen das Beispiel für Deutschland)
+4. Erstellen Sie eine Karte mit den Namen der Landbedeckungsklassen unseres Datenausschnitts und den Umrissen von Australien.**(2 Punkte)**  (siehe im skript mapPhen das Beispiel für Deutschland)
 
-worldmap <- map_data("world",region='Australia')
 
-p=ggplot(dfLCT,aes(x=x,y=y))
-p=p+geom_raster(aes(fill=name))
-p=p+geom_path(data=worldmap,aes(x = long, y = lat, group = group))
-p
-
-7. In unserem heutigen Skript verwenden wir zwei unterschiedliche Ausgabe-Befehle (*pdf()*, *png()*). Betrachten Sie die Zeilen im Code und die jeweilige Hilfe-Seite. Beschreiben Sie die Unterschiede - wann wuerden Sie welches Kommando bevorzugen? **(2 Punkte)**
 
 # Literatur

@@ -17,7 +17,7 @@ output:
 
 # Überblick
 
-Im Rahmen dieser Übung verwenden und analysieren wir die räumliche Variabilität des maximalen Blattflächenindexes (Leaf Area Index) in Australien. Der LAI ist Bestandteil des MODIS Produkts [MCD15A3H](https://lpdaac.usgs.gov/products/mcd15a3hv006/). Wie werden Niederschlagsdaten (http://worldclim.org/version2, klimatisches Mittel 1970-2000) und die schon häufiger verwendeten Landbedeckungsdaten hinzuziehen um zu verstehen wie sich die Abhängigkeit des LAI vom Niederschlag zwischen Vegetationstypen unterscheidet.
+Im Rahmen dieser Übung verwenden und analysieren wir die räumliche Variabilität des maximalen Blattflächenindexes (Leaf Area Index) in Australien. Der LAI ist Bestandteil des MODIS Produkts [MCD15A3H](https://lpdaac.usgs.gov/products/mcd15a3hv006/). Wir werden Niederschlagsdaten (http://worldclim.org/version2, klimatisches Mittel 1970-2000) und die schon häufiger verwendeten Landbedeckungsdaten hinzuziehen um zu verstehen wie sich die Abhängigkeit des LAI vom Niederschlag zwischen Vegetationstypen unterscheidet.
 Die folgenden Schritte sind dafür notwendig:
 
 - Einlesen der LAI Werte über mehrere Jahre
@@ -50,7 +50,7 @@ setwd('S:/FGOE/')
 setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts')
 ```
 
-Die benötigten Fernerkundungsdaten finden Sie auf dem T: Laufwerk. Kopieren Sie diese in den folgenden Ordner
+Die benötigten Fernerkundungsdaten finden Sie auf dem T: Laufwerk. Kopieren Sie diese in den folgenden Ordner:
 ```{r}
 data.dir <- 'data/LAI/AUS'
 ```
@@ -59,7 +59,7 @@ data.dir <- 'data/LAI/AUS'
 
 ## Einlesen der Daten
 
-Ähnlich zu unserer Sitzung "Phänologie" wird heute zunächst eine Zeitreihe aus den Dateien erzeugt. Wir berechnen dann für jedes Jahr den maximalen LAI und mitteln dann über die Jahre. Um die einzelnen Jahre zu unterscheiden benutzen wir die Information im Dateinamen, dort findet sich immer das Muster _xxxx, wobei xxxx die vierstellige Jahreszahl ist.
+Ähnlich zu unserer Sitzung "Phänologie" wird heute zunächst eine Zeitreihe aus den Dateien erzeugt. Wir berechnen für jedes Jahr den maximalen LAI und mitteln dann über die Jahre. Um die einzelnen Jahre zu unterscheiden benutzen wir die Information im Dateinamen, dort findet sich immer das Muster _xxxx, wobei xxxx die vierstellige Jahreszahl ist.
 Anstatt alle Dateien in die Variable files zu speichern verwenden wir den input Parameter `pattern` um nur die Dateien eines Jahres auszuwählen.
 
 ---------------------------------------------------
@@ -175,7 +175,7 @@ dfPLCTmaxLAI = dfPLCTmaxLAI[-ind,]
 
 # Erstellen der Abbildungen
 
-Wir schauen uns zunächst an welche vegetationstypen in welchem Niederschlagsbereich auftreten.  Was bewirkt der Parameter scale='free_y'?
+Wir schauen uns zunächst an welche Vegetationstypen in welchem Niederschlagsbereich auftreten.  Was bewirkt der Parameter scale='free_y'?
 ```{r}
 p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation))
 p = p + facet_wrap(~name, ncol=3, scale="free_y")
@@ -208,11 +208,11 @@ Welche anderen Vegetationstypen würden sie evtl. aufgrund der Datenlage ausschl
 # Hausaufgaben
 
 
-1. Wir haben heute unter anderem eine Interpolation zweier Raster-Datensätze durchgeführt (Befehl resample). Erläutern Sie warum wir dies durchführen mussten. Überlegen Sie ausserdem was die methodischen Unterschiede zwischen 'bilinear' und 'ngb' sind. Welche Methode würden Sie verwenden wenn Temperatur, NPP, oder NDVI Werte interpoliert werden sollen - welche Methode würden Sie für die Interpolation von Landnutzungsklassen verwenden? Begründen Sie Ihre Entscheidung. **(2 Punkte)**
+1. Wir haben heute unter anderem eine Interpolation zweier Raster-Datensätze durchgeführt (Befehl `resample`). Erläutern Sie warum wir dies durchführen mussten. Überlegen Sie ausserdem was die methodischen Unterschiede zwischen 'bilinear' und 'ngb' sind. Welche Methode würden Sie verwenden wenn Temperatur, NPP, oder NDVI Werte interpoliert werden sollen - welche Methode würden Sie für die Interpolation von Landnutzungsklassen verwenden? Begründen Sie Ihre Entscheidung. **(2 Punkte)**
 
-2. Wir verwenden heute ein neues geom: *geom_smooth()*. Begründen Sie kurz warum Sie Unterschiede in der 'Dicke' der Unsicherheitsbänder in den einzelnen Landnutzungs-Panelen sehen. Ausserdem: was bedeutet das Argument 'se=TRUE'? **(2 Punkte)**
+2. Wir verwenden heute ein neues geom: *geom_smooth()*. Begründen Sie kurz warum Sie Unterschiede in der 'Dicke' der Unsicherheitsbänder in den einzelnen Landnutzungs-Panelen sehen. Ausserdem: was bedeutet das Argument `se=TRUE`? **(2 Punkte)**
 
-3. Erzeugen Sie einen neuen Plot basierend auf der letzten Abbildung in dem Sie alle Landbedeckungsklassen in einem Panel darstellen (nur die Linien, ohne geom_hex). Färben Sie die Linien der einzelnen Landnutzungsklassen unterschiedlich ein (Hinweis: kopieren Sie die Plotbefehle der Übung und passen sie relevante ggplot Befehle an; Tipp: u.a. facet_wrap, color) **(2 Punkte)**
+3. Erzeugen Sie einen neuen Plot basierend auf der letzten Abbildung in dem Sie alle Landbedeckungsklassen in einem Panel darstellen (nur die Linien, ohne `geom_hex`). Färben Sie die Linien der einzelnen Landnutzungsklassen unterschiedlich ein (Hinweis: kopieren Sie die Plotbefehle der Übung und passen sie relevante ggplot Befehle an; Tipp: u.a. `facet_wrap`, `color`) **(2 Punkte)**
 
 4. Erstellen Sie eine Karte mit den Namen der Landbedeckungsklassen unseres Datenausschnitts und den Landes-/Kontinentgrenzen von Australien.**(2 Punkte)**  (siehe im skript mapPhen das Beispiel für Deutschland)
 

@@ -17,7 +17,7 @@ output:
 
 # Überblick
 
-Im Rahmen dieser Übung verwenden analysieren wir die zeitliche und räumliche Variabilität des maximalen Blattflächenindexes (Leaf Area Index) in Australien. Der LAI ist Bestandteil des MODIS Produkts [MCD15A3H](https://lpdaac.usgs.gov/products/mcd15a3hv006/). Wie werden Niederschlagsdaten (http://worldclim.org/version2, klimatisches Mittel 1970-2000) und die schon häufiger verwendeten Landbedeckungsdaten hinzuziehen um zu verstehen wie sich die Abhängigkeit des LAI vom Niederschlag zwischen Vegetationstypen unterscheidet.
+Im Rahmen dieser Übung verwenden und analysieren wir die räumliche Variabilität des maximalen Blattflächenindexes (Leaf Area Index) in Australien. Der LAI ist Bestandteil des MODIS Produkts [MCD15A3H](https://lpdaac.usgs.gov/products/mcd15a3hv006/). Wie werden Niederschlagsdaten (http://worldclim.org/version2, klimatisches Mittel 1970-2000) und die schon häufiger verwendeten Landbedeckungsdaten hinzuziehen um zu verstehen wie sich die Abhängigkeit des LAI vom Niederschlag zwischen Vegetationstypen unterscheidet.
 Die folgenden Schritte sind dafür notwendig:
 
 - Einlesen der LAI Werte über mehrere Jahre
@@ -114,7 +114,7 @@ Wir machen auch nochmal schnell eine Abbildung mit `plot()` um zu überprüfen o
 ```{r}
 
 
-  file <- '/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/data/LAI/AUS/MCD12Q1_h31v11_2010-01-01.LC_Type3.tif'
+  file <- 'data/LAI/AUS/MCD12Q1_h31v11_2010-01-01.LC_Type3.tif'
   LCT <- crop(raster(file),crop_extent)
   valid_range <- c(0, 253)
   LCT[LCT < valid_range[1]] = NA
@@ -147,8 +147,10 @@ Die Niederschlagsdaten werden gelesen. Stimmt hier die Auflösung überein? Verg
 
 ------------------------------------------------------
 
+Die Niederschlagsdaten werden mit dem Faktor 12 multipliziert um die Einheit von mm/Monat in mm/Jahr zu ändern).
+
 ```{r}
-Precip <- raster(file.path(data.dir,'worldclimPmean.tif'))
+Precip <- raster(file.path(data.dir,'worldclimPmean.tif'))*12
 ```
 
 Anschließend werden alle drei Datensätze anhand der Koordinaten-Spalten kombiniert. 
@@ -208,12 +210,11 @@ Welche anderen Vegetationstypen würden sie evtl. aufgrund der Datenlage ausschl
 
 1. Wir haben heute unter anderem eine Interpolation zweier Raster-Datensätze durchgeführt (Befehl resample). Erläutern Sie warum wir dies durchführen mussten. Überlegen Sie ausserdem was die methodischen Unterschiede zwischen 'bilinear' und 'ngb' sind. Welche Methode würden Sie verwenden wenn Temperatur, NPP, oder NDVI Werte interpoliert werden sollen - welche Methode würden Sie für die Interpolation von Landnutzungsklassen verwenden? Begründen Sie Ihre Entscheidung. **(2 Punkte)**
 
-2. Wir verwenden heute in Plot2 ein neues geom: *geom_smooth()*. Begründen Sie kurz warum Sie in PLot2 unterschiede in der 'Dicke' der Unsicherheitsbänder in den einzelnen Landnutzungs-Panelen sehen. Ausserdem: was bedeutet das Argument 'se=TRUE'? **(2 Punkte)**
+2. Wir verwenden heute ein neues geom: *geom_smooth()*. Begründen Sie kurz warum Sie Unterschiede in der 'Dicke' der Unsicherheitsbänder in den einzelnen Landnutzungs-Panelen sehen. Ausserdem: was bedeutet das Argument 'se=TRUE'? **(2 Punkte)**
 
 3. Erzeugen Sie einen neuen Plot basierend auf der letzten Abbildung in dem Sie alle Landbedeckungsklassen in einem Panel darstellen (nur die Linien, ohne geom_hex). Färben Sie die Linien der einzelnen Landnutzungsklassen unterschiedlich ein (Hinweis: kopieren Sie die Plotbefehle der Übung und passen sie relevante ggplot Befehle an; Tipp: u.a. facet_wrap, color) **(2 Punkte)**
 
-
-4. Erstellen Sie eine Karte mit den Namen der Landbedeckungsklassen unseres Datenausschnitts und den Umrissen von Australien.**(2 Punkte)**  (siehe im skript mapPhen das Beispiel für Deutschland)
+4. Erstellen Sie eine Karte mit den Namen der Landbedeckungsklassen unseres Datenausschnitts und den Landes-/Kontinentgrenzen von Australien.**(2 Punkte)**  (siehe im skript mapPhen das Beispiel für Deutschland)
 
 
 

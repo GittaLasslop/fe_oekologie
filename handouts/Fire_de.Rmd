@@ -3,282 +3,244 @@ title: "Fernerkundung globale Ökologie: 5. Feuer"
 author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
 classoption: a4paper
 #lang: de-DE
-bibliography: /home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2018/handouts/literatur.bib
+bibliography: literatur.bib
 output:
-  tufte::tufte_handout:
+#  tufte::tufte_handout:
+   pdf_document:
 ##    latex_engine: xelatex
-    fig_caption: yes
-    includes:
-      in_header: styles.tex
+ #   fig_caption: yes
+#    includes:
+#      in_header: styles.tex
 ##    toc: true
     highlight: default
 ---
 # Evaluierung
-26.06.2018, 10:00 - 12:00 Uhr
+18.06.2019, 10:00 - 12:00 Uhr
 
-http://r.sd.uni-frankfurt.de/85825621
+http://r.sd.uni-frankfurt.de/465dc250
 
-# Feuer
+# Überblick
 
-MODIS Kürzel: [MCD45A1](https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/burned-area/MCD45A1/). Die Webseite zu diesem Product wurde leider vor ein paar Wochen offline genommen, da schon neue Produkte verfügbar sind. Daher ist online keine ausführliche Beschreibung mehr vorhanden.
-
-## Literatur
-@roy_collection_2008; @giglio_global_2006
+Wir benutzen heute den burned area Datensatz mit dem MODIS Kürzel [MCD64A1](https://lpdaac.usgs.gov/products/mcd64a1v006/). 
+Der monatliche Datensatz beinhaltet für jede Gridzelle den "Burn day of year" mit 500m räumlicher Auflösung. Unsere Daten wurden schon etwas weiterprozessiert. Die Daten sind aggregiert auf 0.045° und enthalten nur noch die Information wie groß der Anteil der verbrannten Fläche in der gesamten Gridzelle in dem entsprechenden Monat war.
+Zur Analyse der Daten nehmen wir noch den Landcover Datensatz sowie einen Niederschlagsdatensatz hinzu. Wir wollen zunächst einen Eindruck über die räumliche Verteilung von verbrannter Fläche, Landbedeckungstypen und Niederschlag bekommen.
+Dann wollen wir heute analysieren ob wir für unterschiedliche Vegetations- oder Oberflächenbedeckungstypen eine andere Feuersaisonalität finden. Zum Beispiel könnte man erwarten dass in anthropogen genutzten Flächen die Saisonalität weniger durch die klimatischen Bedingungen bestimmt wird oder dass bewaldete Flächen im Vergleich zu Wiesen oder Savannen länger brauchen um auszutrocknen. Daher werden wir für die verschiedenen Landbedeckungsklassen die Saisonalität der verbrannten Fläche mit der des Niederschlags vergleichen.
 
 ## Initialisieren
-Sollten Sie eine Fehlermeldung beim Laden der Pakete bekommen, installieren Sie diese bitte als erstes nochmal neu mit dem Code aus der 1. Stunde:
-```{r, message=FALSE, warning=FALSE,eval=FALSE}
-for (p in c("raster", "rgeos", "ggplot2", "rworldmap", "maps", "mapproj", "rgdal", "devtools")) {
-  if (!require(p, character.only=TRUE)) {
-    install.packages(p)
-    library(p, character.only=TRUE)
-  }
-}
-
-library("devtools")
-install_github("joergsteinkamp/FEglobaleOekologie")
-install_github("dgrtwo/gganimate")
-```
-
-Laden der benötigten Pakete, sowie initialisieren der Umgebungsvariablen.
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
-library(raster)
-library(plyr)
-library(ggplot2)
-library(gganimate)
-library(FEglobaleOekologie)
-fegloekOptions(baseDir = "/home/gitta/R/Lehre/")
-fegloekOptions(region="SAFRICA")
-fegloekInit()
-
-library(gganimate)
-```
-```{r, message=FALSE, warning=FALSE, eval=FALSE}
-library(raster)
-library(plyr)
-library(ggplot2)
-library(FEglobaleOekologie)
-fegloekOptions(baseDir = "IhrBaseDir")
-fegloekOptions(region="SAFRICA")
-fegloekInit()
-
-library(gganimate)
-```
-Laden der in den letzten Stunden geschriebenen Funktionen und gespeicherten Variablen.
-```{r}
-source(file.path(getOption("fegloekBaseDir"), "R", "variables.R"), encoding=getOption("encoding"))
-source(file.path(getOption("fegloekBaseDir"), "R", "functions.R"), encoding=getOption("encoding"))
-```
-Download der Daten von https://powerfolder.gwdg.de/filestable/MjRGYXU2YUViNThFdU5yMlFhZXV2 (Fire_region.zip), die entpackten Dateien sollen in folgendem Verzeichnis liegen.
-```{r, message=FALSE, warning=FALSE,eval=FALSE}
-file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
-```
-
-## Einlesen und Verarbeiten der Daten
-
-Laden der Landnutzungsklassen und erzeugen eine Maske, bei der Land 1 ist,
-Wasser und Unklassifiziert 0. Anzeigen der Gesamtpixelzahl und Anzahl der Landpixel
-erfolgt mit "nrow". Zusätzlich wird eine Spalte mit dem Namen der
-Landbedeckungsklasse erzeugt.
+Kopieren sie sich die Daten vom T-Laufwerk.
+Laden der benötigten Pakete, sowie setzen des Arbeitsverzeichnisses.
 
 ```{r}
-data.dir <- file.path(getOption("fegloekDataDir"), getOption("fegloekRegion"))
-dfLCT <- geotiff2df(file.path(data.dir, "MCD12Q1_2010-01-01.Land_Cover_Type_3.tif"), "id")
-dfLCT$mask = 1
-dfLCT$mask[dfLCT$id >= 254] = 0
-dfLCT$mask[dfLCT$id == 0] = 0
-
-nrow(dfLCT)
-dfLCT = subset(dfLCT, mask == 1)
-nrow(dfLCT)
-
-dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
+library(raster)
+library(ggplot2)
+library(reshape2)
+```
+```{r, echo=FALSE}
+setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/')
 ```
 
-\marginnote{
-\textbf{Aufgabe}\\
-1. Wie groß is der Landanteil in Ihrer bearbeiteten Region? 
-
-2. Wie bereits bei NPP besprochen, gibt es auch hier Fehlklassifizierungen. Es
-macht zum Beispiel keinen Sinn, Nadelwälder in Äquatornähe zu haben. Diese
-können Sie durch obige Maskierung ebenfalls aus dem Datensatz entfernen.
-}
-
-Im Folgendem werden monatliche Feuerdaten eingelesen und gezählt, wie viele
-Pixel pro Monat gebrannt haben. Die Gesamtanzahl der brennenden Pixel pro Monat wird im data.frame tsFire, die Anzahl der Pixel pro Landbedeckungsklasse im data.frame tsLCTFire gespeichert.
-Die Schleife dauert recht lange, verlieren Sie nicht
-die Geduld oder gehen Sie Essen. Sie können die Zeile "print"
-aktivieren, um eine Fortschrittsanzeige zu bekommen.
-
-```{r, message=FALSE}
-files  <- list.files(data.dir, pattern="burndate.tif$", full.names=TRUE)
-date   <- extractDate(files)
-tsFire <- data.frame(date=date, count=0)
-
-if (exists("tsLCTFire"))
-  rm(tsLCTFire)
-
-for (i in 1:length(files)) {
-  dfFire <- geotiff2df(files[i], "burndate", valid_range=c(0, 366))
-  dfMerged <- merge(dfFire, dfLCT, by=c("x", "y"))
-  if (nrow(dfFire) > 0) {
-    tsFire$count[i] = nrow(dfMerged)
-  
-
-  if (exists("tsLCTFire")) {
-    tsLCTFire <- rbind(tsLCTFire,
-                       cbind(ddply(dfMerged, c("name"), summarize,
-                                   count=length(burndate)), date=date[i]))
-  } else {
-    tsLCTFire <- cbind(ddply(dfMerged, c("name"), summarize,
-                             count=length(burndate)), date=date[i])
-  }
-  }
-#  print(paste0(round(i / (length(files)) * 100, 1), "% "))
-}
-```
-## Darstellen der Daten
-Wie häufig brennt es in der Region Ihrer Wahl? Erstellen Sie mit ggplot ein Histogramm für die Variable count im dataframe tsFire. Benutzen sie dafür geom_histogram.
 ```{r, eval=FALSE}
+setwd('S:/FGOE')
+```
+
+## Einlesen der Daten
+Als erstes müssen wir die Daten einlesen und kombinieren.
+Welche Schritte sind dafür notwendig?
+
+Welche Funktionen stehen Ihnen zum Einlesen, aggregieren und kombiniern der Daten zur Verfügung? Die Niederschlagsdatei und die Datei für die verbrannte Fläche enthalten mehrere Bänder (eines für jeden Zeitschritt), welche Funktion muss daher zum Lesen der Daten verwendet werden? Welche Schritte sind notwendig um die Daten auf die gleich Auflösung zu bringen? Für die Landbedeckungsklassen benutzen wir wieder den Modalwert um zu aggregieren. Für die anderen Datensätze gegebenenfalls die Funktion `resample()`.
+
+```{r, eval=FALSE}
+BF <-
+LC <-
+Precip <-
+
+Mode <- function(x, ...) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+LCLR <- aggregate()
+```
+
+Nachdem wir die Daten auf die gleiche Auflösung gebracht haben wollen wir zunächst überprüfen ob die Daten sinnvoll aussehen, damit wir ausschließen können dass beim Einlesen ein Fehler passiert ist.
+Erstellen Sie als erstes jeweils eine Karte mit der mittleren jährlichen verbrannten Fläche, dem Jahresniederschlag und der Landbedeckung mit `ggplot`. Benutzen Sie die Funktion `overlay` um über die layer zu mitteln oder zu summieren. Da in einigen Monaten für die verbrannte Fläche Fehlwerte enthalten sind, müssen wir diese beim Mitteln ausschließen. Wir benutzen eine selbstgeschriebene Funktion in der der Parameter `na.rm` an die Funktion `mean` übergeben wird.
+
+```{r, eval=FALSE}
+mean.na <- function(data){
+  result=mean(data,na.rm=T)
+  return(result)
+}
+BFmean=overlay()
+Precipmean=overlay()
+```
+
+Wie müssen Sie die `raster`-Objekte umwandeln um die Daten mit `ggplot` abbilden zu können? Erstellen Sie die folgenden Abbildungen.
+
+```{r, eval=FALSE}
+
 p <- ggplot(data=??, aes(??))
-p <- p + geom_histogram(??)
+p <- p + geom_raster(??)
 ```
-Wechseln Sie eventuell die Region fall Sie feststellen dass es sehr wenig brennt.
 
-Erzeugen Sie eine PDF Datei, mit der Zeitreihe:
-
-\marginnote{
-\textbf{Aufgabe}\\
-Welche Einheit muss auf der y-Achse stehen?
-
-Überlegen Sie, wie Sie das als Anteil in Prozent der gesammten
-Landfläche berechnen können?
+```{r,echo=FALSE}
+sum.na <- function(data){
+  result=sum(data,na.rm=T)
+  return(result)
 }
+mean.na <- function(data){
+  result=mean(data,na.rm=T)
+  return(result)
+}
+BF=stack('data/Feuer/BF/BF_MCD64A1_Africa_2014_2016_monthly_WGS84_045.tif')
+valid_range <- c(0, 253)
+LC=raster('data/Feuer/LC/LC_MCD12Q1v006_Band_3_LAI_Africa_2017_WGS84_0045.tif')
+LC=crop(LC,BF)
+LC[LC < valid_range[1]] = NA
+LC[LC > valid_range[2]] = NA
+Mode <- function(x, ...) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+LCLR=aggregate(LC,fac=10,fun=Mode)  
+BF=resample(BF,LCLR)
+Precip=stack('data/Feuer/P/AFwc2.0_30s_prec.tif')
+Precip=crop(Precip,BF)
+Precip=resample(Precip,BF)
+Precipmean=overlay(Precip,fun=sum)
+BFmean=overlay(BF,fun=mean.na)*12
+dfPrecipmean=as.data.frame(rasterToPoints(Precipmean))
+names(dfPrecipmean)=c('x','y','Precipitation')
+dfLC=as.data.frame(rasterToPoints(LCLR))
+names(dfLC)=c('x','y','id')
+LCTtable=read.table('data/Feuer/LC/LCT3Lookuptable.txt',header=T)
+dfLCT=merge(LCTtable,dfLC,by='id')
+dfBFmean=as.data.frame(rasterToPoints(BFmean))
+names(dfBFmean)=c('x','y','BF')
+dataDF=merge(dfBFmean,dfPrecipmean,by=c('x','y'),all=TRUE)
+dataDF=merge(dataDF,dfLCT,by=c('x','y'),all=TRUE)
+# plots der Karten
 
-```{r, message=FALSE, warning=FALSE}
-p <- ggplot(tsFire, aes(x=date, y=count))
-p <- p + geom_bar(stat="identity", fill="red")
-p <- p + scale_x_date()
-p <- p + xlab("Datum")
-p <- p + ylab("burned")
+p<-ggplot(data=dataDF,aes(x=x,y=y,fill=name))
+p=p+geom_raster()+coord_fixed()
+p
 ```
+
+```{r,echo=FALSE}
+
+p<-ggplot(data=dataDF,aes(x=x,y=y,fill=BF))
+p=p+geom_raster()+coord_fixed()
+p
+```
+
+```{r,echo=FALSE}
+
+p<-ggplot(data=dataDF,aes(x=x,y=y,fill=Precipitation))
+p=p+geom_raster()+coord_fixed()
+p
+```
+
+---------------------------------------------------------
+***Aufgabe***
+
+Passen Sie, wenn Sie Zeit haben, die Farbskala an.
+
+---------------------------------------------------------
+
+
+## Saisonalität der verbrannten Fläche
+Die Niederschlagsdaten sind bereits über 30 Jahre gemittelte Monatswerte. Die Daten der verbrannten Fläche sind auch monatlich allerdings über drei Jahre fortlaufend. Es müssen daher erst noch Monatsmittel über die drei Jahre berechnet werden (Mittelwert für Jan., Feb., März, etc.). Mit `subset` können wir auf einzelne Layer zugreifen. Ergänzen Sie die folgende Schleife um die Monatsmittel über die drei Jahre zu berechnen .
 ```{r, eval=FALSE}
-file <- paste0(getOption("fegloekRegion"), "_Fire.pdf")
-pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=8, height=3)
-print(p)
-dev.off()
-```
-```{r, echo=FALSE, fig.width=6, fig.height=3}
-print(p)
+
+BFmonthly=list()
+for (i in ??){
+  All3months=subset(BF,c(i,i+12,i+24))
+  BFmonthly[i]=overlay(All3months,fun=mean.na)
+}
+BFmonthly=stack(BFmonthly)
 ```
 
-Um heraus zu finden, was gebrannt hat, wurden die verbrannten Pixel auch
-nach Landbedeckungsklasse getrennt gespeichtert. Plotten Sie jetzt die Zeitreihen
-getrennt für jede Landbedeckungsklasse. Ergänzen Sie dafür den Befehl facet_wrap im code.
+Wie hoch ist die verbrannte Fläche? Berechnen Sie die monatliche verbrannte Fläche für die gesammte Region und stellen Sie sie in einem Säulendiagramm (`geom_col`) dar. Berücksichtigen Sie dafür die räumliche Auflösung, über die Sie die Größe einer Gridzelle erhalten. Gehen Sie davon aus das 1km 0.01° entspricht.
+```{r, eval=FALSE}
 
+
+p <- ggplot(data=??, aes(??))
+p <- p + geom_col(??)
+```
+
+Speichern Sie die Abbildung in eine PDF-Datei.
+
+```{r, echo=FALSE,warning=FALSE}
+BFmonthly=list()
+for (i in 1:12){
+  BFmonthly[i]=overlay(subset(BF,c(i,i+12,i+24)),fun=mean.na)
+}
+BFmonthly=stack(BFmonthly)
+
+MonthlyBA=data.frame(Months=1:12,BA=cellStats(BFmonthly*20.25,stat =sum))
+p=ggplot(data=MonthlyBA,aes(x=Months,y=BA))
+p=p+geom_col()
+p
+
+```
+
+
+## Kombinieren der monatlichen Daten
+Um die Saisonalität von verbrannter Fläche und Niederschlag getrennt nach den Bedeckungsklassen darzustellen, müssen wir zunächst die monatlichen Rasterdaten in einen data.frame umwandeln und kombinieren. Bei der Kombination von Niederschlag und verbrannter Fläche müssen wir nun nicht nur die geographischen Koordinaten, sondern auch den Zeitpunkt berücksichtigen.
+
+```{r}
+# umwandeln in data.frame
+DFBFmonthly=as.data.frame(rasterToPoints(BFmonthly))
+# umbenennen der Spalten
+names(DFBFmonthly)=c('x','y',1:12)
+# das gleich für den Niederschlag
+DFPrecipMonthly=as.data.frame(rasterToPoints(Precip))
+names(DFPrecipMonthly)=c('x','y',1:12)
+
+#Anstatt einzelner Spalten für jeden Monat wollen wir eine Spalte, in der der Monat angegeben wird.
+DFPrecipMonthly=melt(DFPrecipMonthly,id.vars=c('x','y'))
+names(DFPrecipMonthly)=c('x','y','Month','Precipitation')
+DFBFmonthly=melt(DFBFmonthly,id.vars=c('x','y'))
+names(DFBFmonthly)=c('x','y','Month','BF')
+
+# Kombination von BF und Niederschlag
+DFmonthly=merge(DFBFmonthly,DFPrecipMonthly,by=c('x','y','Month'))
+DFmonthly=merge(DFmonthly,dfLCT,by=c('x','y'))
+
+# Mittelwerte für jeden Monat und jeden Landbedeckungstyp (name)
+DFmonthlyagg = aggregate( . ~ name+Month, FUN=mean.na, data=DFmonthly)
+DFmonthlyagg$Mon = as.numeric(DFmonthlyagg$Month)
+
+```
 
 ```{r, echo=FALSE}
-p <- ggplot(tsLCTFire, aes(x=date, y=count))
-p <- p + geom_bar(stat="identity",fill="red")
-p <- p + scale_x_date()
-p <- p + xlab("Datum")
-p <- p + ylab("burned")
-p <- p + facet_wrap(~name, ncol=3)
+p=ggplot(data=DFmonthlyagg,aes(x=Mon))
+p= p+facet_wrap(.~name)
+p=p+geom_line(aes(y=Precipitation,colour='Precip'))
+p=p+geom_line(aes(y=BF*2000,colour='BF'))
+p <- p + scale_y_continuous(sec.axis = sec_axis(~./2000, name = "Burned Fraction"))
+p <- p + scale_colour_manual(values = c( "red","black"))
+p
+
 ```
-```{r, eval=FALSE}
-p <- ggplot(tsLCTFire, aes(x=date, y=count))
-p <- p + geom_bar(stat="identity",fill="red")
-p <- p + scale_x_date()
-p <- p + xlab("Datum")
-p <- p + ylab("burned")
-p <- p + facet_wrap(~???, ncol=3)
-```
+
+Erweitern Sie den folgenden Code. Um eine zweite y-Achse mit der verbrannten Fläche hinzuzufügen skalieren wir die Variable BF so dass Sie in einen ähnlichen Wertebereich wie der Niederschlag ist und fügen dann eine entsprechend skalierte y-Achse hinzu (`sec.axis`).
 
 ```{r, eval=FALSE}
-file <- paste0(getOption("fegloekRegion"), "_FireTSLCT.pdf")
-pdf(file.path(getOption("fegloekFigDir"), file), paper="special", width=12, height=6)
-print(p)
-dev.off()
-```
-```{r, echo=FALSE, fig.width=8, fig.height=5}
-print(p)
-```
-
-## Räumliche Feuerverbreitung
-
--------------------------------------------------------
-**Hinweis**
-
-Dieser Teil ist nur sinnvoll, wenn "genügend" Pixel gebrannt haben, damit das auf
-der Karte sichtbar wird. Überlegen Sie selbst, ob Sie in Ihrer Region weiter machen
-oder zu einer anderen Region wechseln sollten.
--------------------------------------------------------
-
-\marginnote{
-\textbf{Aufgabe}\\
-Füre eine Animation sind die Datenmengen sehr groß definieren Sie daher einen Bereich (fireExtent) auf den die Bilder zugeschnitten
-werden (crop), um die Datenmengen zu reduzieren. Testen Sie dafür einige Monate 
-und benutzen Sie den plot(rFire) Befehl um schnell zu sehen ob und wo es brennt.
-}
-```{r, eval=FALSE}
-rFire <- raster(files[1])
-rFire[rFire>366]=NA
-plot(rFire)
-rFire <- crop(rFire, fireExtent)
-plot(rFire)
-```
-Für die Beschriftung der einzelnen Zeitschritte extrahieren wir das Datum aus den Dateinamen.
-```{r, eval=FALSE}
-files <- list.files(data.dir, pattern='.*burndate.tif$',
-                    full.names=TRUE)
-date  <- extractDate(files)
-```
-
-Jeder Zeitschritt wird einzeln eingelesen und in einer Liste gespeichert, die data.frames dieser liste werden im Anschluss aneinander gefügt. Wählen Sie einen kleineren Bereich, indem Sie fireExtent neu definieren, wenn es mit der Animation zu lange dauert.
-
-
-```{r, eval=FALSE}
-## empty list of data.frames (will be combined after loop)
-list_of_dfFires <- list()
-
-for (i in 1:length(files)) {
-  dfFire <- geotiff2df(files[i], "burndate", crop=fireExtent)
-  dfFire$state=""
-
-  dfFire = subset(dfFire, burndate != 11111)
-
-  dfFire$state[dfFire$burndate == 0] = "unburned"
-  dfFire$state[dfFire$burndate > 0] = "burned"
-  dfFire$state[dfFire$burndate == 900] = "snow or high aerosol"
-  dfFire$state[dfFire$burndate == 9998] = "water"
-  dfFire$state[dfFire$burndate == 9999] = "water"
-  dfFire$state[dfFire$burndate == 10000] = "insufficient data"
-  dfFire$state <- factor(dfFire$state, levels=c("unburned", "burned",
-                 "snow or high aerosol", "water", "insufficient data"))
-  dfFire$date = date[i]
-  list_of_dfFires[[i]]=dfFire
-}
-## Verknuepfung der einzelnen dfLCT data.frames zu einem grossen data.frame
-dfFireAll <- do.call("rbind", list_of_dfFires)
-
-p <- ggplot(dfFireAll, aes(x=x, y=y, frame=date))
-p <- p + geom_raster(aes(fill=state))
-p <- p + scale_fill_manual(values=c("unburned"="darkgreen", "burned"="orange",
-                 "snow or high aerosol"="lightyellow", "water"="lightblue",
-                 "insufficient data"="grey60"), drop=FALSE)
-p <- p + xlab("easting")
-p <- p + ylab("northing")
-p <- p + labs(title = "Fire ")
-gganimate(p,file='Fire.html')
+p=ggplot(??,aes(x=Mon))
+p= p+facet_wrap(??)
+p=p+geom_line(aes(y=Precipitation,colour='Precip'))
+p=p+geom_line(aes(y=BF*2500,colour='BF'))
+p <- p + scale_y_continuous(sec.axis = sec_axis(~./2500, name = "Burned Fraction [%]"))
+p <- p + scale_colour_manual(values = c( "red","black"))
+p
 
 ```
 
+Da diesmal die Farbgebung der Linien verschiedene Spalten aus dem Data.frame unterscheidet, müssen wir die Linien jeweils mit `geom_line` hinzufügen. In dem Aufruf von `geom_line` übergeben wir, wie die Farbe in der Legende beschriftet werden soll (z.B. colour='BF'). 
 
-# Aufgaben
-1. Erstellen Sie eine Abbildung der mehrjährigen Monatsmittel der Feuerdynamik (basierend auf tsFire)! Gehen Sie dabei analog zur Hausaufgabenlösung des Phänologie Handouts vor. **(3 Punkte)**
+--------------------------------------------------------------
+***Aufgabe***
 
-2. Erreicht die Feueraktivität für alle Landnutzungsklassen im selben Monat ihr Maximum? Um dies Abschätzen zu können erstellen Sie ein Liniendiagram (mit geom_line()) der Zeitreihe. Die Farbe der Linie soll die Landbedeckungstypen darstellen. Da die Größenordnung der Feueraktivitäten der einzelnen Landbedeckungstypen eventuell sehr unterschiedlich ist könnte es sinnvoll sein den Logarithmus der Feueraktivität zu benutzen. Welche zusätzlichen Zeilen code und/ oder welche Änderungen sind dafür notwendig? **(2 Punkte)**
+Die Abbildung für Shrubs sieht etwas verdächtig aus. Finden Sie heraus wieso.
 
-3. Beschreiben Sie was der Aufruf geom_raster(aes(fill=state)) und der Aufruf geom_path(data=regionmap, size=0.1, colour="black", aes(x=long, y=lat, group=group)) zu dem Plotobjekt hinzufügt. **(2 Punkte)**
-
-# Literatur
+--------------------------------------------------------------

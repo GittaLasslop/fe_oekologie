@@ -9,10 +9,12 @@ output:
 ##    highlight: default
     number_sections: true
 ---
+# Überblick
+Dieses Dokument bietet eine kurze Einführung in R und die Entwicklungsumgebung Rstudio. Sie sollen hierbei das Zusammenspiel aus Texteditor und Konsole in Rstudio lernen und einen Überblick über die verfügbaren Variablentypen in R bekommen. Desweiteren sollen Sie lernen wie Sie auf die in den Variablen abgespeicherten Werte zugreifen können.
 
 # Kurzbeschreibung
 [R](https://cran.r-project.org/) ist eine Programmiersprache und Programmierumgebung zur statistischen Auswertung und graphischen Darstellung von Daten.
-R ist Open-Source-Software, was bedeutet dass die Nutzung (zumeist) kostenfrei und der Source Code öffentlich verfügbar ist. Unter www.r-project.org finden sich umfassende Informationen zu R.   
+R ist Open-Source-Software. Das bedeutet, dass die Nutzung (zumeist) kostenfrei und der Source Code öffentlich verfügbar ist. Unter www.r-project.org finden sich umfassende Informationen zu R.   
 
 Die Standarddistribution kann durch zahlreiche Pakete erweitert werden, die dann speziellere Methoden beinhalten. Diese Pakete sind online verfügbar (z.B. auf dem Internetportal cran.org) und können auf Ihrem System nachinstalliert werden. 
 Der Aufruf des Programms R startet eine Konsole in der Befehle ausgeführt werden können. Zur Dokumentation einer Datenanalyse oder zur Entwicklung von Methoden ist es jedoch hilfreich weitere Tools zur Verfügung zu haben. 
@@ -20,42 +22,60 @@ Diese werden in Entwicklungsumgebungen zusammengefasst.
 
 # RStudio
 
-[RStudio](https://www.rstudio.com/) ist eine Entwicklungsumgebung für R (Figure 1). Der wichtigste Teil dieser Software ist ein Texteditor mit dem wir R-Programme schreiben, modifizieren und als Textdateien speichern. Diese Programme, auch Skripte genannt, sind eine Abfolge von Befehlen und Funktionsaufrufen die bei Ausführung des Skripts sequentiell abgearbeitet werden. Skripte erleichtern die Datenanalyse da sie den Ablauf klar dokumentieren (Reproduzierbarkeit), eine effiziente Widerholung ähnlicher Analysen ermöglichen, und den Arbeitsaufwand bei repetitiven Aufgaben sehr reduzieren.
+[RStudio](https://www.rstudio.com/) ist eine Entwicklungsumgebung für R (Abbildung 1). In dieser Entwicklungsumgebung finden wir die Konsole wieder, aber auch einen Texteditor. Ausserdem gibt es noch eine Übersicht über bereits benutzte Befehle (History), bestehende Variablen (Environment), Dateien, Hilfeseiten, Abbildungen, sowie eine Übersicht über installierte Pakete.
 
-Die zweite wichtige Komponente in der Entwicklungsumgebung RStudio ist die Konsole. In der Konsole werden die Programme oder einzelne Befehle ausgeführt und die Ergebnisse der einzelnen Befehle werden hier ausgegeben. Aus dem Editor heraus können Sie auch einzelne Zeilen mit "Run" (bzw. Ctrl+Enter) in der Konsole ausführen. Ausserdem gibt es noch eine Übersicht über bereits benutzte Befehle (History), bestehende Variablen (Environment), Dateien, Hilfe, Abbildungen, sowie eine Übersicht über installierte Pakete.
+Der am häufigsten benutzte Teil dieser Software ist ein Texteditor, mit dem wir R-Programme schreiben, modifizieren und als Textdateien speichern. Diese Programme, auch Skripte genannt, sind eine Abfolge von Befehlen und Funktionsaufrufen die bei Ausführung des Skripts sequentiell abgearbeitet werden. Skripte erleichtern die Datenanalyse da sie den Ablauf klar dokumentieren (Reproduzierbarkeit), eine effiziente Widerholung ähnlicher Analysen ermöglichen, und den Arbeitsaufwand bei repetitiven Aufgaben sehr reduzieren. Der Editor in Rstudio unterstützt die Entwicklung von R-Skripten durch das Hervorheben von Schlüsselwörtern der Programmiersprache. Dadurch lassen sich Skripte leichter lesen und verstehen und auch Tippfehler lassen sich leichter auffinden.
+
+Die zweite unerlässliche Komponente in der Entwicklungsumgebung RStudio ist die Konsole. In der Konsole werden die Programme oder einzelne Befehle ausgeführt und die Ergebnisse der einzelnen Befehle werden hier ausgegeben. 
+
 
 ```{r echo=FALSE, out.width="100%", fig.align="center", fig.cap="Benutzeroberfläche der RStudio Entwicklungsumgebung."}
 knitr::include_graphics("screenshot_rstudio_annotated.png")
 ```
 
+**Unterschied zwischen Konsole und Texteditor**
+Wir werden sowohl im Texteditor als auch in der Konsole R Befehle eintippen. Die im Texteditor eingegebenen Befehle können direkt als Textdatei abgespeichert werden. Dadurch können Analysen eindeutig dokumentiert werden und ohne weiteren Aufwand wiederholt werden. Um die Befehle auszuführen, z.B. Daten einzulesen, oder Mittelwerte von Daten zu berechnen, müssen die Befehle in der Konsole ausgeführt werden. Befehle die in der Konsole eingegeben werden, werden direkt ausgeführt. Allerdings wird die Abfolge der Befehle nicht abgespeichert und eine Analyse könnte daher nicht einfach wiederholt werden.
 
+In Rstudio gibt es mehrere Möglichkeiten die Befehle aus dem Editor an die Konsole zu übertragen:  
 
-# R als Taschenrechner
+* Sie können einzelne Zeilen im Editor markieren und mit "Run" in der Konsole ausführen (siehe Abbildung 1),
+* mit dem Button "Source" können Sie das gesamte Skript ausführen,
+* mit der Tastenkombination STR+Enter können sie markierte Bereiche ausführen
+* oder Sie können Text im Texteditor kopieren und in der Konsole einfügen.
+
 
 Wir nutzen R zunächst für einfache Rechenaufgaben. Geben Sie in der Konsole die folgenden Rechnungen gefolgt von Enter ein:
 
 ```{r,eval=FALSE}
 1 + 1
 73579 * 34684434
-sin(pi / 4)
-1 / sqrt(2)
+25*4+3.2^2
+((1/15+1/17)*3+4.3^3)/27
 ```
 **Hinweis:** *In R, wie in allen Programmiersprachen wird der Punkt als Dezimaltrennzeichen benutzt.*
 
--------------------------------------
+----------------------------------------------------------------------------
 **Aufgabe**
 
-Führen Sie die Berechnungen in der Konsole aus. Schreiben Sie dann ein Skript mit diesen Berechnugnen und führen Sie es aus. Testen Sie auch die zeilenweise Ausführung!
+Führen Sie die Berechnungen in der Konsole aus. Schreiben Sie dann ein Skript im Texteditor mit diesen Berechnugnen und führen Sie es aus. Testen Sie auch die verschiedenen Möglichkeiten Befehle vom Texteditor in die Konsole zu übertragen!
 -------------------------------------
 
 # Variablen
 
 
-Variablen speichern Werte, die wir ihnen zuweisen. In R funktioniert das
-durch die Zeichen "=" und "<-". Zwischen diesen beiden Zeichen gibt es keinen Unterschied. 
-Da beide verwendet werden, werden wir auch bei immer mal wieder in den Skripten benutzen.
+Variablen speichern Werte, die wir ihnen zuweisen. In den folgenden Abschnitten werden wir wichtige Variablentypen einführen. Diese Unterscheiden sich in ihren Dimensionen und darin welche Werte darin abgespeichert werden. Daraus ergeben sich dann Unterschiede im Zugriff auf die darin abgespeicherten Werte und in der Verwendung der Variablen.
+In R funktioniert das Zuweisen der Werte
+durch die Zeichen "=" und "<-". Zwischen diesen beiden Zeichen gibt es keinen Unterschied für die Variablenzuweisung. 
+Da beide verwendet werden, werden wir auch beide immer mal wieder in den Skripten benutzen. Die folgende Zeile weist der Variablen x den Wert 56 zu.
+
+```{r}
+x <- 56
+```
+
+
 Über den Variablennamen können wir die Werte wieder abrufen bzw. auf sie zugreifen.
 Mit diesen Variablen kann man dann weiter rechnen oder sie verändern.
+Variablen sind daher eine wichtige Organisationseinheit in Skripten.
 
 Es sollten möglichst selbsterklärende Namen für Variablen gewählt werden bzw.
 aus dem Kontext sollte sich erschließen, was sie bedeuten.  
@@ -64,15 +84,13 @@ Ziffern und dem Punkt ('.') zusammengesetzt werden. Variablennamen
 dürfen **kein Leerzeichen** beinhalten und nicht mit einer Zahl beginnen. Variablennamen können
 aus mehreren Wörtern zusammengesetzt sein. Zur besseren Lesbarkeit kann der Anfang
 des zweiten Wortes hervorgehoben werden, zum Beispiel kann "dozentenNamen",
-"dozenten.namen" oder "dozenten_namen" in R benutzt werden, wobei wir bei
-erster Konvention bleiben. Unter R ist es eigentlich Standard mit "." zu trennen.
-Aber Vorsicht, in den meisten anderen Sprachen wie C, C++ und Python hat der Punkt eine besondere
-Bedeutung! Beim Benennen der Variablen sollte man möglichst konsistent sein und
+"dozenten.namen" oder "dozenten_namen" in R benutzt werden.
+Beim Benennen der Variablen sollte man möglichst konsistent sein und
 wenn verkürzte Variablennamen verwendet werden, sollten sie in Kommentaren erklärt
 werden, falls sich der Zusammenhang nicht von alleine erschließt.
 
 ```{r}
-dozentenNamen <- "Lasslop/Werner"
+dozentenNamen <- "Lasslop/Thurner"
 dozentenNamen
 ```
 
@@ -95,7 +113,6 @@ Mit dem Befehl
 ls()
 ```
 werden alle momentan existierenden Variablen angezeigt. Eine Übersicht dieser Variablen finden Sie auch im "Environment" Fenster. 
-
 
 ## Nulldimensionale Variablen
 
@@ -482,11 +499,11 @@ while(i > 0.00001) {
 ```
 
 
-# Klammern
+# Zusammenfassung verschiedener Klammertypen
+In R werden runde Klammern, eckige Klammern und geschweifte Klammern verwendet.
+Die Verwechslung von verschiedenen Klammertypen ist ein häufiger auftretender Fehler. Daher haben wir hier nochmal die unterschiedlichen Klammertypen und ihre Verwendung zusammengefasst.
 
-Zusammenfassung der unterschiedlichen Klammertypen und ihre Verwendung.
-
-## Funktionsaufruf: ()
+## Funktionsaufruf: Runde Klammern ()
 
 Parameter werden in Klammern an Funktionen übergeben. Dies kann entweder als Positions-Argument oder als
 benanntes Argument ("Parameter=Wert") erfolgen. Bei Positions-Argumenten 
@@ -501,7 +518,7 @@ x <- data.frame(x=1:5, y=6:10)
 mean(x$x)
 ```
 
-## Index-Zugriff: []
+## Index-Zugriff: Eckige Klammern []
 
 Mit den eckigen Klammern können bestimmte Elemente in einer mehrdimensionalen Variablen
 angesprochen werden. Ausserdem kann eine logische (boolean) Variable gleicher Dimensionalität benutzt werden, um 
@@ -514,7 +531,7 @@ x[2, 1, 1]
 x[1:3, 4, 5]
 ```
 
-## Blöcke: \{\}
+## Blöcke: geschweifte Klammern \{\}
 
 Die geschweiften Klammern werden benötigt wenn Code nur unter bestimmten Bedingungen
 ausgeführt bzw. wiederholt werden soll oder um den Inhalt von Funktionen zu definieren. Es ist Konvention,

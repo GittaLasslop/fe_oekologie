@@ -193,7 +193,7 @@ p <- ggplot(data=dfPLCTmaxLAI, aes(x=Precipitation, y=maxLAI))
 p = p + facet_wrap(~name)
 p = p + xlab("Niederschlag [mm/JAHR]")
 p = p + ylab("Maximaler LAI [m2/m2]")
-p = p + geom_hex(bins=c(50))
+p = p + geom_hex(bins=50)
 p = p + geom_smooth(se=TRUE)
 print(p)
 ```
@@ -205,8 +205,12 @@ Welche Parameter sind noch von Bedeutung für den maximalen LAI und sollten in d
 Welche anderen Vegetationstypen würden sie evtl. aufgrund der Datenlage ausschließen?
 
 -----------------------------------------------------------------
-# Hausaufgaben
+# Aufgabe
 
+Berechnen Sie die Zeitreihen des LAI für zwei verschiedene Landcovertypen (z.b. Evergreen Broadleaf forest und Grasses) für ein Jahr.
+Ändern sie die Farbskala in für das `geom_hex()`
+
+# Hausaufgaben
 
 1. Wir haben heute unter anderem eine Interpolation zweier Raster-Datensätze durchgeführt (Befehl `resample`). Erläutern Sie warum wir dies durchführen mussten. Überlegen Sie ausserdem was die methodischen Unterschiede zwischen 'bilinear' und 'ngb' sind. Welche Methode würden Sie verwenden wenn Temperatur, NPP, oder NDVI Werte interpoliert werden sollen - welche Methode würden Sie für die Interpolation von Landnutzungsklassen verwenden? Begründen Sie Ihre Entscheidung. **(2 Punkte)**
 

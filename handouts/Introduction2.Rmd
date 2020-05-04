@@ -24,6 +24,8 @@ Nach der Einführung in das Programmieren im Allgemeinen und die Syntax von R in
 
 4) Abbildungen mit Hilfe der `plot()` Funktion erstellen.
 
+5) Erste Funktionen schreiben. Funktionen bieten eine Möglichkeit code immer wieder zu verwenden ohne ihn anpassen zu müssen und sind eine gute Möglichkeit effizienter zu programmieren.
+
 # Ordnerstruktur
 
 Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei befindet. Das passiert mit der Angabe des Pfades. Der Pfad kann absolut (z.b. `S:/Users/MeinPfad/data`) oder relativ angegeben werden (`data/ersteDaten.txt`). Für Schwierigkeiten sorgen hierbei oft Pfade mit Umlauten oder Leerzeichen. 
@@ -209,6 +211,62 @@ for (i in 1:n){
 }
 ```
 
+# Funktionen
+Wir haben nun schon einige Funktionen genutzt, die in R zur Verfügung gestellt werden, z.B. die Funktion `png()`. Eine grundlegende Regel für gute Programmierung lautet: "Don't repeat yourself". Code der nach dieser Regel geschrieben wurde ist übersichtlicher, Fehler können leichter gefunden werden und Aktualisierungen sind einfacher.
+Berechnungen oder Skriptteile, die häufig wiederholt werden sollten daher in Funktionen zusammengefasst werden. Dadurch können Berechnungen einfach wiederholt werden und komplexe Berechnungsabläufe klarer strukturiert werden.  Funktionen beschreiben oft eine allgemeinere Form einer Befehlsfolge. Durch die Übergabe von Funktionsargumenten kann in jedem Aufruf das Ergebnis für den spezifizerten Fall/ die übergebenen Werte berechnet werden.
+
+Funktionen werden mit dem keyword **function** definiert und einem Funktionsnamen zugewiesen. Die Funktion wird über diesen Funktionsnamen aufgerufen. Dabei können der Funktion Parameter übergeben werden, mit denen Berechnungen durchgeführt werden. Das Ergebnis wird dann mit dem Befehl *return* zurückgegeben. Dieser Rückgabewert muss in eine Variable abgespeichert werden wenn Sie ihn später wieder abrufen wollen. 
+
+```{r}
+quadratFunktion <- function(x) {
+                    y <- x^2
+                    return(y)
+                   }
+
+quadratFunktion(-3)
+mein_quadrat = quadratFunktion(11)
+```
+
+Der Bereich zwischen den geschweiften Klammern ist der Funktionskörper. Alle Befehle in diesem Bereich werden bei Aufruf der Funktion abgearbeitet.
+
+Parametern können auch Standardwerte übergeben werden (z.B. a=1; wenn a nicht angegeben wird erhält die Variable in der Funktion den Wert 1).
+
+```{r}
+parabelFunktion <- function(x, a=1, b=0, c=0) {
+                    y <- a * x^2 + b * x + c
+                    return(y)
+                   }
+
+parabelFunktion(-3:3)
+parabelFunktion(-3:3, c=-5)
+```
+
+Die Variablen x,a,b und c existieren dabei nur innerhalb der Funktion, außerhalb können die Variablen mit gleichem Namen definiert sein, durch den Aufruf der Funktion werden diese nicht benutzt oder verändert! 
+
+\newpage
+
+-------------------------------------------------------------------------
+**Aufgabe**
+
+Schreiben Sie eine Funktion, die einen Geldbetrag in Euro in Schweizer Franken umrechnet. 
+Als Standardwechselkurs können Sie den Wechselkurs 1 Euro = 1.13 Schweizer Franken benutzen, 
+es soll aber auch möglich sein einen Wert für den Wechselkurs an die Funktion zu übergeben. 
+-------------------------------------
+
+```{r, eval=FALSE}
+EuroInSchweizerFranken <- function(Euro, Wechselkurs=1.13) {
+                    # Fügen Sie hier die Berechnung ein:
+  
+                    return(SchweizerFranken)
+                   }
+
+EuroInSchweizerFranken(1)
+EuroInSchweizerFranken(1,Wechselkurs=1.5)
+EuroInSchweizerFranken(1,1.5)
+
+```
+
+
 # Zusammenfassung
 
 * Beim **Lesen von Textdateien** können verschiedene Parameter übergeben werden, die die Struktur der Datei (Header, Trennzeichen) definieren.
@@ -220,6 +278,8 @@ for (i in 1:n){
 * Zum **Lesen von räumlichen Daten** aus .tif Dateien verwenden wir das Paket "raster". Einzelne Dateien können mit der Funktion `raster()` gelesen werden, mehrere Dateien mit der Funktion `stack()`. Die Daten der einzelnen Dateien sind dann in den Layern des RasterStack (Stapel) zu finden. Die Funktion `plot()` kann auch auf diese raster Objekte angewendet werden. Die Informationen über das Raster Objekt werden in der Konsole ausgegeben wenn man den Variablennamen gefolgt von Enter dort eingibt.
 
 * Mit der Funktion `png()` können Abbildungen in **png-Dateien abgespeichert** werden. Die Datei muss mit dem Befehl `dev.off()` wieder geschlossen werden.
+
+* Funktionen sind ein wichtiger Bestandteil guter Programmierung und helfen den Code übersichtlich und fehlerfrei zu halten.
 
 # Hausaufgaben
 
@@ -234,3 +294,23 @@ Rufen Sie die Hilfe für die plot-Funktion auf (?plot). Schauen Sie sich die Arg
 Speichern Sie die Abbildungen als png-Dateien ab.
 
 2) Benutzen Sie google um herauszufinden wie Sie die Farbe der Punkte oder Linie ändern können. Welche Suchanfrage bringt Ihnen die Lösung? Fertigen Sie die Abbildung aus Aufgabe 1 mit roten Punkten an und speichern Sie sie als png-Datei.
+
+3) Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises. Eingabeparameter soll der Radius sein. Rückgabewert soll die Fläche sein. Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Radius 1 und geben Sie das Ergebnis mit print() aus.
+
+4). Erstellen Sie eine Funktion meine_bewertung die ein Argument als Eingabe erwartet und folgende Funktionalität besitzt. Für Werte kleiner als 0 soll "ungültig", für Werte von 1-4 soll "sehr wenig", für Werte von 5-10 "wenig", für Werte von 10-100 "viel" und für alle Werte größer als 100 "sehr viel" zurückgegeben werden. 
+
+
+```{r, eval=FALSE}
+
+meine_bewertung <- function(x){
+  # hier kommt ihr Kontrollfluss hin
+  
+  return(bewertung)
+}
+
+# test der funktion
+print(meine_bewertung(12))
+print(meine_bewertung(-23))
+# ...
+
+```

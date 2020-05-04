@@ -1,6 +1,6 @@
 ---
 title: "Fernerkundung globale Ökologie: R Einführung"
-author: "[Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Werner](mailto:christian.werner@senckenberg.de)"
+author: "[Gitta Lasslop](mailto:gitta.lasslop@senckenberg.de)/[Martin Thurner](mailto:martin.thurner@senckenberg.de)"
 classoption: a4paper
 #lang: de-DE
 output:
@@ -10,21 +10,28 @@ output:
     number_sections: true
 ---
 # Überblick
-Dieses Dokument bietet eine kurze Einführung in R und die Entwicklungsumgebung Rstudio. Sie sollen hierbei das Zusammenspiel aus Texteditor und Konsole in Rstudio lernen und einen Überblick über die verfügbaren Variablentypen in R bekommen. Desweiteren sollen Sie lernen wie Sie auf die in den Variablen abgespeicherten Werte zugreifen können.
+Dieses Dokument bietet eine kurze Einführung in R und die Entwicklungsumgebung Rstudio. Sie sollen hierbei das Zusammenspiel aus Texteditor und Konsole in Rstudio lernen und sich die ersten Grundlagenkenntisse in der Programmierung mit R aneignen. Wir fangen dafür mit einem Überblick über Variablen und Datentypen an. Desweiteren sollen Sie lernen wie Sie auf die in den Variablen abgespeicherten Werte zugreifen können und wie Sie in Skripten Kontrollstrukturen einsetzen können. Im Skript sind an verschiedenen Stellen Übungen vorgeschlagen, die Ihnen beim Verständnis helfen sollen. Nur die Hausaufgaben am Ende des Skriptes werden bewertet.
 
-# Kurzbeschreibung
+# Installation von R und Rstudio
+Laden sie sich die "base" R Version von der Seite  
+[https://cran.r-project.org/](https://cran.r-project.org/)  
+und installieren Sie R auf Ihrem Rechner. Danach laden und installieren Sie Rstudio (die freie Desktop version):  
+[https://rstudio.com/products/rstudio/download/](https://rstudio.com/products/rstudio/download/).  
+Für die Bearbeitung der Scripte benutzen Sie bitte Rstudio. R ist in Rstudio miteingebunden und muss nicht separat gestartet werden.
+
+# Kurzbeschreibung R
 [R](https://cran.r-project.org/) ist eine Programmiersprache und Programmierumgebung zur statistischen Auswertung und graphischen Darstellung von Daten.
 R ist Open-Source-Software. Das bedeutet, dass die Nutzung (zumeist) kostenfrei und der Source Code öffentlich verfügbar ist. Unter www.r-project.org finden sich umfassende Informationen zu R.   
 
 Die Standarddistribution kann durch zahlreiche Pakete erweitert werden, die dann speziellere Methoden beinhalten. Diese Pakete sind online verfügbar (z.B. auf dem Internetportal cran.org) und können auf Ihrem System nachinstalliert werden. 
 Der Aufruf des Programms R startet eine Konsole in der Befehle ausgeführt werden können. Zur Dokumentation einer Datenanalyse oder zur Entwicklung von Methoden ist es jedoch hilfreich weitere Tools zur Verfügung zu haben. 
-Diese werden in Entwicklungsumgebungen zusammengefasst.
+Diese werden in Entwicklungsumgebungen zusammengefasst. Wir verwenden im Kurs Rstudio als Entwicklungsumgebung.
 
 # RStudio
 
 [RStudio](https://www.rstudio.com/) ist eine Entwicklungsumgebung für R (Abbildung 1). In dieser Entwicklungsumgebung finden wir die Konsole wieder, aber auch einen Texteditor. Ausserdem gibt es noch eine Übersicht über bereits benutzte Befehle (History), bestehende Variablen (Environment), Dateien, Hilfeseiten, Abbildungen, sowie eine Übersicht über installierte Pakete.
 
-Der am häufigsten benutzte Teil dieser Software ist ein Texteditor, mit dem wir R-Programme schreiben, modifizieren und als Textdateien speichern. Diese Programme, auch Skripte genannt, sind eine Abfolge von Befehlen und Funktionsaufrufen die bei Ausführung des Skripts sequentiell abgearbeitet werden. Skripte erleichtern die Datenanalyse da sie den Ablauf klar dokumentieren (Reproduzierbarkeit), eine effiziente Widerholung ähnlicher Analysen ermöglichen, und den Arbeitsaufwand bei repetitiven Aufgaben sehr reduzieren. Der Editor in Rstudio unterstützt die Entwicklung von R-Skripten durch das Hervorheben von Schlüsselwörtern der Programmiersprache. Dadurch lassen sich Skripte leichter lesen und verstehen und auch Tippfehler lassen sich leichter auffinden.
+**Starten Sie Rstudio!** Der am häufigsten benutzte Teil dieser Software ist ein Texteditor, mit dem wir R-Programme schreiben, modifizieren und als Textdateien speichern. Diese Programme, auch Skripte genannt, sind eine Abfolge von Befehlen und Funktionsaufrufen die bei Ausführung des Skripts sequentiell abgearbeitet werden. Skripte erleichtern die Datenanalyse da sie den Ablauf klar dokumentieren (Reproduzierbarkeit), eine effiziente Widerholung ähnlicher Analysen ermöglichen, und den Arbeitsaufwand bei repetitiven Aufgaben sehr reduzieren. Der Editor in Rstudio unterstützt die Entwicklung von R-Skripten durch das Hervorheben von Schlüsselwörtern der Programmiersprache. Dadurch lassen sich Skripte leichter lesen und verstehen und auch Tippfehler lassen sich leichter auffinden. **Erstellen Sie ein neues R-Skript.** Klicken Sie dafür oben links auf *File*, dann *New File*, dann *R Script*.
 
 Die zweite unerlässliche Komponente in der Entwicklungsumgebung RStudio ist die Konsole. In der Konsole werden die Programme oder einzelne Befehle ausgeführt und die Ergebnisse der einzelnen Befehle werden hier ausgegeben. 
 
@@ -60,19 +67,19 @@ Wir nutzen R zunächst für einfache Rechenaufgaben. Geben Sie in der Konsole di
 Führen Sie die Berechnungen in der Konsole aus. Schreiben Sie dann ein Skript im Texteditor mit diesen Berechnugnen und führen Sie es aus. Testen Sie auch die verschiedenen Möglichkeiten Befehle vom Texteditor in die Konsole zu übertragen!
 -------------------------------------
 
-# Variablen
+# R Programmierung
+In dieser ersten Einführung in die Programmierung mit R beschreiben wir die verschiedenen Datentypen, die in R zur Verfügung stehen und beschäftigen uns mit Kontrollstrukturen, die uns z.B. erlauben bestimmte Teile eines Skriptes zu wiederholen oder unter bestimmten Bedingungen auszuführen.
 
-
-Variablen speichern Werte, die wir ihnen zuweisen. In den folgenden Abschnitten werden wir wichtige Variablentypen einführen. Diese Unterscheiden sich in ihren Dimensionen und darin welche Werte darin abgespeichert werden. Daraus ergeben sich dann Unterschiede im Zugriff auf die darin abgespeicherten Werte und in der Verwendung der Variablen.
-In R funktioniert das Zuweisen der Werte
-durch die Zeichen "=" und "<-". Zwischen diesen beiden Zeichen gibt es keinen Unterschied für die Variablenzuweisung. 
+## Variablen
+Variablen speichern Werte, die wir ihnen zuweisen. Je nachdem was für Werte bzw. Daten wir in den Variablen abspeichern möchten, wird der passende Datentyp (auch Variablentyp) ausgewählt. Die Datentypen unterscheiden sich in ihren Dimensionen und darin welche Werte darin abgespeichert werden. Daraus ergeben sich dann Unterschiede im Zugriff auf die darin abgespeicherten Werte und in der Verwendung der Variablen.
+In R funktioniert das Zuweisen der Werte durch die Zeichen "=" und "<-". Zwischen diesen beiden Zeichen gibt es keinen Unterschied für die Variablenzuweisung. 
 Da beide verwendet werden, werden wir auch beide immer mal wieder in den Skripten benutzen. Die folgende Zeile weist der Variablen x den Wert 56 zu.
 
 ```{r}
 x <- 56
 ```
 
-
+### Variablennamen
 Über den Variablennamen können wir die Werte wieder abrufen bzw. auf sie zugreifen.
 Mit diesen Variablen kann man dann weiter rechnen oder sie verändern.
 Variablen sind daher eine wichtige Organisationseinheit in Skripten.
@@ -80,7 +87,7 @@ Variablen sind daher eine wichtige Organisationseinheit in Skripten.
 Es sollten möglichst selbsterklärende Namen für Variablen gewählt werden bzw.
 aus dem Kontext sollte sich erschließen, was sie bedeuten.  
 Variablennamen können aus Buchstaben (klein oder groß wird unterschieden) 
-Ziffern und dem Punkt ('.') zusammengesetzt werden. Variablennamen
+Ziffern, dem Unterstrich ('_') und dem Punkt ('.') zusammengesetzt werden. Variablennamen
 dürfen **kein Leerzeichen** beinhalten und nicht mit einer Zahl beginnen. Variablennamen können
 aus mehreren Wörtern zusammengesetzt sein. Zur besseren Lesbarkeit kann der Anfang
 des zweiten Wortes hervorgehoben werden, zum Beispiel kann "dozentenNamen",
@@ -94,27 +101,26 @@ dozentenNamen <- "Lasslop/Thurner"
 dozentenNamen
 ```
 
-```{r}
-x <- 56
-y <- 8
-z <- x-y
-z = z+1
-x = z+y
-```
-
--------------------------------------
-**Aufgabe**
-
-Welchen Wert hat jetzt die Variable x?
--------------------------------------
-
 Mit dem Befehl 
 ```{r}
 ls()
 ```
-werden alle momentan existierenden Variablen angezeigt. Eine Übersicht dieser Variablen finden Sie auch im "Environment" Fenster. 
+werden alle momentan existierenden Variablen angezeigt. Eine Übersicht dieser Variablen finden Sie auch im "Environment" Fenster.
 
-## Nulldimensionale Variablen
+### Reservierte Wörter und Variablennamen
+
+Die folgenden Wörter dürfen nicht als Variablennamen verwendet werden da sie
+Teil der Programmiersprache sind.
+
+* **if**, **else**, **repeat**, **while**, **function**, **for**, **in**, **next**, **break**
+* **TRUE**, **FALSE**, **NULL**, **Inf**, **NaN**, **NA** 
+* und noch ein paar exotische mehr
+
+Es ist ebenfalls nicht sinnvoll **T** und **F** als Namen für Variablen zu verwenden,
+da dies Kurzformen für **TRUE** und **FALSE** sind und oft zu schwer auffindbaren Fehlern führen.
+
+
+### Nulldimensionale Variablen
 
 
 Atomare Variablen bestehen nur aus exakt einem Wert. Alle anderen Variablenarten sind aus ihnen aufgebaut.
@@ -138,12 +144,12 @@ character=as.character(number)
 class(character)
 ```
 
-## Eindimensionale Variablen/ Vektor
+### Eindimensionale Variablen/ Vektor
 
 ```{r}
 x1 <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 ```
-wobei "c" für "combine" steht. Einfacher:
+wobei "c" für "combine" steht. Noch einfacher geht es mit dem Doppelpunkt ":" :
 ```{r}
 x1 <- 1:13
 ```
@@ -164,7 +170,7 @@ x1[c(3,7:10)]
 ```
 **Hinweis:** *In R wird auf das erste Element mit dem Index 1 zugegriffen, die meisten anderen Programmiersprachen (Python, C/C++) indizieren das erste Element mit 0.*
 
--------------------------------------
+----------------------------------------------------------------------------------------------
 **Aufgabe**
 
 Speichern Sie das 5. bis 8. Element der Variablen x1 von oben in die Variable y1. Anschliessend speichern Sie das 2. sowie die Elemente 4 bis 6 in die Variable y2. Wie lautet das 3. Element in y2?
@@ -183,7 +189,7 @@ as.numeric(geschlechtF)
 ```
 Sobald die Variable als Faktor definiert ist, wird erkannt wieviele eindeutige Kategorien (levels) vorhanden sind. Die Werte der Variablen können dann nur auf eine der vorhandenen Kategorien gesetzt werden (der letzte Buchstabe "F" im Variablennamen deutet hier auf den Variablentyp hin).
 
--------------------------------------
+------------------------------------------------------------------------------------------------------
 **Aufgabe**
 standorte <- c("arable", "forest", "urban", "bare", "water", "grass", "arable", "forest", "urban", "bare", "bare", "arable", "water", "grass", "grass", "forest")
 
@@ -197,10 +203,10 @@ Wandeln Sie auch die Variable *himmelsrichtungen* in einen Faktor um. Welches Pr
 -------------------------------------
 
 
-## Zweidimensionale Variablen
+### Zweidimensionale Variablen
 
 
-### Matrix 
+#### Matrix 
 *Schema*: matrix(Werte, Zahl der Reihen, Zahl der Spalten)"
 ```{r}
 y=matrix(1:12, 3, 4)
@@ -222,16 +228,16 @@ b
 ```
 
 
-### Dataframe
+#### Dataframe
 *Schema*: data.frame(Spalte1=Werte1, Spalte2=Werte2, ...)   
 "Werte1" und "Werte2" müssen hierbei die gleiche Länge haben bzw. ein Vielfaches des jeweils Anderen sein.
 Im Gegensatz zu einer Matrix kann ein *data.frame* aus Spalten mit unterschiedlichen Variablentypen 
-aufgebaut sein. Ausserdem werden den Spalten Namen zugewiesen. Die Datenstruktur ähnelt dadurch einer Tabelle, wobei die Zeilen als einzelne Beobachtungen und die Spalten als einzelne Variablen interpretiert werden können. Viele Funktionen in R erwarten einen *data.frame* als input, er ist daher ein sehr häufig verwendeter Datentyp in R.
+aufgebaut sein. Ausserdem werden den Spalten Namen zugewiesen. Die Datenstruktur ähnelt dadurch einer Tabelle, wobei die Zeilen als einzelne Beobachtungen und die Spalten als einzelne Variablen interpretiert werden können. Viele Funktionen in R erwarten einen *data.frame* als Input, er ist daher ein sehr häufig verwendeter Datentyp in R.
 
 ```{r}
 df=data.frame(x=1:3, y=4:6, z=letters[1:3])
 ```
-Auf die Werte der einzelne Spalten kann man mit dem Dollarzeichen (und Spaltenname) oder mit doppelten eckigen Klammern (mit Spaltenname oder Index) zugreifen. Durch die Möglichkeit den Spaltennamen zu benutzen muss die Position der Spalte im Dataframe nicht bekannt sein. Rückgabewert ist dann ein Vektor.
+Auf die Werte der einzelne Spalten kann man mit dem Dollarzeichen (und Spaltenname) oder mit doppelten eckigen Klammern (mit Spaltenname oder Index) zugreifen. Durch die Möglichkeit den Spaltennamen zu benutzen muss die Position der Spalte im *data.frame* nicht bekannt sein. Rückgabewert ist dann ein Vektor.
 ```{r}
 df$x
 df[[1]]
@@ -249,7 +255,7 @@ df[1,2]
 df[2,c('x','y')]
 ```
 
--------------------------------------
+---------------------------------------------------------------------
 **Aufgabe**
 
 Erstellen Sie einen *data.frame* "Tabelle1" mit den Spalten "Latitude", "Longitude", "Landcover". Die Spalte "Landcover" soll den Typ Faktor haben.
@@ -262,7 +268,7 @@ Geben Sie den erstellten data.frame aus und führen Sie außerdem den Befehl *su
 
 -------------------------------------
 
--------------------------------------
+--------------------------------------------------------------------
 **Aufgabe**
 
 Erstellen Sie einen *data.frame* "Tabelle2" mit den Spalten "Latitude", "Longitude", "Landcover". Die Spalte "Landcover" soll den Typ Faktor haben.
@@ -277,7 +283,7 @@ Geben Sie den erstellten data.frame aus und führen Sie außerdem den Befehl *su
 
 
 
-### Konvertierung zwischen Matrizen und data.frames
+#### Konvertierung zwischen Matrizen und data.frames
 Zwischen den beiden Datentypen kann wie folgt konvertiert werden:
 ```{r}
 x <- data.frame(x=1:5, y=6:10)
@@ -286,7 +292,7 @@ x <- as.data.frame(y)
 x
 y
 ```
-### Listen
+#### Listen
 *Schema* list(var1=var1,var2=var2,...)
 Variablen vom Typ list können im Gegensatz zu *data.frame* Variablen auch Einträge mit unterschiedlicher Länge haben. Die Datentypen der einzelnen Variablen können ebenso unterschiedlich sein. Listen sind daher ein sehr flexibler Datentyp in dem sich sehr unterschiedliche Informationen abspeichern lassen.
 
@@ -305,9 +311,9 @@ site$Vegetation
 ```
 Die Namen, der in einer Liste gespeicherten Variablen, können mit der Funktion *names()* abgerufen werden.
 
-## Mehrdimensionale Variablen
+### Mehrdimensionale Variablen
 
-### Array
+#### Array
 *Schema* array(Werte, Dimensionen)
 Im Vergleich zur zwei-dimensionalen *matrix* ist bei einem *array* die Anzahl der Dimensionen nicht beschränkt. 
 Beim Aufruf der Funktion werden erst die Werte dann die Dimensionen übergeben. Ein häufiges Beispiel für 3-d arrays sind Daten, die über Raum- und Zeitkoordinaten verfügen (x,y,t). 
@@ -323,65 +329,11 @@ dim(multidim)
 ```
 
 
-# Funktionen
 
-Komplizierte Berechnungen oder Schritte sollten in Funktionen zusammengefasst werden. So können Berechnungen einfach wiederholt werden und komplexe Berechnungsabläufen klarer strukturiert werden. Funktionen beschreiben oft eine allgemeinere Form einer Befehlsfolge. Durch die Übergabe von Funktionsargumenten kann in jedem Aufruf das Ergebnis für den spezifizerten Fall/ die übergebenen Werte berechnet werden.
-
-Funktionen werden mit dem keyword **function** definiert und einem Funktionsnamen zugewiesen. Die Funktion wird über diesen Funktionsnamen aufgerufen. Dabei können der Funktion Parameter übergeben werden, mit denen Berechnungen durchgeführt werden. Das Ergebnis wird dann mit dem Befehl *return* zurückgegeben. Dieser Rückgabewert muss in eine Variable abgespeichert werden wenn Sie ihn später wieder abrufen wollen. 
-
-```{r}
-quadratFunktion <- function(x) {
-                    y <- x^2
-                    return(y)
-                   }
-
-quadratFunktion(-3)
-mein_quadrat = quadratFunktion(11)
-```
-
-Der Bereich zwischen den geschweiften Klammern ist der Funktionskörper. Alle Befehle in diesem Bereich werden bei Aufruf der Funktion abgearbeitet.
-
-Parametern können auch Standardwerte übergeben werden (z.B. a=1; wenn a nicht angegeben wird erhält die Variable in der Funktion den Wert 1).
-
-```{r}
-parabelFunktion <- function(x, a=1, b=0, c=0) {
-                    y <- a * x^2 + b * x + c
-                    return(y)
-                   }
-
-parabelFunktion(-3:3)
-parabelFunktion(-3:3, c=-5)
-```
-
-Die Variablen x,a,b und c existieren dabei nur innerhalb der Funktion, außerhalb können die Variablen mit gleichem Namen definiert sein, durch den Aufruf der Funktion werden diese nicht benutzt oder verändert! 
-
-\newpage
-
--------------------------------------------------------------------------
-**Aufgabe**
-
-Schreiben Sie eine Funktion, die einen Geldbetrag in Euro in Schweizer Franken umrechnet. 
-Als Standardwechselkurs können Sie den Wechselkurs 1 Euro = 1.13 Schweizer Franken benutzen, 
-es soll aber auch möglich sein einen Wert für den Wechselkurs an die Funktion zu übergeben. 
--------------------------------------
-
-```{r, eval=FALSE}
-EuroInSchweizerFranken <- function(Euro, Wechselkurs=1.13) {
-                    # Fügen Sie hier die Berechnung ein:
-  
-                    return(SchweizerFranken)
-                   }
-
-EuroInSchweizerFranken(1)
-EuroInSchweizerFranken(1,Wechselkurs=1.5)
-EuroInSchweizerFranken(1,1.5)
-
-```
-
-# Kontrollstrukturen
+## Kontrollstrukturen
 Der Ablauf eines Programms oder Skriptes wird durch Kontrollstrukturen definiert. Diese werden benutzt um Programmteile nur unter bestimmten Bedingungen oder mehrfach auszuführen.
 
-## Bedingungen
+### Bedingungen
 Zur Überprüfung von Bedingungen werden logische Operatoren eingesetzt, dabei können die folgenden Bedingungen getestet werden:
 
 * Gleichheit: x==y
@@ -446,7 +398,7 @@ Farbe
 
 
 
-## Schleifen
+### Schleifen
 
 Mit Schleifen kann ein Skript-Teil wiederholt werden. Die gebräuchlichste Art eine Schleife zu definieren ist die *for*-Schleife.
 
@@ -499,11 +451,11 @@ while(i > 0.00001) {
 ```
 
 
-# Zusammenfassung verschiedener Klammertypen
+## Zusammenfassung verschiedener Klammertypen
 In R werden runde Klammern, eckige Klammern und geschweifte Klammern verwendet.
 Die Verwechslung von verschiedenen Klammertypen ist ein häufiger auftretender Fehler. Daher haben wir hier nochmal die unterschiedlichen Klammertypen und ihre Verwendung zusammengefasst.
 
-## Funktionsaufruf: Runde Klammern ()
+### Funktionsaufruf: Runde Klammern ()
 
 Parameter werden in Klammern an Funktionen übergeben. Dies kann entweder als Positions-Argument oder als
 benanntes Argument ("Parameter=Wert") erfolgen. Bei Positions-Argumenten 
@@ -518,7 +470,7 @@ x <- data.frame(x=1:5, y=6:10)
 mean(x$x)
 ```
 
-## Index-Zugriff: Eckige Klammern []
+### Index-Zugriff: Eckige Klammern []
 
 Mit den eckigen Klammern können bestimmte Elemente in einer mehrdimensionalen Variablen
 angesprochen werden. Ausserdem kann eine logische (boolean) Variable gleicher Dimensionalität benutzt werden, um 
@@ -531,7 +483,7 @@ x[2, 1, 1]
 x[1:3, 4, 5]
 ```
 
-## Blöcke: geschweifte Klammern \{\}
+### Blöcke: geschweifte Klammern \{\}
 
 Die geschweiften Klammern werden benötigt wenn Code nur unter bestimmten Bedingungen
 ausgeführt bzw. wiederholt werden soll oder um den Inhalt von Funktionen zu definieren. Es ist Konvention,
@@ -548,18 +500,6 @@ if (1 + 1 == 3) {
   message("Falsch")
 }
 ```
-
-# Reservierte Wörter und Variablennamen
-
-Die folgenden Wörter dürfen nicht als Variablennamen verwendet werden da sie
-Teil der Sprache sind.
-
-* **if**, **else**, **repeat**, **while**, **function**, **for**, **in**, **next**, **break**
-* **TRUE**, **FALSE**, **NULL**, **Inf**, **NaN**, **NA** 
-* und noch ein paar exotische mehr
-
-Es ist ebenfalls nicht sinnvoll **T** und **F** als Namen für Variablen zu verwenden,
-da dies Kurzformen für **TRUE** und **FALSE** sind und oft zu schwer auffindbaren Fehlern führen.
 
 
 # Zusätzliche Pakete/ Befehle laden
@@ -595,14 +535,9 @@ Ob eine Variable überhaupt existiert prüfen Sie mit dem Befehl **exists(\<Vari
 
 Um die Dimensionen von Variablen zu überprüfen nutzen Sie **length()** (z.B. Anzahl der Elemente in einem Vektor, Anzahl der Spalten in einem data.frame, Anzahl der Elemente in einem Array). Bei zwei-dimensionalen Variablen können Sie die Anzahl der Spalten mit **ncol()** und die Anzahl der Zeilen mit **nrow()** abfragen. Ausserdem können Sie die Dimensionen eines Objekts mit **dim()** erfahren.
 
-
-
-
-
-
 # Hausaufgabe
 
-1. Erstellen Sie einen *data.frame* KohlenstoffSpeicher mit den Spalten Ökosystem, Vegetation und Boden. Tragen sie in der Ökosystemspalte drei verschiedene Namen für Ökosysteme ein, in der zweiten und dritten Spalte numerische Werte für Vegetations- und Bodenkohlenstoffspeicher.
+1. Erstellen Sie einen *data.frame* KohlenstoffSpeicher mit den Spalten Ökosystem, Vegetation und Boden. Tragen sie in der Ökosystemspalte drei verschiedene Namen für Ökosysteme ein, in der zweiten und dritten Spalte numerische Werte für Vegetations- und Bodenkohlenstoffspeicher. *(1 Punkt)*
 2. Der *data.frame* Geburtstag enthält die Geburtstagsdaten von Einstein, Humboldt und Darwin. Greifen Sie auf die einzelnen Zeilen zu und speichern Sie sie in chronologischer Reihenfolge in einem von Ihnen erstellten data.frame Geburtstag2.
 
 ```{r, eval=FALSE}
@@ -611,30 +546,13 @@ Geburtstag=data.frame(Person=c('Albert Einstein','Alexander von Humboldt','Charl
                       Month=c(3,9,2),
                       Year=c(1879,1769,1809))
 ```
-Berechnen Sie wieviele Tage Albert Einstein nach Charles Darwin geboren wurde, indem Sie auf die einzelnen Einträge im data.frame zugreifen.
+Berechnen Sie mit R wieviele Tage Albert Einstein nach Charles Darwin geboren wurde, indem Sie auf die einzelnen Einträge im data.frame zugreifen. *Hinweis: Es gibt viele Möglichkeiten hier auf die richtige Antwort zu kommen. Zur Vereinfachung können Sie Schaltjahre vernachlässigen.* *(2 Punkte)*
 
-3. Berechnen Sie die Quadratwurzel der Zahlen 1 bis 10 mit einer **for-Schleife** und lassen Sie das Ergebnis mit print() ausgeben.
+3. Berechnen Sie die Quadratwurzel der Zahlen 1 bis 10 mit einer **for-Schleife** und lassen Sie das Ergebnis mit print() ausgeben. *(1 Punkt)*
 
-4. Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises. Eingabeparameter soll der Radius sein. Rückgabewert soll die Fläche sein. Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Radius 1 und geben Sie das Ergebnis mit print() aus.
 
-5. Schreiben Sie einen R Code mit einer Variablen Uhrzeit, der für den Wert '9 Uhr' der Variablen den Text 'Guten Morgen' ausgibt, für den Wert '18 Uhr' den Text 'Guten Abend'. (auch mit print())
+4. Schreiben Sie einen R Code mit einer Variablen Uhrzeit, der für den Wert '9 Uhr' der Variablen den Text 'Guten Morgen' ausgibt, für den Wert '18 Uhr' den Text 'Guten Abend'. (auch mit print()) *(2 Punkte)*
 
-6. Erstellen Sie einen Funktion die ein Argument als Eingabe erwartet und folgende Funktionalität besitzt. Für Werte kleiner als 0 soll "ungültig", für Werte von 1-4 soll "sehr wenig", für Werte von 5-10 "wenig", für Werte von 10-100 "viel" und für alle Werte größer als 100 "sehr viel" zurückgegeben werden. 
-
-```{r, eval=FALSE}
-
-meine_bewertung <- function(x){
-  # hier kommt ihr Kontrollfluss hin
-  
-  return(bewertung)
-}
-
-# test der funktion
-print(meine_bewertung(12))
-print(meine_bewertung(-23))
-# ...
-
-```
 
 
 

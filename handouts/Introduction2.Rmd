@@ -28,7 +28,7 @@ Nach der Einführung in das Programmieren im Allgemeinen und die Syntax von R in
 
 # Ordnerstruktur
 
-Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei befindet. Das passiert mit der Angabe des Pfades. Der Pfad kann absolut (z.b. `C:/Users/MeinPfad/data/ersteDaten.txt`) oder relativ angegeben werden (`data/ersteDaten.txt`). Für Schwierigkeiten sorgen hierbei oft Pfade mit Umlauten oder Leerzeichen. 
+Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei befindet. Das passiert mit der Angabe des Pfades. Der Pfad kann absolut (z.b. `C:/Users/MeinPfad/data/ersteDaten.txt`) oder relativ zum aktuellen Arbeitsverzeichnis angegeben werden (`data/ersteDaten.txt`). Die absoluten Pfade beginnen unter Windows mit der Angabe der Festplattenpartition ('C:'), unter Linux mit einem Schrägstrich ('/'). Für Schwierigkeiten bei der Pfadangaben sorgen oft Pfade mit Umlauten oder Leerzeichen. 
 
 -------------------------------------
 **Sehr wichtiger Hinweis**
@@ -107,7 +107,7 @@ summary(Daten)
 head(Daten)
 class(Daten$V2)
 ```
-Die Daten wurden in einem data.frame namens "Daten" abgespeichert.
+Die eingelesenen Daten wurden in einem data.frame namens "Daten" abgespeichert.
 Die einzelnen Spalten in der Tabelle sind erkannt worden, jedoch hat R nicht erkannt dass die erste Zeile die Namen der Spalten beinhaltet. Alle Variablen werden als Faktoren interpretiert und die Spalten bekommen noch zusätzliche Namen (z.B. V2) Über die Hilfe der Funktion können wir herausfinden wie wir R mitteilen können, dass die Spaltennamen bereits in der Datei enthalten sind.
 ```{r}
 ?read.table
@@ -121,15 +121,22 @@ class(Daten$Tmin)
 R benennt nun die Spalten entsprechend der Information in der Datei und erkennt die numerischen Daten richtig.
 Wir haben nun noch zwei weitere Dateien mit den gleichen Daten aber etwas anderem Format. Diese wollen wir nun auch richtig einlesen und müssen dafür den Aufruf der Funktion `read.table()` etwas anpassen. Die erste Datei enthält als Trennzeichen ein Semikolon. Bei der zweiten Datei ist noch eine zusätzliche Zeile mit Beschreibung der Daten vorangestellt. Versuchen Sie zunächst die Dateien ohne gesetzte Parameter einzulesen und überprüfen Sie das Ergebnis. Dann mit den darauf folgenden Anpassungen:
 ```{r,eval=FALSE}
-Daten=read.table('data/intro2/ErsteDatenc.txt')
-summary(Daten)
-Daten=read.table('data/intro2/ErsteDatencR.txt')
-summary(Daten)
-Daten=read.table('data/intro2/ErsteDatenc.txt',header=TRUE,sep=';')
-summary(Daten)
-Daten=read.table('data/intro2/ErsteDatencR.txt',header=TRUE,sep=';',skip=1)
-summary(Daten)
+Daten1=read.table('data/intro2/ErsteDatenc.txt')
 ```
+Da das Lesen einen Fehler verursacht schauen wir uns die Datei zunächst an und benutzen dann verschiedene Parameter um das Einlesen der Daten zu verbessern.
+```{r,eval=FALSE}
+file.show('data/intro2/ErsteDatenc.txt')
+Daten1=read.table('data/intro2/ErsteDatenc.txt', sep=';')
+summary(Daten1)
+Daten1=read.table('data/intro2/ErsteDatenc.txt', header=T, sep=';')
+summary(Daten1)
+Daten2=read.table('data/intro2/ErsteDatencR.txt')
+file.show('data/intro2/ErsteDatencR.txt')
+Daten2=read.table('data/intro2/ErsteDatencR.txt', header = TRUE, sep=';')
+Daten2=read.table('data/intro2/ErsteDatencR.txt', header = TRUE, sep=';', skip=1)
+summary(Daten2)
+```
+Benutzen Sie auch die Funktion head um sich den Anfang des data.frames anzuschauen.
 
 ## Einfache Abbildungen
 
@@ -204,7 +211,7 @@ Im nächsten Schritt wollen wir die Landbedeckung mehrerer Jahre einlesen und zw
 ```{r}
 files=list.files('data/intro2/Alaska/')
 LandCover=stack(paste0('data/intro2/Alaska/',files))
-is.na(LandCover)=LandCover==255
+LandCover[LandCover == 255] <- NA
 LandCover
 plot(LandCover)
 ```
@@ -299,7 +306,7 @@ EuroInSchweizerFranken(1,1.5)
 
 * Mit der Funktion `png()` können Abbildungen in **png-Dateien abgespeichert** werden. Die Datei muss mit dem Befehl `dev.off()` wieder geschlossen werden.
 
-* Funktionen sind ein wichtiger Bestandteil guter Programmierung und helfen den Code übersichtlich und fehlerfrei zu halten.
+* Funktionen sind ein wichtiger Bestandteil guter Programmierung und helfen den Code übersichtlich und fehlerfrei zu halten. Wichtige Bestandteile von Funktionen sind der Funktionsname, Inputparameter, Rückgabewert und dann natürlich die Berechnungen die in der Funktion durchgeführt werden.
 
 # Hausaufgaben
 

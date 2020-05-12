@@ -198,9 +198,14 @@ hist(LandCover)
 
 Die Karte und die Verteilung sehen etwas seltsam aus. Der Wert 255 ist in diesem Datensatz benutzt worden um Gridzellen ohne Information zu kennzeichnen (missing values). R hat dies nicht selbst erkannt, aber die Werte können einfach auf NA gesetzt werden.
 ```{r}
-LandCover[LandCover == 255] <- NA
+NAMask <- LandCover== 255
+LandCover[NAMask] <- NA
 ```
-
+Wir erzeugen hier eine Maske, die 1 oder TRUE ist an allen Punkten, an denen die LandCover den Wert 255 hat. Diese Maske wir benutzen um mit den eckigen Klammern auf die entsprechenden Punkte in dem Raster LandCover zuzugreifen und diese auf NA zu setzen. Diese beiden Schritte kann man auch zusammenfassen:
+```{r}
+LandCover[LandCover== 255] <- NA
+```
+In Worten könnte man diesen Befehl dann wie folgt formulieren: Setze an allen Punkten an denen Landcover gleich 255 ist den Wert auf NA.
 Wir überprüfen wieder das Ergebnis:
 ```{r}
 plot(LandCover)

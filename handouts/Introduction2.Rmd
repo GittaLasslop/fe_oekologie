@@ -91,7 +91,7 @@ Sie können die Daten von Hand herunterladen und entzippen oder die folgenden Be
 ```{r,eval=FALSE}
 urlfile=!! bitte auf oben angegebenen Link setzen !!
 download.file(urlfile,'data/intro2.zip')
-unzip('data/intro2.zip)
+unzip('data/intro2.zip',exdir='data')
 ```
 Sollten die Befehle bei Ihnen nicht funktionieren laden Sie die Daten herunter indem Sie den Link im Browserfenster eingeben. Entzippen Sie dann den Ordner in Ihren Datenordner.
 

@@ -380,15 +380,12 @@ Falls "LC" den Wert "urban" hat, die Farbe "rot". Für alle anderen Werte in "LC
 # testen Sie den Kontrollfluss mit weiteren LC Varianten 
 # (forest, urban, arable, water, ...)
 
-LC="forest"
-if (LC==  'forest'){
-  Farbe = 'gruen'
-  
-} else if (LC == 'urban') {
-  Farbe = 'rot'
-  
+if (){
+
+} else if () {
+
 } else {
-Farbe = 'grau'
+
 }
 LC
 Farbe

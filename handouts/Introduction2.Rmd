@@ -28,7 +28,7 @@ Nach der Einführung in das Programmieren im Allgemeinen und die Syntax von R in
 
 # Ordnerstruktur
 
-Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei befindet. Das passiert mit der Angabe des Pfades. Der Pfad kann absolut (z.b. `S:/Users/MeinPfad/data`) oder relativ angegeben werden (`data/ersteDaten.txt`). Für Schwierigkeiten sorgen hierbei oft Pfade mit Umlauten oder Leerzeichen. 
+Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei befindet. Das passiert mit der Angabe des Pfades. Der Pfad kann absolut (z.b. `C:/Users/MeinPfad/data/ersteDaten.txt`) oder relativ angegeben werden (`data/ersteDaten.txt`). Für Schwierigkeiten sorgen hierbei oft Pfade mit Umlauten oder Leerzeichen. 
 
 -------------------------------------
 **Sehr wichtiger Hinweis**
@@ -36,8 +36,8 @@ Um Daten einlesen zu können muss irgendwie angegeben werden wo sich die Datei b
 Vermeiden Sie Pfadangaben mit Leerzeichen oder Umlauten!
 -------------------------------------
 
-Erstellen Sie nun auf einem Laufwerk, das nicht gelöscht wird ein Arbeitsverzeichnis für den Kurs. Im Kurs werden wir von nun an immer das Arbeitsverzeichnis auf diesen Ordner setzen und können dann mit relativen Pfadangaben arbeiten. In diesem Verzeichnis legen Sie einen Ordner "data" und einen Ordner "plots" an. Alle Daten, die wir benutzen, werden wir im Ordner "data" abspeichern, alle Abbildungen die wir erstellen im Ordner "plots". Um am Ende nicht die Übersicht zu verlieren werden wir noch Unterverzeichnisse für die einzelnen Stunden erstellen. Für heute also noch einen ordner "intro2" innerhalb der Ordner "data" und "plots". 
-Wir setzen nun das Arbeitsverzeichnis mit der Funktion `setwd()` (set working directory). Der Pfad muss in Anführungszeichen übergeben werden (einfach '  oder doppelt "). Dadurch bekommt der Pfad den Datentyp "character". 
+Erstellen Sie nun auf einem Laufwerk, das nicht gelöscht wird ein Verzeichnis für den Kurs. Im Kurs werden wir von nun an immer das Arbeitsverzeichnis auf diesen Ordner setzen und können dann mit relativen Pfadangaben arbeiten.  
+Wir setzen nun das Arbeitsverzeichnis mit der Funktion `setwd()` (set working directory). Der Pfad muss in Anführungszeichen übergeben werden (einfach '  oder doppelt "). Dadurch bekommt der Pfad den Datentyp "character". Der Ordner auf den wir das Arbeitsverzeichnis setzen wollen muss bereits existieren.
 
 -------------------------------------
 **Achtung**
@@ -45,14 +45,21 @@ Wir setzen nun das Arbeitsverzeichnis mit der Funktion `setwd()` (set working di
 Den Pfad müssen Sie entsprechend anpassen.
 -------------------------------------
 
-```{r}
-setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/')
+```{r,echo=FALSE}
+setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2020/handouts/')
 ```
+```{r,eval=FALSE}
+setwd('IhrArbeitsverzeichnis')
+```
+
+In diesem Verzeichnis legen Sie einen Ordner "data" und einen Ordner "plots" an. Alle Daten, die wir benutzen, werden wir im Ordner "data" abspeichern, alle Abbildungen die wir erstellen im Ordner "plots". Um am Ende nicht die Übersicht zu verlieren werden wir noch Unterverzeichnisse für die einzelnen Stunden erstellen. Für heute also noch einen ordner "intro2" innerhalb der Ordner "data" und "plots".
+
 Wir wollen die folgende Struktur im Kurs verwenden:
+
 ```
 coursedir
-   +- data/lesson/region
-   +- plots/lesson (names: hw_ for homework)
+   +- data/Sitzungsname/region
+   +- plots/Sitzungsname 
    +- script<1, …>.R (all scripts etc.) 
    +- fe_functions.R (helper script)
 ```
@@ -65,21 +72,34 @@ dir.create('plots')
 dir.create('data/intro2')
 dir.create('plots/intro2')
 ```
+
 Bestehen die Ordner bereits, wird eine Warnung ausgegeben. Die erstellten Ordner können mit `list.files()` überprüft werden.
+
+```{r, eval=FALSE}
+list.files()
+```
 
 
 # Einlesen von Daten und einfache Abbildungen
 
 ## Textdateien
-Bei kleinen Datenmengen können Daten in Textdateien abgespeichert werden. Diese sind dann häufig angeordnet wie eine Tabelle. Diese Tabelle kann Zeilennamen und Spaltennamen besitzen, oder es können auch nur die Werte abgespeichert sein. Die Abgrenzung zwischen den Zeilen wird automatisch erkannt, da der Zeilenumbruch in Dateien klar definiert ist. Die Abgrenzung zwischen Spalten ist nicht klar definiert, hierfür kommen verschiedene Zeichen in Frage. Z.B. können die Spalten durch ein Komma (csv Dateien: comma separated values), ein Leerzeichen, ein Semikolon oder ein Tab getrennt sein. Dieses Trennzeichen muss evtl. beim Einlesen der Daten mitangegeben werden. Zum Einlesen von Textdateien bietet die Funktion `read.table()` Möglichkeiten solche Parameter anzugeben. Wir lesen nun die erste Datei ein (Wetterdaten vom Flughafen Frankfurt). Laden Sie hierfür die [\underline{\textcolor{blue}{Daten}}](https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip?temp_url_sig=9834f040d82b57bbb16af185bc8f3afab8e7d20d&temp_url_expires=2019-07-02T11:37:17Z) für heute herunter und speichern sie in dem Ordner "data/intro2". Oder kopieren Sie die Daten vom T-Laufwerk.
+Bei kleinen Datenmengen können Daten in Textdateien abgespeichert werden. Diese sind dann häufig angeordnet wie eine Tabelle. Diese Tabelle kann Zeilennamen und Spaltennamen besitzen, oder es können auch nur die Werte abgespeichert sein. Die Abgrenzung zwischen den Zeilen wird automatisch erkannt, da der Zeilenumbruch in Dateien klar definiert ist. Die Abgrenzung zwischen Spalten ist nicht klar definiert, hierfür kommen verschiedene Zeichen in Frage. Z.B. können die Spalten durch ein Komma (csv Dateien: comma separated values), ein Leerzeichen, ein Semikolon oder ein Tab getrennt sein. Dieses Trennzeichen muss evtl. beim Einlesen der Daten mit angegeben werden. Zum Einlesen von Textdateien bietet die Funktion `read.table()` Möglichkeiten solche Parameter anzugeben. Wir lesen nun die erste Datei ein (Wetterdaten vom Flughafen Frankfurt). Laden Sie hierfür die [\underline{\textcolor{blue}{Daten}}](https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip?temp_url_sig=41aee2394b0bda97f2b78e0cf8701b18782dbe6d&temp_url_expires=2020-07-21T11:44:04Z) für heute herunter und speichern sie in dem Ordner "data/intro2".
 
-https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip?temp_url_sig=9834f040d82b57bbb16af185bc8f3afab8e7d20d&temp_url_expires=2019-07-02T11:37:17Z
+https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip?temp_url_sig=41aee2394b0bda97f2b78e0cf8701b18782dbe6d&temp_url_expires=2020-07-21T11:44:04Z
 
-Wir versuchen die erste Datei zu lesen und in die Variable Daten abzuspeichern.
+Sie können die Daten von Hand herunterladen und entzippen oder die folgenden Befehle ausführen.
+```{r,eval=FALSE}
+urlfile=!! bitte auf oben angegebenen Link setzen !!
+download.file(urlfile,'data/intro2.zip')
+unzip('data/intro2.zip)
+```
+Sollten die Befehle bei Ihnen nicht funktionieren laden Sie die Daten herunter indem Sie den Link im Browserfenster eingeben. Entzippen Sie dann den Ordner in Ihren Datenordner.
+
+Wir versuchen die erste Datei zu lesen und in die Variable Daten abzuspeichern. Diese erste Datei sollte nun den Pfad data/intro2/ErsteDaten.txt relativ zu Ihrem Arbeitsverzeichnis haben. Sollte dies nicht der Fall sein, verschieben Sie die Datei von Hand dorthin und verfahren Sie auch weiter unten im Skript so.
 ```{r}
-setwd('S:/FGOE')
 Daten=read.table('data/intro2/ErsteDaten.txt')
 ```
+Sollten Sie die Fehlermeldung 'No such file or directory' bekommen, überprüfen Sie die Verzeichnisse und Pfadangaben.
 Wir schauen nun was R gelesen und abgespeichert hat. Wir benutzen die Funktion `class()` um den Datentyp abzufragen und erhalten detailliertere Informationen zu den eingelesenen Werten mit der Funktion `summary()`. Dieser Befehl liefert eine deskriptive Statistik für die einzelnen Spalten. Die Funktion `head()` gibt die ersten Zeilen des Datensatzes in der Konsole aus.
 ```{r}
 class(Daten)
@@ -149,10 +169,10 @@ install.packages('rgdal')
 library(raster)
 
 ```
--------------------------------------
+--------------------------------------------
 **Achtung**
 
-Das Laden eines Paketes und die Installation wird von Ausgaben in der Konsole in roter Farbe dokumentiert. Dies ist passiert auch wenn keine Fehler auftreten. Ein Fehler wird durch den Begriff "Error" deutlich gemacht.
+Das Laden eines Paketes und die Installation wird von Ausgaben in der Konsole in roter Farbe dokumentiert. Dies passiert auch wenn keine Fehler auftreten. Ein Fehler wird durch den Begriff "Error" deutlich gemacht.
 -------------------------------------
 
 
@@ -283,21 +303,35 @@ EuroInSchweizerFranken(1,1.5)
 
 # Hausaufgaben
 
-1) Lesen Sie die Daten aus der Datei ErsteDatencR.txt ein und fertigen Sie eine Abbildung der Zeitreihe der mittleren Temperatur an. Wandeln Sie hierfür das Datum mit Daten$Datum=as.Date(Daten$Datum,"%d.%m.%Y") in den speziellen Datentyp für Zeit- und Datumvariablen um.
-Rufen Sie die Hilfe für die plot-Funktion auf (?plot). Schauen Sie sich die Argumente an, die an die Funktion übergeben werden können.
+1) Lesen Sie die Daten aus der Datei ErsteDatencR.txt ein und fertigen Sie eine Abbildung der Zeitreihe der mittleren Temperatur an. Wandeln Sie hierfür das Datum mit 
+```{r}
+Daten$Datum=as.Date(Daten$Datum,"%d.%m.%Y") 
+```
+in den speziellen Datentyp für Zeit- und Datumvariablen um.
+
+Rufen Sie die Hilfe für die plot-Funktion auf (?plot). Schauen Sie sich die Beschreibung der Argumente an, die an die Funktion übergeben werden können.
 Ändern Sie nun die folgenden Dinge in der Abbildung:
 
-* verwenden Sie statt Punkten eine Linie
-* fügen Sie eine Überschrift (main) 'Mittlere Temperatur' hinzu
+* plotten Sie statt Punkten eine Linie mit Punkten
+* fügen Sie eine Überschrift 'Mittlere Temperatur' hinzu und eine Unter-Überschrift 'in Frankfurt' hinzu
 * beschriften Sie x- und y-Achse indem Sie die Parameter xlab und ylab mit sinnvollen Beschriftungen übergeben.
 
 Speichern Sie die Abbildungen als png-Dateien ab.
 
 2) Benutzen Sie google um herauszufinden wie Sie die Farbe der Punkte oder Linie ändern können. Welche Suchanfrage bringt Ihnen die Lösung? Fertigen Sie die Abbildung aus Aufgabe 1 mit roten Punkten an und speichern Sie sie als png-Datei.
 
-3) Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises. Eingabeparameter soll der Radius sein. Rückgabewert soll die Fläche sein. Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Radius 1 und geben Sie das Ergebnis mit print() aus.
+3) Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises names 'Kreisflaeche'. Eingabeparameter soll der Durchmesser sein. Rückgabewert soll die Fläche sein. Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Radius 1 und geben Sie das Ergebnis mit print() aus.
 
-4). Erstellen Sie eine Funktion meine_bewertung die ein Argument als Eingabe erwartet und folgende Funktionalität besitzt. Für Werte kleiner als 0 soll "ungültig", für Werte von 1-4 soll "sehr wenig", für Werte von 5-10 "wenig", für Werte von 10-100 "viel" und für alle Werte größer als 100 "sehr viel" zurückgegeben werden. 
+```{r, eval=FALSE}
+Funktionsname <- function(inputParameter) {
+                    # Fügen Sie hier die Berechnung ein:
+  
+                    return(Rückgabewert)
+                   }
+
+```
+
+4). Erstellen Sie eine Funktion meine_bewertung die ein Argument als Eingabe erwartet und folgende Funktionalität besitzt. Für Werte kleiner als 0 soll "ungültig", für Werte von 1-2 soll "sehr wenig", für Werte von 3-15 "wenig", für Werte von 16-200 "viel" und für alle Werte größer als 200 "sehr viel" zurückgegeben werden. 
 
 
 ```{r, eval=FALSE}

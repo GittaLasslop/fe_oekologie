@@ -319,7 +319,7 @@ Im Vergleich zur zwei-dimensionalen *matrix* ist bei einem *array* die Anzahl de
 Beim Aufruf der Funktion werden erst die Werte dann die Dimensionen übergeben. Ein häufiges Beispiel für 3-d arrays sind Daten, die über Raum- und Zeitkoordinaten verfügen (x,y,t). 
 
 ```{r}
-multidim <- array(1:(2 * 3 * 4), c(3, 4, 2))
+multidim <- array(1:24, c(3, 4, 2))
 multidim
 ```
 
@@ -331,7 +331,7 @@ dim(multidim)
 
 
 ## Kontrollstrukturen
-Der Ablauf eines Programms oder Skriptes wird durch Kontrollstrukturen definiert. Diese werden benutzt um Programmteile nur unter bestimmten Bedingungen oder mehrfach auszuführen.
+Der Ablauf eines Programms oder Skriptes wird durch Kontrollstrukturen definiert. Diese werden benutzt um Programmteile nur unter bestimmten Bedingungen oder mehrfach auszuführen. Dadurch könne Skripte flexibel gestaltet werden, so dass sie immer wieder eingesetzt werden können auch wenn sich zum Beispiel die Input Daten etwas geändert haben. Auch Wiederholungen innerhalb eines Skriptes können so vermieden werden, und das spart häufig viel Zeit.
 
 ### Bedingungen
 Zur Überprüfung von Bedingungen werden logische Operatoren eingesetzt, dabei können die folgenden Bedingungen getestet werden:
@@ -343,7 +343,7 @@ Zur Überprüfung von Bedingungen werden logische Operatoren eingesetzt, dabei k
 * Kleiner gleich: y<=x
 * Größer gleich: y>=x
 
-Diese Bedingunge können mit und (&&) oder mit oder (||) verknüpft werden.
+Diese Bedingungen können mit und (&&) oder mit oder (||) verknüpft werden.
 
 Das englische **if** (falls) wird zur Überprüfung von Bedingungen benutzt, um Befehle nur
 unter diesen Umständen auszuführen.
@@ -381,15 +381,14 @@ Falls "LC" den Wert "urban" hat, die Farbe "rot". Für alle anderen Werte in "LC
 # (forest, urban, arable, water, ...)
 
 LC="forest"
-if (){
-  # ...  
+if (LC==  'forest'){
+  Farbe = 'gruen'
   
-} else if () {
-  # ...
+} else if (LC == 'urban') {
+  Farbe = 'rot'
   
 } else {
-  # ...
-  
+Farbe = 'grau'
 }
 LC
 Farbe
@@ -400,7 +399,7 @@ Farbe
 
 ### Schleifen
 
-Mit Schleifen kann ein Skript-Teil wiederholt werden. Die gebräuchlichste Art eine Schleife zu definieren ist die *for*-Schleife.
+Mit Schleifen kann ein Skript-Teil wiederholt werden. Die gebräuchlichste Art eine Schleife zu definieren ist die *for*-Schleife. Zum Einsatz kommen Schleifen zum Beispiel wenn man die gleichen Berechnungen für verschiedene Dateien ausführen möchte. Die verschiedene Dateien können z.B. Daten aus unterschiedlichen Jahren oder von unterschiedlichen Regionen beinhalten.
 
 *Schema* for (i in 1:10){Befehlsabfolge}
 

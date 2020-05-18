@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-# Übersicht
+# Überblick
 
 Nach der Einführung in das Programmieren im Allgemeinen und die Syntax von R in der ersten Sitzung, wird die zweite Einführung etwas spezifischer. Wir werden:
 
@@ -90,7 +90,7 @@ https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/intro2.zip
 Sie können die Daten von Hand herunterladen und entzippen oder die folgenden Befehle ausführen.
 ```{r,eval=FALSE}
 urlfile=!! bitte auf oben angegebenen Link setzen !!
-download.file(urlfile,'data/intro2.zip')
+download.file(urlfile,'data/intro2.zip', mode="wb")
 unzip('data/intro2.zip',exdir='data')
 ```
 Sollten die Befehle bei Ihnen nicht funktionieren laden Sie die Daten herunter indem Sie den Link im Browserfenster eingeben. Entzippen Sie dann den Ordner in Ihren Datenordner.
@@ -198,12 +198,12 @@ hist(LandCover)
 
 Die Karte und die Verteilung sehen etwas seltsam aus. Der Wert 255 ist in diesem Datensatz benutzt worden um Gridzellen ohne Information zu kennzeichnen (missing values). R hat dies nicht selbst erkannt, aber die Werte können einfach auf NA gesetzt werden.
 ```{r}
-NAMask <- LandCover== 255
+NAMask <- LandCover == 255
 LandCover[NAMask] <- NA
 ```
 Wir erzeugen hier eine Maske, die 1 oder TRUE ist an allen Punkten, an denen die LandCover den Wert 255 hat. Diese Maske wir benutzen um mit den eckigen Klammern auf die entsprechenden Punkte in dem Raster LandCover zuzugreifen und diese auf NA zu setzen. Diese beiden Schritte kann man auch zusammenfassen:
-```{r}
-LandCover[LandCover== 255] <- NA
+```{r, eval=FALSE}
+LandCover[LandCover == 255] <- NA
 ```
 In Worten könnte man diesen Befehl dann wie folgt formulieren: Setze an allen Punkten an denen Landcover gleich 255 ist den Wert auf NA.
 Wir überprüfen wieder das Ergebnis:
@@ -328,11 +328,11 @@ Rufen Sie die Hilfe für die plot-Funktion auf (?plot). Schauen Sie sich die Bes
 * fügen Sie eine Überschrift 'Mittlere Temperatur' hinzu und eine Unter-Überschrift 'in Frankfurt' hinzu
 * beschriften Sie x- und y-Achse indem Sie die Parameter xlab und ylab mit sinnvollen Beschriftungen übergeben.
 
-Speichern Sie die Abbildungen als png-Dateien ab.
+Speichern Sie die Abbildungen als png-Dateien ab. *(4 Punkte)*
 
-2) Benutzen Sie google um herauszufinden wie Sie die Farbe der Punkte oder Linie ändern können. Welche Suchanfrage bringt Ihnen die Lösung? Fertigen Sie die Abbildung aus Aufgabe 1 mit roten Punkten an und speichern Sie sie als png-Datei.
+2) Benutzen Sie google um herauszufinden wie Sie die Farbe der Punkte oder Linie ändern können. Welche Suchanfrage bringt Ihnen die Lösung? Fertigen Sie die Abbildung aus Aufgabe 1 mit roten Punkten an und speichern Sie sie als png-Datei. *(2 Punkte)*
 
-3) Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises names 'Kreisflaeche'. Eingabeparameter soll der Durchmesser sein. Rückgabewert soll die Fläche sein. Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Radius 1 und geben Sie das Ergebnis mit print() aus.
+3) Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises names 'Kreisflaeche'. Eingabeparameter soll der Durchmesser sein. Rückgabewert soll die Fläche sein. Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Durchmesser 2 und geben Sie das Ergebnis mit print() aus. *(3 Punkte)*
 
 ```{r, eval=FALSE}
 Funktionsname <- function(inputParameter) {
@@ -343,7 +343,7 @@ Funktionsname <- function(inputParameter) {
 
 ```
 
-4). Erstellen Sie eine Funktion meine_bewertung die ein Argument als Eingabe erwartet und folgende Funktionalität besitzt. Für Werte kleiner als 0 soll "ungültig", für Werte von 1-2 soll "sehr wenig", für Werte von 3-15 "wenig", für Werte von 16-200 "viel" und für alle Werte größer als 200 "sehr viel" zurückgegeben werden. 
+4). Erstellen Sie eine Funktion meine_bewertung die ein Argument als Eingabe erwartet und folgende Funktionalität besitzt. Für Werte kleiner als 0 soll "ungültig", für Werte von 1-2 soll "sehr wenig", für Werte von 3-15 "wenig", für Werte von 16-200 "viel" und für alle Werte größer als 200 "sehr viel" zurückgegeben werden. Sie benötigen hierfür wieder eine `IF` Abfrage. *(3 Punkte)*
 
 
 ```{r, eval=FALSE}
@@ -360,3 +360,6 @@ print(meine_bewertung(-23))
 # ...
 
 ```
+
+5). Lesen Sie die Landcover Datei des Jahres 2001 ein. Setzen Sie im Raster alle Gridzellen, die einen Wert zwischen 0 und 5 haben auf den Wert 6. Schauen Sie sich die Auswirkungen dieser Änderungen im Histogramm an, d.h. führen Sie vor und nach der Änderung den R Befehl aus, der ein Histogramm der Landcover Daten erzeugt. *(3 Punkte)*
+ 

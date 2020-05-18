@@ -15,18 +15,22 @@ output:
 
 ---
 
-# Einführung
+# Überblick
 
-Das Seminar Material finden Sie im OLAT SOSE 2019.
+In dieser Sitzung werden wir
 
-Die Daten für die heutige Stunde finden sie unter:
+1) zunächst weitere Pakete installieren,
 
-https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/map_de.zip?temp_url_sig=f019a4981eedd082dbbe461e9f8798cdcbcaf103&temp_url_expires=2019-07-05T15:47:22Z
+2) Kartenabbildungen mit ggplot erstellen und diese anpassen,
 
+3) eine Funktion zum Einlesen von Daten schreiben,
 
-## Rstudio
+4) die Daten aufbereiten, und
 
-[RStudio](https://www.rstudio.com/) ist eine sogenannte Entwicklungsumgebung für [R](https://cran.r-project.org/). Hier können Programme geschrieben und getestet werden. Die wichtigsten Teile hierbei sind der Editor und die Konsole. Im Editor werden Programme geschrieben und als Textdateien gespeichert. In der Konsole werden die Programme ausgeführt und die Rückmeldung der einzelnen Befehle erfolgt hier.
+4) die eingelesen Daten abbilden und zusätzlich vordefinierte Punkte in die Abbildung einzeichnen.
+
+Versuchen Sie möglichst genau nachzuvollziehen was in diesem Skript passiert. Überprüfen Sie hierfür immer wieder was in den einzelnen Variablen abgespeichert und verändert wurde. Die Befehle `head()`,`summary()` und `str()` sind hierfür hilfreich. Die Hilfeseiten, die für einzelne Funktionen mit `?Funktionsname` aufgerufen werden können, beschreiben die Funktionen, deren Parameter und Rückgabewerte.
+
 
 ## Pakete laden und installieren
 
@@ -36,32 +40,28 @@ Zunächst müssen alle benötigten Pakete installiert werden. Dies sind in unser
 
 2. Visualisieren (ggplot2; [Online Hilfe](http://docs.ggplot2.org/current/)),
 
-3. Installieren von Nicht-Standard Paketen (devtools).
-
-Ausserdem benötigen wir:
-
-4. Basiskarten (rworldmap, maps, mapproj)
+3. Basiskarten (rworldmap, maps, mapproj)
 
 Wir können nun die Pakete einzeln mit *install.packages* installieren und mit *library* laden. Da wir hier eine ganze Liste an Paketen haben benutzen wir eine Schleife:
 
 ```{r, eval=FALSE, message=FALSE}
 for (p in c("raster", "rgeos", "ggplot2", "rworldmap", 
-            "maps", "mapproj", "rgdal", "devtools")) {
+            "maps", "mapproj", "rgdal")) {
   if (!require(p, character.only=TRUE)) {
     install.packages(p)
   }
   library(p, character.only=TRUE)
 }
 ```
-*!require()* gibt hierbei FALSE zurück wenn das Paket bereits installiert ist, mit dem keyword character.only wird übermittelt dass der Paketname als *character* Datentyp übergeben wird. (So wie auch beim Aufruf von library.) 
+*!require()* gibt hierbei FALSE zurück wenn das Paket bereits installiert ist, mit dem keyword character.only wird übermittelt, dass der Paketname als *character* Datentyp übergeben wird. (So wie auch beim Aufruf von library.) 
 
 ## Verzeichnisse
 Wir wechseln nun in unser Arbeitsverzeichnis und setzen die Verzeichnisse in denen wir die Daten und Abbildungen speichern wollen.
 
-Das Kommando getwd() in der Konsole zeigt Ihnen R Ihr aktuelles Verzeinis an. 
+Das Kommando `getwd()` in der Konsole zeigt Ihnen R Ihr aktuelles Verzeinis an. 
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
-setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2019/handouts/')
+setwd('/home/gitta/R/Lehre/FE_OEKOLOGIE/fe_oekologie_2020/handouts/')
 data.dir='data/map_de/ALASKA/'
 plot.dir='plots/map_de/'
 ```
@@ -71,20 +71,24 @@ source(file.path("R", "variables.R"), encoding=getOption("encoding"))
 source(file.path( "R", "functions.R"), encoding=getOption("encoding"))
 ```
 
-# Erste Karten
+# Karten mit ggplot (grammar of graphics)
+
+In R gibt es verschiedene Systeme um Grafiken zu erstellen. Das Paket ggplot2 ist sehr vielseitig und bietet einen sehr systematischen Umgang mit Abbildungen. 
 
 ## Weltkarte
 
 Da wir nicht die ersten sind die R benutzen um Karten
-zu erstellen nutzen wir eine vorgefertigte Karte aus dem Paket "maps"
-die für die Darstellung mit dem Befehl 'map_data' aus dem Paket 'ggplot2' aufbereitet wird.
+zu erstellen nutzen wir eine vorgefertigte Karte aus dem Paket "maps",
+die für die Darstellung mit dem Befehl `map_data` aus dem Paket `ggplot2` in einen data.frame umgewandelt wird.
+Die Erstellung einer Grafik mit ggplot beginnt stehts mit dem Aufruf der Funktion `ggplot()`. An dieser Stelle wird festgelegt welche Daten verwendet werden und welche Variablen der x- und y-Achse zugeordnet werden sollen. 
+Da in diesem Fall die Ländergrenzen mit abgebildet werden muss noch angegeben werden welche Punkte zu einem Land gehören. Diese Information ist in der Variablen "group" hinterlegt.
 
 Hier sind die Befehle aus dem Paket ggplot2 Paket, mit denen eine erste Weltkarte in Form der Ländergrenzen erstellt wird. Führen sie nach jeder Zeile den Befehl print(p) aus, um zu sehen, welche Auswirkungen die jeweiligen Änderungen haben.
 
 ```{r, message=FALSE, warning=FALSE, out.width="75%", fig.align='center'}
 library(ggplot2)
 worldmap <- map_data("world")
-p <- ggplot(worldmap, aes(y=lat, x=long, group=group))
+p <- ggplot(data=worldmap, aes(y=lat, x=long, group=group))
 p = p + geom_path()
 p = p + coord_fixed()
 p = p + labs(title="Laendergrenzen")
@@ -101,18 +105,18 @@ $p = p + coord \_ map("ortho", orientation=c(45, 8, 0))$
 ersetzt werden.
 Finden Sie mit Hilfe der Hilfeseiten heraus, ob es noch andere Projektionen gibt und probieren diese aus.
 -------------------------------------
--------------------------------------
-**Aufgabe**
-Schauen Sie sich Variablen mit den Befehlen 'head()' und 'str()' an, um zu verstehen, 
-was gerade gemacht wurde.
--------------------------------------
 
 ## Regionale Karte mit Landbedeckung
+Als nächstes wollen wir die erste Abbildung mit Fernerkundungsdaten erstellen. Wir benutzen hierfür das MODIS-Produkt der Landbedeckungsklassen.
+
+Die Daten für die heutige Stunde finden sie unter:
+
+https://swift.dkrz.de/v1/dkrz_a5a4d477-007a-4a5f-8c5e-16156bbc5646/FE/map_de.zip?temp_url_sig=8d434103ca8df43abc710af739a6fb52560c6f80&temp_url_expires=2020-07-27T15:54:58Z
 
 Die von uns vorprozessierten Daten (LUC_ALASKA.zip) werden geladen. Sie können die Daten entweder mit der Funktion download.file() oder von Hand herunterladen. Achten Sie darauf die Datei im Data Verzeichnis abzuspeichern.
 
 Lesen Sie nun die Landbedeckungsdaten Klasse 3 für das Jahr 2001 ein. Die Rasterdaten
-werden in einen "data.frame" umgewandelt und die Spalten umbenannt. Zunächst setzen wir den Dateinamen zusammen. Wir haben unterschiedliche Dateien für unterschiedliche Jahre und land cover typ Klassifizierungen, daher wollen wir den Dateinamen flexibel zusammenbauen:
+werden in einen "data.frame" umgewandelt und die Spalten umbenannt. Zunächst setzen wir den Dateinamen zusammen. Wir haben unterschiedliche Dateien für unterschiedliche Jahre und land cover typ Klassifizierungen, daher wollen wir den Dateinamen flexibel zusammensetzen:
 
 ```{r}
 year <- 2001
@@ -122,12 +126,13 @@ file <- file.path(data.dir,
                          "-01-01.Land_Cover_Type_", lct, ".tif"))
 ```
 
--------------------------------
-** Aufgabe **
-Der nun folgende Teil wird in fast allen folgenden Skripten wieder kommen.
-Deshalb werden wir ihn gemeinsam in eine Funktion packen, die in einer 
+------------------------------------------------------------------
+**Aufgabe**
+Das nun folgende Einlesen von tif-Dateien wird in fast allen folgenden Skripten wieder kommen.
+Deshalb werden wir eine Funktion für diesen Teil erstellen, die in einer 
 Datei 'functions.R' gespeichert werden soll. 
-Dabei wird der Pfad zu dem GeoTiff dieser Funktion als Argument übergeben. 
+Dabei wird dieser Funktion der Pfad zu dem GeoTiff als Argument übergeben. 
+Die Daten werden gelesen und in einen `data.frame` umgewandelt.
 Die Funktion liefert dann die Datentabelle (data.frame) zurück, 
 welche einer Variablen zugewiesen werden kann. Der Funktionsname 
 soll `geotiff2df` sein. Wir werden die Funktion in den folgenden 
@@ -155,7 +160,8 @@ Funktionsname <- function(InputPar1,InputPar2,...){
 **Aufgabe**
  Entfernen Sie den Wert für 'FillValue/Unclassified' in der Spalte 'id' des data.frames 'dfLCT',
  so dass er nicht in der Legende auftaucht. Den Zahlenwert für 'FillValue/Unclassified' 
- finden Sie auf der MODIS-Webseite: \href{https://www.google.de/search?q=MCD12Q1}{Google-Suche nach 'MCD12Q1'}.
+ finden Sie auf der MODIS-Webseite: 
+ \href{https://ladsweb.modaps.eosdis.nasa.gov/filespec/MODIS/6/MCD12Q1}{\textcolor{blue}{MODIS-Webseite (https://ladsweb.modaps.eosdis.nasa.gov/filespec/MODIS/6/MCD12Q1)}}.
 -------------------------------------
 
 
@@ -163,15 +169,19 @@ Funktionsname <- function(InputPar1,InputPar2,...){
 dfLCT = subset(dfLCT, id < 254)
 ```
 
-Allen gültigen numerischen IDs werden ihre Namen zugewiesen. Dafür muss eine lookup-Tabelle LCT3lookuptable erzeugt werden, die die Spalten 'id' und 'name' hat. Die lookup-Tabelle und der Landnutzungsdatendatz werden anhand der gemeinsamen Spalte 'id' verbunden, 'all.X=TRUE' stellt hierbei sicher, dass alle Zeilen aus dfLCT erhalten bleiben. Ist ein 'id'-Wert aus dfLCT nicht in LCTlookuptable bekommt 'name' den Wert 'NA' für 'not available'.
+Allen gültigen numerischen IDs sollen nun ihre Namen zugewiesen. Dafür muss eine lookup-Tabelle LCT3lookuptable erzeugt werden, die die Spalten 'id' und 'name' hat. 
 
--------------------------------------
+--------------------------------------------------------------
 **Aufgabe**
-Suchen Sie auf der \href{https://lpdaac.usgs.gov/dataset_discovery/modis/modis_products_table/mcd12q1}{\textcolor{blue}{MODIS-Webseite}} nach der entsprechenden Tabelle 
-(Land Cover Types Description, Type 3) und erzeugen Sie die lookup-Tabelle. 
-Kopieren Sie hierfür die Tabelle in eine Textdatei und lesen Sie diese mit 
-der read.table() Funktion und selektieren Sie dann die Klassifikation Type 3.
+Suchen Sie auf der 
+\href{https://ladsweb.modaps.eosdis.nasa.gov/filespec/MODIS/6/MCD12Q1}{\textcolor{blue}{MODIS-Webseite (https://ladsweb.modaps.eosdis.nasa.gov/filespec/MODIS/6/MCD12Q1)}} 
+nach der entsprechenden Tabelle (Land_Cover_Type_3 ) und erzeugen Sie einen data.frame mit zwei Spalten: 
+1. der Klassennummer (class number) und 
+2. dem Namen der Landbedeckungsklasse. 
+Die erste Spalte soll den Namen "id"" erhalten, die zweite Spalte den Namen "name".
 -------------------------------------
+
+Die lookup-Tabelle und der Landnutzungsdatendatz werden im Folgenden anhand der gemeinsamen Spalte 'id' verbunden, 'all.X=TRUE' stellt hierbei sicher, dass alle Zeilen aus dfLCT erhalten bleiben, auch die, für die evtl. in LCTlookuptable kein Wert vorhanden ist. Ist ein 'id'-Wert aus dfLCT nicht in LCTlookuptable, bekommt 'name' den Wert 'NA' für 'not available'.
 
 ```{r}
 dfLCT = merge(dfLCT, LCT3lookuptable, by="id", all.x=TRUE)
@@ -202,7 +212,7 @@ p = p + ylab("Latitude")
 p
 ```
 
--------------------------------------
+-----------------------------------------------------------------
 **Aufgabe**
 Ändern Sie in den abgebildeten Kartenausschnitt so dass nur der Bereich zwischen 
 Longitude -160 und -140 gezeigt wird. Setzen Sie die Legende statt unter die Abbildung 
@@ -223,9 +233,9 @@ print(p)
 dev.off()
 ```
 
-\pagebreak
+Die Abbildung gibt bereits eine gute Übersicht über die Verteilung der Landbedeckungsklassen. 
+Der Befehl 'table()' zählt gleiche Werte in einem Vektor (eine Spalte eines data.frames ist ein Vektor) und bietet daher eine einfache zusätzliche Möglichkeit um die Verteilung von Klassen in einer Region zu quantifizieren.
 
-Der Befehl 'table()' zählt gleiche Werte in einem Vektor (eine Spalte eines data.frames ist ein Vektor). Es kann auch der Befehl ddply aus dem Paket plyr verwendet werden, der einen data.frame zurück liefert, aber etwas komplizierter ist.
 ```{r, eval=FALSE}
 table(dfLCT$name)
 ```
@@ -233,7 +243,7 @@ table(dfLCT$name)
 # Hausaufgaben
 1. Was setzt der Parameter ncol in der Funktion guide\_legend? **(1 Punkt)**
 
-2. Wiederholen Sie die Aufgabe mit Land Cover Type 1. Das sollte idealerweise in Form einer for-Schleife mit der Variablen lct gemacht werden. **(2 Punkte)**
+2. Wiederholen Sie das Daten einlesen, aufbereiten und plotten mit Land Cover Type 1. Das sollte idealerweise in Form einer for-Schleife mit der Variablen lct gemacht werden. **(2 Punkte)**
 
 3. Es sind Daten für die Jahre 2001 und 2010 vorhanden. Schreiben Sie erneut eine Schleife für diese 2 Jahre, so dass Sie am Ende vier Karten haben: 2001 + LCT1, 2001 + LCT3, 2010 + LCT1, 2010 + LCT3. **(2 Punkte)**
 

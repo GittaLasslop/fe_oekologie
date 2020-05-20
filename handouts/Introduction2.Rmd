@@ -158,7 +158,7 @@ plot(Daten$Datum, Daten$windmax)
 plot(Daten$Datum, Daten$snow)
 ```
 
-Sie könne auch den Zusammenhang zwischen zwei Variablen, z.B. maximale und minimale Temperatur überprüfen indem Sie die eine als x, die andere als y Wert übergeben (ein sogenannter "scatter plot").
+Sie können auch den Zusammenhang zwischen zwei Variablen, z.B. maximale und minimale Temperatur überprüfen indem Sie die eine als x, die andere als y Wert übergeben (ein sogenannter "Scatterplot").
 ```{r}
 plot(Daten$Tmax, Daten$Tmin)
 ```

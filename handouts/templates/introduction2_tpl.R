@@ -36,7 +36,7 @@
 
 # 3) Schreiben Sie eine Funktion zur Berechnung der Fläche eines Kreises names 'Kreisflaeche'. 
 # Eingabeparameter soll der Durchmesser sein. Rückgabewert soll die Fläche sein. 
-# Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Radius 1 und 
+# Berechnen Sie durch einen Funktionsaufruf die Fläche eine Kreises mit Durchmesser 2 und 
 # geben Sie das Ergebnis mit print() aus.
 
 Funktionsname <- function(inputParameter) {
@@ -62,3 +62,10 @@ meine_bewertung <- function(x){
 print(meine_bewertung(12))
 print(meine_bewertung(-23))
 # ...
+
+
+#5). Lesen Sie die Landcover Datei des Jahres 2001 ein. Setzen Sie im Raster alle Gridzellen, 
+# die einen Wert zwischen 0 und 5 haben auf den Wert 6. Schauen Sie sich die Auswirkungen 
+# dieser Änderungen im Histogramm an, d.h. führen Sie vor und nach der Änderung den R Befehl aus, 
+# der ein Histogramm der Landcover Daten erzeugt.
+

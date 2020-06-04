@@ -22,7 +22,7 @@ Wir werden in dieser Sitzung
 
 ## Pakete laden und installieren
 
-Zunächst müssen alle benötigten Pakete installiert werden. Dies sind in unserem Fall Pakete zum ...
+Zunächst müssen alle benötigten Pakete installiert werden. Dies sind in unserem Fall Pakete zum:
 
 1. Prozessieren von geokodierten Rasterdaten (raster, rgeos), 
 
@@ -68,14 +68,14 @@ dir.create(data.dir)
 
 
 ```{r, echo=FALSE}
-#source(file.path( "R", "functions.R"), encoding=getOption("encoding"))
+source(file.path( "R", "functions.R"), encoding=getOption("encoding"))
 ```
 
 # Weltkarte mit ggplot
 Wir werden nun zum ersten Mal das Paket ggplot2 zur Erstellung einer Grafik verwenden. Dieses Paket basiert auf der "grammar of graphics", einem systematischen Ansatz, zur Erstellung von Grafiken. Dieser Ansatz basiert darauf dass alle Visualisierungen von Daten aus den gleichen Elementen bestehen (so wie ein Satz aus Subjekt, Prädikat, Objekt aufgebaut ist). Eine Grafik besteht demnach aus einem Datensatz, einem Koordinatensystem und sogenannten "Geomen", der Darstellungsform der Daten. 
 
 Die Erstellung einer Grafik mit ggplot beginnt stehts mit dem Aufruf der Funktion `ggplot()`. Mit diesem Aufruf wird ein Plotobject `p` erstellt. An dieser Stelle wird festgelegt welche Daten verwendet werden und welche Variablen der x- und y-Achse zugeordnet werden sollen. 
-Da in diesem Fall die Ländergrenzen mit abgebildet werden muss noch angegeben werden welche Punkte zu einem Land gehören. Diese Information ist in der Variablen "group" hinterlegt. Im nächsten Schritt wird ein Geom zum Plotobject `p` hinzugefügt, in diesem Fall sind das die Ländergrenzen als Linien. Man könnte auch noch weitere Schichten von Geomen hinzufügen. In diesem Beispiel werden mit den nächsten Befehlen nur noch die Beschriftungen angepasst.
+Da in diesem Fall die Ländergrenzen mit abgebildet werden muss noch angegeben werden welche Punkte zu einem Land gehören. Diese Information ist in der Variablen "group" hinterlegt. Im nächsten Schritt wird ein Geom zum Plotobjekt `p` hinzugefügt, in diesem Fall sind das die Ländergrenzen als Linien. Man könnte auch noch weitere Schichten von Geomen hinzufügen. In diesem Beispiel werden mit den nächsten Befehlen nur noch die Beschriftungen angepasst.
 
 Wir benutzen zunächst eine vorgefertigte Karte aus dem Paket `maps`,
 die für die Darstellung mit dem Befehl `map_data` aus dem Paket `ggplot2` in einen data.frame umgewandelt wird.
@@ -229,6 +229,7 @@ stackNDVI <- stack(files)
 **Aufgabe**
 Was bewirkt der Parameter `full.names` in der Funktion `list.files()`? 
 (Rufen Sie die Funktion mit und ohne den Parameter auf und vergleichen Sie das Ergebnis.)
+Das Dollarzeichen bedeutet, dass die definierte Zeichenkette am Ende des Dateinamens sein muss.
 
 **Hinweis**
 Nicht vergessen: Schauen Sie sich Zwischenergebnisse immer wieder mit den
@@ -243,16 +244,17 @@ Aus den bereitgestellten GIS-Daten (Raster-Format, UTM-Projektion) wird eine Zei
 Spalte "ID" an Position 1 wird entfernt.
 
 ```{r}
-dfNDVI <- extract(stackNDVI, sPointsUTM, df=TRUE)
-dfNDVI$ID = NULL
+dfNDVITS <- extract(stackNDVI, sPointsUTM, df=TRUE)
+dfNDVITS$ID = NULL
+dfNDVITS = dfNDVITS*ndviScaleFactor
 ```
 
 Mit der bereitgestellten Funktion `extractDate` werden die 
 Zeitpunkte des jeweiligen "Überflugs" aus den Dateinamen extrahiert. Um die Funktion `extractDate` zu nutzen müssen wir die Datei, in der die Funktion enthalten ist, zunächst sourcen. Die Dateinamen werden aus den Spaltennamen (mit `colnames`) entnommen.
 
 ```{r}
-source('R/extractDate.R')
-filenames <- colnames(dfNDVI)
+source('data/PHEN/extractDate.R')
+filenames <- colnames(dfNDVITS)
 ndviDate <- extractDate(filenames)
 ```
 
@@ -260,26 +262,26 @@ ndviDate <- extractDate(filenames)
 Im Folgenden wird der Median jeder Zeitserie berechnet. Der Median wird später als blaue Linien im Plot dargestellt. Der Schnittpunkt der Vegetationsindex-Kurve mit dem Median stellt eine sehr grobe Abschätzung des Anfangs und Ende der Vegetationsperiode dar.
 
 ```{r}
-ndviMid <- apply(dfNDVI, 1, "median", na.rm=TRUE)
+ndviMid <- apply(dfNDVITS, 1, "median", na.rm=TRUE)
 ```
 
 Der dfNDVI hat die extrahierten Zeitserien zeilenweise angeordnet. Wir wollen die Zeitserien für die vier Punkte jedoch jeweils in einer Spalte haben, mit der zusätzlichen Spalte `date`. Hierfür muss `dfNDVI` transponiert werden (Befehl `t()`).
 
 ```{r}
-dfNDVI = data.frame(date=ndviDate, t(dfNDVI))
+transposed.dfNDVITS = data.frame(date=ndviDate, t(dfNDVITS))
 ```
 
 Um eine effiziente Verabeitung durch die Abbildungsfunktionen von ggplot2 zu ermöglichen müssen die Daten transformiert werden. Dies geschieht mit der funktion `melt` aus dem Paket `reshape2` (https://www.jstatsoft.org/article/view/v021i12).
 
 ```{r}
 library(reshape2)
-melted.dfNDVI <- melt(dfNDVI, id.vars="date")
-ndviMid <- data.frame(variable=paste0("X", 1:4), median=ndviMid)
+melted.dfNDVITS <- melt(transposed.dfNDVITS, id.vars="date")
+df.ndviMid <- data.frame(variable=paste0("X", 1:4), median=ndviMid)
 ```
 
 ----------------------------------------
 **Aufgabe**
-Vergleichen Sie dfNDVI und melted.dfNDVI. Was hat die Funktion melt bewirkt?
+Vergleichen Sie transposed.dfNDVI und melted.dfNDVI. Was hat die Funktion melt bewirkt?
 -------------------------------
 
 ## Grafikausgabe
@@ -291,13 +293,13 @@ file <- "NEUROPE_NDVI.pdf"
 pdf(file.path(folder, file), paper="special", width=8, height=8)
 ```
 ```{r, message=FALSE, warning=FALSE, fig.width=8, fig.height=5}
-p <- ggplot(melted.dfNDVI, aes(x=date, y=value))
+p <- ggplot(melted.dfNDVITS, aes(x=date, y=value))
 p <- p + geom_line()
-p <- p + geom_hline(data=ndviMid, aes(yintercept=median),
+p <- p + geom_hline(data=df.ndviMid, aes(yintercept=median),
                     colour="blue", linetype="dashed")
 p <- p + scale_x_date()
-p <- p + xlab("Datum")
 p <- p + facet_wrap(~variable, ncol=1)
+p <- p + xlab("Datum")
 p <- p + ylab("NDVI")
 print(p)
 ```
@@ -342,9 +344,9 @@ p = p + xlab("Longitude")
 p = p + ylab("Latitude")
 p
 ```
+Lesen Sie die dafür benutzten Variablen erneut ein **(1 Punkt)**.
 
-
-I.) Aendern Sie in den abgebildeten Kartenausschnitt so dass nur der Bereich bis Latitude 6250000 gezeigt wird. **(1Punkt)**
+I.) Aendern Sie den abgebildeten Kartenausschnitt so dass nur der Bereich bis Latitude 6250000 gezeigt wird. **(1Punkt)**
 
 II.) Setzen Sie die Legende statt unter die Abbildung über die Abbildung.  **(1 Punkt)**
 
